@@ -1,6 +1,6 @@
 <?php
 
-namespace TestBundle\Sensio\Cms\FooBundle;
+namespace TestBundle\Fabpot\FooBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -18,8 +18,16 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  *
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class SensioCmsFooBundle extends Bundle
+class FabpotFooBundle extends Bundle
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getParent()
+    {
+        return 'SensioFooBundle';
+    }
+
     /**
      * {@inheritdoc}
      */
