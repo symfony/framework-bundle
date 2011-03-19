@@ -48,26 +48,26 @@ class TraceableEventDispatcher extends ContainerAwareEventDispatcher implements 
     {
         parent::triggerListener($listener, $eventName, $event);
 
-        $listenerString = $this->listenerToString($listener);
+        $listenerString = $this->listenerToString($listener, $eventName);
 
         if (null !== $this->logger) {
             $this->logger->debug(sprintf('Notified event "%s" to listener "%s"', $eventName, $listenerString));
         }
 
         $this->called[$eventName.'.'.$listenerString] = array(
-            'event'    => $eventName,
-            'listener' => $listenerString,
+            'class' => $listenerString,
+            'event' => $eventName,
         );
 
         if ($event->isPropagationStopped() && null !== $this->logger) {
-            $this->logger->debug(sprintf('Listener "%s" stopped propagation of the event "%s"', $this->listenerToString($listener), $eventName));
+            $this->logger->debug(sprintf('Listener "%s" stopped propagation of the event "%s"', $this->listenerToString($listener, $eventName), $eventName));
 
             $skippedListeners = $this->getListeners($eventName);
             $skipped = false;
 
             foreach ($skippedListeners as $skippedListener) {
                 if ($skipped) {
-                    $this->logger->debug(sprintf('Listener "%s" was not called for event "%s"', $this->listenerToString($skippedListener), $eventName));
+                    $this->logger->debug(sprintf('Listener "%s" was not called for event "%s"', $this->listenerToString($skippedListener, $eventName), $eventName));
                 }
 
                 if ($skippedListener === $listener) {
@@ -92,14 +92,13 @@ class TraceableEventDispatcher extends ContainerAwareEventDispatcher implements 
     {
         $notCalled = array();
 
-        foreach (array_keys($this->listeners) as $name) {
+        foreach (array_keys($this->getListeners()) as $name) {
             foreach ($this->getListeners($name) as $listener) {
                 $listener = $this->listenerToString($listener);
-
                 if (!isset($this->called[$name.'.'.$listener])) {
                     $notCalled[] = array(
-                        'event'    => $name,
-                        'listener' => $listener,
+                        'class' => $listener,
+                        'event' => $name,
                     );
                 }
             }
@@ -108,18 +107,18 @@ class TraceableEventDispatcher extends ContainerAwareEventDispatcher implements 
         return $notCalled;
     }
 
-    protected function listenerToString($listener, $eventName)
+    protected function listenerToString($listener)
     {
         if (is_object($listener)) {
             if ($listener instanceof \Closure) {
                 return 'Closure';
             }
 
-            return get_class($listener).'::'.$eventName;
+            return get_class($listener);
         }
 
         if (is_array($listener)) {
-            return is_object($listener[0]) ? sprintf('%s::%s', get_class($listener[0]), $listener[1]) : implode('::', $listener);
+            return is_object($listener[0]) ? get_class($listener[0]) : implode('::', $listener);
         }
     }
 }
