@@ -15,32 +15,36 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
 /**
- * Adds all services with the tag "form.type" as argument
- * to the "form.type.loader" service
+ * Adds all services with the tags "form.type" and "form.type_guesser" as
+ * arguments of the "form.extension" service
  *
  * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
  */
-class AddFormTypesPass implements CompilerPassInterface
+class FormPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('form.type.loader')) {
+        if (!$container->hasDefinition('form.extension')) {
             return;
         }
 
         // Builds an array with service IDs as keys and tag aliases as values
         $types = array();
-        $tags = $container->findTaggedServiceIds('form.type');
 
-        foreach ($tags as $serviceId => $arguments) {
-            $alias = isset($arguments[0]['alias'])
-                ? $arguments[0]['alias']
+        foreach ($container->findTaggedServiceIds('form.type') as $serviceId => $tag) {
+            $alias = isset($tag[0]['alias'])
+                ? $tag[0]['alias']
                 : $serviceId;
 
             // Flip, because we want tag aliases (= type identifiers) as keys
             $types[$alias] = $serviceId;
         }
 
-        $container->getDefinition('form.type.loader')->replaceArgument(1, $types);
+        $container->getDefinition('form.extension')->replaceArgument(1, $types);
+
+        // Find all services annotated with "form.type_guesser"
+        $guessers = array_keys($container->findTaggedServiceIds('form.type_guesser'));
+
+        $container->getDefinition('form.extension')->replaceArgument(2, $guessers);
     }
 }
