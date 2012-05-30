@@ -320,7 +320,7 @@ class FrameworkExtension extends Extension
             'Symfony\\Bundle\\FrameworkBundle\\EventListener\\SessionListener',
             'Symfony\\Component\\HttpFoundation\\Session\\Storage\\SessionStorageInterface',
             'Symfony\\Component\\HttpFoundation\\Session\\Storage\\NativeSessionStorage',
-            'Symfony\\Component\\HttpFoundation\\Session\\Storage\\Handler\NativeSessionHandler',
+            'Symfony\\Component\\HttpFoundation\\Session\\Storage\\Handler\FileSessionHandler',
             'Symfony\\Component\\HttpFoundation\\Session\\Storage\\Proxy\AbstractProxy',
             'Symfony\\Component\\HttpFoundation\\Session\\Storage\\Proxy\SessionHandlerProxy',
             $container->getDefinition('session')->getClass(),
