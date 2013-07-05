@@ -3,7 +3,8 @@
  * @Author Belgacem TLILI <belgacem034d@gmail.com>
  * 
  */
-namespace Alceste\ToolboxBundle\Command;
+namespace Symfony\Bundle\FrameworkBundle\Command;
+
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
