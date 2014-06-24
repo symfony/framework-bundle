@@ -107,6 +107,18 @@ class ControllerNameParserTest extends TestCase
         );
     }
 
+    public function testInvalidBundleName()
+    {
+        $parser = $this->createParser();
+
+        try {
+            $parser->parse('FooFakeBundle:Fake:index');
+            $this->fail('->parse() throws a \InvalidArgumentException if the bundle does not exist');
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\InvalidArgumentException', $e, '->parse() throws a \InvalidArgumentException if the bundle does not exist');
+        }
+    }
+
     private function createParser()
     {
         $bundles = array(
@@ -121,6 +133,10 @@ class ControllerNameParserTest extends TestCase
             ->expects($this->any())
             ->method('getBundle')
             ->will($this->returnCallback(function ($bundle) use ($bundles) {
+                if (!isset($bundles[$bundle])) {
+                    throw new \InvalidArgumentException(sprintf('Invalid bundle name "%s"', $bundle));
+                }
+
                 return $bundles[$bundle];
             }))
         ;
