@@ -25,7 +25,7 @@ abstract class ContainerAwareCommand extends Command implements ContainerAwareIn
     /**
      * @var ContainerInterface|null
      */
-    private $container;
+    protected $container;
 
     /**
      * @return ContainerInterface
