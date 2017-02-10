@@ -28,6 +28,28 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testCachePoolsNamespaceConfig()
+    {
+        $configs = [
+            [
+                'cache' => [
+                    'pools' => [
+                        'cache.example' => [
+                            'namespace' => 'example',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $config = (new Processor())->processConfiguration(new Configuration(true), $configs);
+
+        $cacheExampleConfig = $config['cache']['pools']['cache.example'];
+
+        $this->assertArrayHasKey('namespace', $cacheExampleConfig);
+        $this->assertEquals('example', $cacheExampleConfig['namespace']);
+    }
+
     public function testDoNoDuplicateDefaultFormResources()
     {
         $input = array('templating' => array(
