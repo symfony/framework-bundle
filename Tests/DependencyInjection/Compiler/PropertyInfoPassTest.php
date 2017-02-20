@@ -15,6 +15,9 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PropertyInfoPass;
 use Symfony\Component\DependencyInjection\Reference;
 
+/**
+ * @group legacy
+ */
 class PropertyInfoPassTest extends TestCase
 {
     public function testServicesAreOrderedAccordingToPriority()
