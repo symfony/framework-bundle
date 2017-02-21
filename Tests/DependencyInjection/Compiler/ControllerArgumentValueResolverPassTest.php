@@ -18,6 +18,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 
+/**
+ * @group legacy
+ */
 class ControllerArgumentValueResolverPassTest extends TestCase
 {
     public function testServicesAreOrderedAccordingToPriority()
