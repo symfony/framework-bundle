@@ -19,6 +19,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
+/**
+ * @group legacy
+ */
 class AddConstraintValidatorsPassTest extends TestCase
 {
     public function testThatConstraintValidatorServicesAreProcessed()
