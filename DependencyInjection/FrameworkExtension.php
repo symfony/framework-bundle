@@ -507,11 +507,11 @@ class FrameworkExtension extends Extension
             $transitions = array();
             foreach ($workflow['transitions'] as $transition) {
                 if ($type === 'workflow') {
-                    $transitions[] = new Definition(Workflow\Transition::class, array($transition['name'], $transition['from'], $transition['to']));
+                    $transitions[] = new Definition(Workflow\Transition::class, array($transition['name'], $transition['from'], $transition['to'],$transition['roles']));
                 } elseif ($type === 'state_machine') {
                     foreach ($transition['from'] as $from) {
                         foreach ($transition['to'] as $to) {
-                            $transitions[] = new Definition(Workflow\Transition::class, array($transition['name'], $from, $to));
+                            $transitions[] = new Definition(Workflow\Transition::class, array($transition['name'], $from, $to,$transition['roles']));
                         }
                     }
                 }
@@ -547,7 +547,7 @@ class FrameworkExtension extends Extension
             if (isset($markingStoreDefinition)) {
                 $workflowDefinition->replaceArgument(1, $markingStoreDefinition);
             }
-            $workflowDefinition->replaceArgument(3, $name);
+            $workflowDefinition->replaceArgument(4, $name);
 
             // Store to container
             $workflowId = sprintf('%s.%s', $type, $name);
