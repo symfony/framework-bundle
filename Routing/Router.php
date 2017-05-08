@@ -97,7 +97,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
             }
 
             foreach ($route->getRequirements() as $name => $value) {
-                $route->setRequirement($name, $this->resolve($value));
+                $route->setRequirement($name, $this->resolve($value, true));
             }
 
             $route->setPath($this->resolve($route->getPath()));
@@ -121,7 +121,8 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
     /**
      * Recursively replaces placeholders with the service container parameters.
      *
-     * @param mixed $value The source which might contain "%placeholders%"
+     * @param mixed $value                 The source which might contain "%placeholders%"
+     * @param bool  $acceptArrayParameters Used to allow the the parameter array support (mean one of the array)
      *
      * @return mixed The source with the placeholders replaced by the container
      *               parameters. Arrays are resolved recursively.
@@ -129,7 +130,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
      * @throws ParameterNotFoundException When a placeholder does not exist as a container parameter
      * @throws RuntimeException           When a container value is not a string or a numeric value
      */
-    private function resolve($value)
+    private function resolve($value, $acceptArrayParameters = false)
     {
         if (is_array($value)) {
             foreach ($value as $key => $val) {
@@ -161,6 +162,8 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
                 $this->collectedParameters[$match[1]] = $resolved;
 
                 return (string) $resolved;
+            } else if ($acceptArrayParameters && is_array($resolved)) {
+                return implode('|', $resolved);
             }
 
             throw new RuntimeException(sprintf(
