@@ -763,6 +763,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->children()
+                                    ->scalarNode('namespace')->defaultNull()->end()
                                     ->scalarNode('adapter')->defaultValue('cache.app')->end()
                                     ->booleanNode('public')->defaultFalse()->end()
                                     ->integerNode('default_lifetime')->end()
