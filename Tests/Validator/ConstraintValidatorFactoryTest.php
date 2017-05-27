@@ -19,6 +19,9 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Blank as BlankConstraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
+/**
+ * @group legacy
+ */
 class ConstraintValidatorFactoryTest extends TestCase
 {
     public function testGetInstanceCreatesValidator()
@@ -27,7 +30,7 @@ class ConstraintValidatorFactoryTest extends TestCase
 
         $constraint = $this->getMockBuilder('Symfony\\Component\\Validator\\Constraint')->getMock();
         $constraint
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('validatedBy')
             ->will($this->returnValue($class));
 
@@ -63,7 +66,7 @@ class ConstraintValidatorFactoryTest extends TestCase
 
         $constraint = $this->getMockBuilder(Constraint::class)->getMock();
         $constraint
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('validatedBy')
             ->will($this->returnValue($service));
 
@@ -71,10 +74,6 @@ class ConstraintValidatorFactoryTest extends TestCase
         $this->assertSame($validator, $factory->getInstance($constraint));
     }
 
-    /**
-     * @group legacy
-     * @expectedDeprecation Passing an array of validators or validator aliases as the second argument of "Symfony\Bundle\FrameworkBundle\Validator\ConstraintValidatorFactory::__construct" is deprecated since 3.3 and will be removed in 4.0. Use the service locator instead.
-     */
     public function testGetInstanceReturnsServiceWithAlias()
     {
         $service = 'validator_constraint_service';
@@ -106,7 +105,7 @@ class ConstraintValidatorFactoryTest extends TestCase
     {
         $constraint = $this->getMockBuilder('Symfony\\Component\\Validator\\Constraint')->getMock();
         $constraint
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('validatedBy')
             ->will($this->returnValue('Fully\\Qualified\\ConstraintValidator\\Class\\Name'));
 
