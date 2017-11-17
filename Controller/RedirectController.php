@@ -14,7 +14,8 @@ namespace Symfony\Bundle\FrameworkBundle\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\GoneHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -51,12 +52,17 @@ class RedirectController
      * @param bool       $permanent        Whether the redirection is permanent
      * @param bool|array $ignoreAttributes Whether to ignore attributes or an array of attributes to ignore
      *
-     * @throws HttpException In case the route name is empty
+     * @throws GoneHttpException|NotFoundHttpException In case the path is empty
      */
     public function redirectAction(Request $request, string $route, bool $permanent = false, $ignoreAttributes = false): Response
     {
         if ('' == $route) {
-            throw new HttpException($permanent ? 410 : 404);
+            if ($permanent) {
+                throw new GoneHttpException();
+            }
+            else {
+                throw new NotFoundHttpException();
+            }
         }
 
         $attributes = array();
@@ -87,12 +93,17 @@ class RedirectController
      * @param int|null    $httpPort  The HTTP port (null to keep the current one for the same scheme or the default configured port)
      * @param int|null    $httpsPort The HTTPS port (null to keep the current one for the same scheme or the default configured port)
      *
-     * @throws HttpException In case the path is empty
+     * @throws GoneHttpException|NotFoundHttpException In case the path is empty
      */
     public function urlRedirectAction(Request $request, string $path, bool $permanent = false, string $scheme = null, int $httpPort = null, int $httpsPort = null): Response
     {
         if ('' == $path) {
-            throw new HttpException($permanent ? 410 : 404);
+            if ($permanent) {
+                throw new GoneHttpException();
+            }
+            else {
+                throw new NotFoundHttpException();
+            }
         }
 
         $statusCode = $permanent ? 301 : 302;
