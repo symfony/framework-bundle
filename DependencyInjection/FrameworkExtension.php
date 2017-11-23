@@ -660,7 +660,15 @@ class FrameworkExtension extends Extension
 
         $container->setParameter('session.storage.options', $options);
 
-        // session handler (the internal callback registered with PHP session management)
+      if (null !== $config['attribute_bag']) {
+        $container->getDefinition('session')->replaceArgument(1, new Reference($config['attribute_bag']));
+      }
+
+      if (null !== $config['flash_bag']) {
+        $container->getDefinition('session')->replaceArgument(2, new Reference($config['flash_bag']));
+      }
+
+      // session handler (the internal callback registered with PHP session management)
         if (null === $config['handler_id']) {
             // Set the handler class to be null
             $container->getDefinition('session.storage.native')->replaceArgument(1, null);
