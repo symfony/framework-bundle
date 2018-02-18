@@ -87,13 +87,13 @@ class RedirectControllerTest extends TestCase
     {
         return [
             [true, false, false, Response::HTTP_MOVED_PERMANENTLY, ['additional-parameter' => 'value']],
-            array(false, false, false, Response::HTTP_FOUND, ['additional-parameter' => 'value']),
-            array(false, false, true, Response::HTTP_FOUND, []),
-            array(false, false, ['additional-parameter'], Response::HTTP_FOUND, []),
-            array(true, true, false, Response::HTTP_PERMANENTLY_REDIRECT, ['additional-parameter' => 'value']),
-            array(false, true, false, Response::HTTP_TEMPORARY_REDIRECT, ['additional-parameter' => 'value']),
-            array(false, true, true, Response::HTTP_TEMPORARY_REDIRECT, []),
-            array(false, true, ['additional-parameter'], Response::HTTP_TEMPORARY_REDIRECT, []),
+            [false, false, false, Response::HTTP_FOUND, ['additional-parameter' => 'value']],
+            [false, false, true, Response::HTTP_FOUND, []],
+            [false, false, ['additional-parameter'], Response::HTTP_FOUND, []],
+            [true, true, false, Response::HTTP_PERMANENTLY_REDIRECT, ['additional-parameter' => 'value']],
+            [false, true, false, Response::HTTP_TEMPORARY_REDIRECT, ['additional-parameter' => 'value']],
+            [false, true, true, Response::HTTP_TEMPORARY_REDIRECT, []],
+            [false, true, ['additional-parameter'], Response::HTTP_TEMPORARY_REDIRECT, []],
         ];
     }
 
