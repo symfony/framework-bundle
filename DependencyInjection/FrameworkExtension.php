@@ -1374,8 +1374,18 @@ class FrameworkExtension extends Extension
             foreach ($resourceStores as $storeDsn) {
                 $storeDsn = $container->resolveEnvPlaceholders($storeDsn, null, $usedEnvs);
                 switch (true) {
-                    case 'flock' === $storeDsn:
-                        $storeDefinition = new Reference('lock.store.flock');
+                    case 0 === strpos($storeDsn,'flock'):
+                        $flockPath = str_replace('flock://', '', $storeDsn, $isMatched);
+
+                        if ($isMatched) {
+                            $storeDefinition = new Definition(FlockStore::class);
+                            $storeDefinition->setPublic(false);
+                            $storeDefinition->setArguments([$flockPath]);
+                            $container->setDefinition($storeDefinitionId = 'lock.flock.store.'.$container->hash($storeDsn), $storeDefinition);
+                        } else {
+                            $storeDefinitionId = 'lock.store.flock';
+                        }
+                        $storeDefinition = new Reference($storeDefinitionId);
                         break;
                     case 'semaphore' === $storeDsn:
                         $storeDefinition = new Reference('lock.store.semaphore');
