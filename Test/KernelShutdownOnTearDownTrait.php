@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 if (method_exists(\ReflectionMethod::class, 'hasReturnType') && (new \ReflectionMethod(TestCase::class, 'tearDown'))->hasReturnType()) {
 eval('
+    namespace Symfony\Bundle\FrameworkBundle\Test;
     /**
      * @internal
      */
