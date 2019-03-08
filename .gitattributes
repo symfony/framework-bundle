@@ -1,0 +1,8 @@
+# Auto-detect text files, ensure they use LF.
+* text=auto eol=lf
+
+# Exclude non-essential files from dist
+/Tests export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/phpunit.xml.dist export-ignore
