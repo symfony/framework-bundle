@@ -37,6 +37,9 @@
         "doctrine/cache": "~1.0",
         "doctrine/annotations": "~1.0"
     },
+    "replace" : {
+        "symfony/framework-bundle" : "2.8.*"
+    },
     "require-dev": {
         "symfony/browser-kit": "~2.4|~3.0.0",
         "symfony/console": "~2.8.19|~3.2.7",
