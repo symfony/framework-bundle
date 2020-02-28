@@ -166,9 +166,9 @@ abstract class AbstractController implements ServiceSubscriberInterface
     /**
      * Returns a JsonResponse that uses the serializer component if enabled, or json_encode.
      */
-    protected function json($data, int $status = 200, array $headers = [], array $context = []): JsonResponse
+    protected function json($data, int $status = 200, array $headers = [], array $context = [], bool $json = false): JsonResponse
     {
-        if ($this->container->has('serializer')) {
+        if (false === $json && $this->container->has('serializer')) {
             $json = $this->container->get('serializer')->serialize($data, 'json', array_merge([
                 'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
             ], $context));
@@ -176,7 +176,7 @@ abstract class AbstractController implements ServiceSubscriberInterface
             return new JsonResponse($json, $status, $headers, true);
         }
 
-        return new JsonResponse($data, $status, $headers);
+        return new JsonResponse($data, $status, $headers, $json);
     }
 
     /**

@@ -228,6 +228,19 @@ class AbstractControllerTest extends TestCase
         $this->assertEquals('{}', $response->getContent());
     }
 
+    public function testJsonWithAlreadyNativeJsonData()
+    {
+        $controller = $this->createController();
+        $controller->setContainer(new Container());
+
+        $response = $controller->json('{"foo":"bar"}', 200, [], [], true);
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertJsonStringEqualsJsonString(
+            '{"foo":"bar"}',
+            $response->getContent()
+        );
+    }
+
     public function testFile()
     {
         $container = new Container();
