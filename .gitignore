@@ -1,3 +1,6 @@
 vendor/
 composer.lock
 phpunit.xml
+.idea/framework-bundle.iml
+.idea/misc.xml
+.idea/modules.xml
