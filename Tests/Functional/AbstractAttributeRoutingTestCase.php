@@ -13,7 +13,7 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class AbstractAttributeRoutingTest extends AbstractWebTestCase
+abstract class AbstractAttributeRoutingTestCase extends AbstractWebTestCase
 {
     /**
      * @dataProvider getRoutes
