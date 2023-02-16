@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Catalogue\MergeOperation;
 use Symfony\Component\Translation\DataCollectorTranslator;
@@ -131,40 +132,7 @@ EOF
         $kernel = $this->getApplication()->getKernel();
 
         // Define Root Paths
-        $transPaths = $this->getRootTransPaths();
-        $codePaths = $this->getRootCodePaths($kernel);
-
-        // Override with provided Bundle info
-        if (null !== $input->getArgument('bundle')) {
-            try {
-                $bundle = $kernel->getBundle($input->getArgument('bundle'));
-                $bundleDir = $bundle->getPath();
-                $transPaths = [is_dir($bundleDir.'/Resources/translations') ? $bundleDir.'/Resources/translations' : $bundleDir.'/translations'];
-                $codePaths = [is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundleDir.'/templates'];
-                if ($this->defaultTransPath) {
-                    $transPaths[] = $this->defaultTransPath;
-                }
-                if ($this->defaultViewsPath) {
-                    $codePaths[] = $this->defaultViewsPath;
-                }
-            } catch (\InvalidArgumentException) {
-                // such a bundle does not exist, so treat the argument as path
-                $path = $input->getArgument('bundle');
-
-                $transPaths = [$path.'/translations'];
-                $codePaths = [$path.'/templates'];
-
-                if (!is_dir($transPaths[0])) {
-                    throw new InvalidArgumentException(sprintf('"%s" is neither an enabled bundle nor a directory.', $transPaths[0]));
-                }
-            }
-        } elseif ($input->getOption('all')) {
-            foreach ($kernel->getBundles() as $bundle) {
-                $bundleDir = $bundle->getPath();
-                $transPaths[] = is_dir($bundleDir.'/Resources/translations') ? $bundleDir.'/Resources/translations' : $bundle->getPath().'/translations';
-                $codePaths[] = is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundle->getPath().'/templates';
-            }
-        }
+        [$transPaths, $codePaths] = $this->defineRootPaths($kernel, $input);
 
         // Extract used messages
         $extractedCatalogue = $this->extractMessages($locale, $codePaths);
@@ -406,5 +374,46 @@ EOF
         }
 
         return $codePaths;
+    }
+
+    /**
+     * @return array<int,array<int,string>>
+     */
+    private function defineRootPaths(KernelInterface $kernel, InputInterface $input): array
+    {
+        $transPaths = $this->getRootTransPaths();
+        $codePaths = $this->getRootCodePaths($kernel);
+
+        try {
+            foreach ($this->iterateBundles($kernel, $input) as $bundle) {
+                $bundleDir = $bundle->getPath();
+                $transPaths[] = is_dir($bundleDir . '/Resources/translations') ? $bundleDir . '/Resources/translations' : $bundleDir . '/translations';
+                $codePaths[] = is_dir($bundleDir . '/Resources/views') ? $bundleDir . '/Resources/views' : $bundleDir . '/templates';
+            }
+        } catch (\InvalidArgumentException) {
+            // such a bundle does not exist, so treat the argument as path
+            $path = $input->getArgument('bundle');
+
+            $transPaths = [$path . '/translations'];
+            $codePaths = [$path . '/templates'];
+
+            if (!is_dir($transPaths[0])) {
+                throw new InvalidArgumentException(sprintf('"%s" is neither an enabled bundle nor a directory.', $transPaths[0]));
+            }
+        }
+
+        return [$transPaths, $codePaths];
+    }
+
+    /**
+     * @return iterable<BundleInterface>
+     */
+    private function iterateBundles(KernelInterface $kernel, InputInterface $input): iterable
+    {
+        if (null !== ($bundle = $input->getArgument('bundle'))) {
+            yield $kernel->getBundle($bundle);
+        } elseif ($input->getOption('all')) {
+            yield from $kernel->getBundles();
+        }
     }
 }
