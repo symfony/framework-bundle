@@ -74,7 +74,7 @@ class TranslationDebugCommand extends Command
         $this->enabledLocales = $enabledLocales;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDefinition([
@@ -183,14 +183,14 @@ EOF
                         $states[] = self::MESSAGE_MISSING;
 
                         if (!$onlyUnused) {
-                            $exitCode = $exitCode | self::EXIT_CODE_MISSING;
+                            $exitCode |= self::EXIT_CODE_MISSING;
                         }
                     }
                 } elseif ($currentCatalogue->defines($messageId, $domain)) {
                     $states[] = self::MESSAGE_UNUSED;
 
                     if (!$onlyMissing) {
-                        $exitCode = $exitCode | self::EXIT_CODE_UNUSED;
+                        $exitCode |= self::EXIT_CODE_UNUSED;
                     }
                 }
 
@@ -204,7 +204,7 @@ EOF
                     if ($fallbackCatalogue->defines($messageId, $domain) && $value === $fallbackCatalogue->get($messageId, $domain)) {
                         $states[] = self::MESSAGE_EQUALS_FALLBACK;
 
-                        $exitCode = $exitCode | self::EXIT_CODE_FALLBACK;
+                        $exitCode |= self::EXIT_CODE_FALLBACK;
 
                         break;
                     }
@@ -358,6 +358,9 @@ EOF
         return $fallbackCatalogues;
     }
 
+    /**
+     * @return array<int,string>
+     */
     private function getRootTransPaths(): array
     {
         $transPaths = $this->transPaths;
@@ -368,6 +371,9 @@ EOF
         return $transPaths;
     }
 
+    /**
+     * @return array<int,string>
+     */
     private function getRootCodePaths(KernelInterface $kernel): array
     {
         $codePaths = $this->codePaths;
