@@ -263,6 +263,7 @@ class FrameworkExtension extends Extension
 
         if (!class_exists(ControllerAttributesListener::class)) {
             $container->removeDefinition('kernel.controller_attributes_listener');
+            $container->removeDefinition('serialize_controller_result_listener');
         }
 
         if (!ContainerBuilder::willBeAvailable('symfony/clock', ClockInterface::class, ['symfony/framework-bundle'])) {

@@ -37,6 +37,7 @@ use Symfony\Component\HttpKernel\EventListener\ErrorListener;
 use Symfony\Component\HttpKernel\EventListener\IsSignatureValidAttributeListener;
 use Symfony\Component\HttpKernel\EventListener\LocaleListener;
 use Symfony\Component\HttpKernel\EventListener\ResponseListener;
+use Symfony\Component\HttpKernel\EventListener\SerializeControllerResultAttributeListener;
 use Symfony\Component\HttpKernel\EventListener\ValidateRequestListener;
 
 return static function (ContainerConfigurator $container) {
@@ -177,5 +178,11 @@ return static function (ContainerConfigurator $container) {
             ->parent('cache.system')
             ->private()
             ->tag('cache.pool')
+
+        ->set('serialize_controller_result_listener', SerializeControllerResultAttributeListener::class)
+        ->args([
+            service('serializer')->nullOnInvalid(),
+        ])
+        ->tag('kernel.event_subscriber')
     ;
 };
