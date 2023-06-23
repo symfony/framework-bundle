@@ -58,7 +58,8 @@ trait MicroKernelTrait
             $container->import($configDir.'/{services}_'.$this->environment.'.yaml');
         } else {
             $container->import($configDir.'/{services}.php');
-        }
+			$container->import($configDir.'/{services}_'.$this->environment.'.php');
+		}
     }
 
     /**
