@@ -105,6 +105,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\AsTargetedValueResolver;
 use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestHeaderValueResolver;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\EventListener\ControllerAttributesListener;
@@ -261,6 +262,9 @@ class FrameworkExtension extends Extension
         $loader->load('fragment_renderer.php');
         $loader->load('error_renderer.php');
 
+        if (!class_exists(RequestHeaderValueResolver::class)) {
+            $container->removeDefinition('argument_resolver.header_value_resolver');
+        }
         if (!class_exists(ControllerAttributesListener::class)) {
             $container->removeDefinition('kernel.controller_attributes_listener');
             $container->removeDefinition('serialize_controller_result_listener');
