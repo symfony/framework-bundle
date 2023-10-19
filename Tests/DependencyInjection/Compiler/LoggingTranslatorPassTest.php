@@ -17,6 +17,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Translation\Translator;
 
+/**
+ * @group legacy
+ */
 class LoggingTranslatorPassTest extends TestCase
 {
     public function testProcess()

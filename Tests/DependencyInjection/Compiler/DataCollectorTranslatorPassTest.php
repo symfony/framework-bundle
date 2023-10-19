@@ -20,6 +20,9 @@ use Symfony\Component\Translation\DataCollectorTranslator;
 use Symfony\Component\Translation\Translator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @group legacy
+ */
 class DataCollectorTranslatorPassTest extends TestCase
 {
     private ContainerBuilder $container;
