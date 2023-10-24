@@ -11,6 +11,7 @@ CHANGELOG
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
  * Add support for `framework.secrets.decryption_env_var` to contain dots
  * Enable mocking non-shared services in tests
+ * Add support for setting `mock_response_factory` per scoped HTTP client
  * Add `KernelTestCase::executeCommand()` to execute a command in functional tests
  * Add `framework.html_sanitizer.sanitizers.*.default_action` config option
  * Deprecate parameters `router.request_context.scheme` and `router.request_context.host`;

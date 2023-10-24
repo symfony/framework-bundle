@@ -57,7 +57,6 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpClient\CachingHttpClient;
 use Symfony\Component\HttpClient\Exception\ChunkCacheItemNotFoundException;
-use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpFoundation\IpUtils;
@@ -2474,20 +2473,56 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertEquals(new Reference('app.another_bus'), $container->getDefinition('mailer.mailer')->getArgument(1));
     }
 
+    public function testHttpClientNoMock()
+    {
+        $container = $this->createContainerFromFile('http_client_scoped_without_query_option');
+
+        $definition = $container->getDefinition('foo');
+        $arguments = $definition->getArgument(0);
+
+        $this->assertCount(1, $arguments);
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('http_client.transport', (string) $arguments[0]);
+    }
+
     public function testHttpClientMockResponseFactory()
     {
         $container = $this->createContainerFromFile('http_client_mock_response_factory');
 
-        $definition = $container->getDefinition('http_client.mock_client');
+        $this->assertTrue($container->hasDefinition('.http_client.mock_transport.my_factory'));
+        $this->assertTrue($container->hasDefinition('.http_client.mock_transport.my_other_factory'));
 
-        $this->assertSame(MockHttpClient::class, $definition->getClass());
-        $this->assertCount(1, $definition->getArguments());
+        $definition = $container->getDefinition('notMocked');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('http_client.transport', (string) $arguments[0]);
 
-        $argument = $definition->getArgument(0);
+        $definition = $container->getDefinition('mocked');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('.http_client.mock_transport.my_factory', (string) $arguments[0]);
 
-        $this->assertInstanceOf(Reference::class, $argument);
-        $this->assertSame('http_client.transport', current($definition->getDecoratedService()));
-        $this->assertSame('my_response_factory', (string) $argument);
+        $definition = $container->getDefinition('mocked_custom_factory');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('.http_client.mock_transport.my_other_factory', (string) $arguments[0]);
+    }
+
+    public function testHttpClientUseMockClientButOverrideInScopedClientsAndEnableFactories()
+    {
+        $container = $this->createContainerFromFile('http_client_mock');
+
+        $this->assertTrue($container->hasDefinition('http_client.mock_transport'));
+        $this->assertTrue($container->hasDefinition('.http_client.mock_transport.my_response_factory'));
+
+        $definition = $container->getDefinition('notMocked');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('http_client.transport', (string) $arguments[0]);
+
+        $definition = $container->getDefinition('mocked');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('http_client.mock_transport', (string) $arguments[0]);
+
+        $definition = $container->getDefinition('mocked_with_factory');
+        $arguments = $definition->getArgument(0);
+        $this->assertSame('.http_client.mock_transport.my_response_factory', (string) $arguments[0]);
     }
 
     public function testRegisterParameterCollectingBehaviorDescribingTags()

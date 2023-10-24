@@ -2809,6 +2809,17 @@ class FrameworkExtension extends Extension
             ->getDefinition('http_client.uri_template')
             ->setArgument(2, $defaultUriTemplateVars);
 
+        if (!$defaultMockResponseFactory = $config['mock_response_factory'] ?? null) {
+            $defaultTransportId = 'http_client.transport';
+        } elseif (\is_string($defaultMockResponseFactory)) {
+            $defaultTransportId = '.http_client.mock_transport.'.$defaultMockResponseFactory;
+            $container->register($defaultTransportId, MockHttpClient::class)
+                ->setArguments([new Reference($defaultMockResponseFactory)])
+                ->addTag('kernel.reset', ['method' => 'reset']);
+        } else {
+            $defaultTransportId = 'http_client.mock_transport';
+        }
+
         foreach ($config['scoped_clients'] as $name => $scopeConfig) {
             if ($container->has($name)) {
                 throw new InvalidArgumentException(\sprintf('Invalid scope name: "%s" is reserved.', $name));
@@ -2823,6 +2834,20 @@ class FrameworkExtension extends Extension
             $retryOptions = $scopeConfig['retry_failed'] ?? ['enabled' => false];
             unset($scopeConfig['retry_failed']);
 
+            if (false === $mockResponseFactory = $scopeConfig['mock_response_factory'] ?? $defaultMockResponseFactory) {
+                $transportId = 'http_client.transport';
+            } elseif ($mockResponseFactory === $defaultMockResponseFactory) {
+                $transportId = $defaultTransportId;
+            } elseif (\is_string($mockResponseFactory)) {
+                $transportId = '.http_client.mock_transport.'.$mockResponseFactory;
+                $container->register($transportId, MockHttpClient::class)
+                    ->setArguments([new Reference($mockResponseFactory)])
+                    ->addTag('kernel.reset', ['method' => 'reset']);
+            } else {
+                $transportId = 'http_client.mock_transport';
+            }
+            unset($scopeConfig['mock_response_factory']);
+
             // This "transport" service is decorated in the following order:
             // 1. ThrottlingHttpClient (5) -> throttles requests
             // 2. UriTemplateHttpClient (10) -> expands URI templates
@@ -2832,7 +2857,7 @@ class FrameworkExtension extends Extension
             // 6. TraceableHttpClient (100) -> traces requests
             $container->register($name, HttpClientInterface::class)
                 ->setFactory('current')
-                ->setArguments([[new Reference('http_client.transport')]])
+                ->setArguments([[new Reference($transportId)]])
                 ->addTag('http_client.client')
             ;
 
@@ -2888,12 +2913,6 @@ class FrameworkExtension extends Extension
 
                 $container->registerAliasForArgument('httplug.'.$name, HttpAsyncClient::class, $name);
             }
-        }
-
-        if ($responseFactoryId = $config['mock_response_factory'] ?? null) {
-            $container->register('http_client.mock_client', MockHttpClient::class)
-                ->setDecoratedService('http_client.transport', null, -10)
-                ->setArguments([new Reference($responseFactoryId)]);
         }
     }
 
