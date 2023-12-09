@@ -25,6 +25,8 @@ CHANGELOG
  * Set `framework.rate_limiter.limiters.*.lock_factory` to `auto` by default
  * Deprecate `RateLimiterFactory` autowiring aliases, use `RateLimiterFactoryInterface` instead
  * Allow configuring compound rate limiters
+ * Make `ValidatorCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
+ * Make `SerializeCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
 
 7.2
 ---
