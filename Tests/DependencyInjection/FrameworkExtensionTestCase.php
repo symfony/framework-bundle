@@ -15,6 +15,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Fixtures\Workflow\Validator\DefinitionValidator;
 use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\Messenger\DummyMessage;
 use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 use Symfony\Bundle\FullStack;
@@ -287,7 +288,11 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testWorkflows()
     {
-        $container = $this->createContainerFromFile('workflows');
+        DefinitionValidator::$called = false;
+
+        $container = $this->createContainerFromFile('workflows', compile: false);
+        $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
+        $container->compile();
 
         $this->assertTrue($container->hasDefinition('workflow.article'), 'Workflow is registered as a service');
         $this->assertSame('workflow.abstract', $container->getDefinition('workflow.article')->getParent());
@@ -310,6 +315,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         ], $tags['workflow'][0]['metadata'] ?? null);
 
         $this->assertTrue($container->hasDefinition('workflow.article.definition'), 'Workflow definition is registered as a service');
+        $this->assertTrue(DefinitionValidator::$called, 'DefinitionValidator is called');
 
         $workflowDefinition = $container->getDefinition('workflow.article.definition');
 
@@ -403,7 +409,9 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $this->expectException(InvalidDefinitionException::class);
         $this->expectExceptionMessage('A transition from a place/state must have an unique name. Multiple transitions named "go" from place/state "first" were found on StateMachine "my_workflow".');
-        $this->createContainerFromFile('workflow_not_valid');
+        $container = $this->createContainerFromFile('workflow_not_valid', compile: false);
+        $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
+        $container->compile();
     }
 
     public function testWorkflowCannotHaveBothSupportsAndSupportStrategy()

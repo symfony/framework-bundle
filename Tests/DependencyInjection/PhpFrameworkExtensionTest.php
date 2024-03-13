@@ -102,7 +102,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidDefinitionException::class);
         $this->expectExceptionMessage('A transition from a place/state must have an unique name. Multiple transitions named "a_to_b" from place/state "a" were found on StateMachine "article".');
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -128,7 +128,55 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
                     ],
                 ],
             ]);
+            $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
         });
+    }
+
+    /**
+     * @dataProvider provideWorkflowValidationCustomTests
+     */
+    public function testWorkflowValidationCustomBroken(string $class, string $message)
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage($message);
+        $this->createContainerFromClosure(function ($container) use ($class) {
+            $container->loadFromExtension('framework', [
+                'annotations' => false,
+                'http_method_override' => false,
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'workflows' => [
+                    'article' => [
+                        'type' => 'state_machine',
+                        'supports' => [
+                            __CLASS__,
+                        ],
+                        'places' => [
+                            'a',
+                            'b',
+                        ],
+                        'transitions' => [
+                            'a_to_b' => [
+                                'from' => ['a'],
+                                'to' => ['b'],
+                            ],
+                        ],
+                        'definition_validators' => [
+                            $class,
+                        ],
+                    ],
+                ],
+            ]);
+        });
+    }
+
+    public static function provideWorkflowValidationCustomTests()
+    {
+        yield ['classDoesNotExist', 'Invalid configuration for path "framework.workflows.workflows.article.definition_validators.0": The validation class "classDoesNotExist" does not exist.'];
+
+        yield [\DateTime::class, 'Invalid configuration for path "framework.workflows.workflows.article.definition_validators.0": The validation class "DateTime" is not an instance of "Symfony\Component\Workflow\Validator\DefinitionValidatorInterface".'];
+
+        yield [WorkflowValidatorWithConstructor::class, 'Invalid configuration for path "framework.workflows.workflows.article.definition_validators.0": The "Symfony\\\\Bundle\\\\FrameworkBundle\\\\Tests\\\\DependencyInjection\\\\WorkflowValidatorWithConstructor" validation class constructor must not have any arguments.'];
     }
 
     public function testWorkflowDefaultMarkingStoreDefinition()
@@ -405,5 +453,16 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         foreach (Email::VALIDATION_MODES as $mode) {
             yield [$mode];
         }
+    }
+}
+
+class WorkflowValidatorWithConstructor implements \Symfony\Component\Workflow\Validator\DefinitionValidatorInterface
+{
+    public function __construct(bool $enabled)
+    {
+    }
+
+    public function validate(\Symfony\Component\Workflow\Definition $definition, string $name): void
+    {
     }
 }

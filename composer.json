@@ -67,7 +67,7 @@
         "symfony/twig-bundle": "^6.4|^7.0",
         "symfony/type-info": "^7.1",
         "symfony/validator": "^6.4|^7.0",
-        "symfony/workflow": "^6.4|^7.0",
+        "symfony/workflow": "^7.3",
         "symfony/yaml": "^6.4|^7.0",
         "symfony/property-info": "^6.4|^7.0",
         "symfony/json-streamer": "7.3.*",
@@ -108,7 +108,7 @@
         "symfony/validator": "<6.4",
         "symfony/web-profiler-bundle": "<6.4",
         "symfony/webhook": "<7.2",
-        "symfony/workflow": "<6.4"
+        "symfony/workflow": "<7.3"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\FrameworkBundle\\": "" },

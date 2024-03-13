@@ -52,6 +52,7 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Webhook\Controller\WebhookController;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
+use Symfony\Component\Workflow\Validator\DefinitionValidatorInterface;
 use Symfony\Component\Workflow\WorkflowEvents;
 
 /**
@@ -403,6 +404,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->fixXmlConfig('support')
+                                ->fixXmlConfig('definition_validator')
                                 ->fixXmlConfig('place')
                                 ->fixXmlConfig('transition')
                                 ->fixXmlConfig('event_to_dispatch', 'events_to_dispatch')
@@ -432,8 +434,25 @@ class Configuration implements ConfigurationInterface
                                         ->prototype('scalar')
                                             ->cannotBeEmpty()
                                             ->validate()
-                                                ->ifTrue(fn ($v) => !class_exists($v) && !interface_exists($v, false))
+                                                ->ifTrue(static fn ($v) => !class_exists($v) && !interface_exists($v, false))
                                                 ->thenInvalid('The supported class or interface "%s" does not exist.')
+                                            ->end()
+                                        ->end()
+                                    ->end()
+                                    ->arrayNode('definition_validators')
+                                        ->prototype('scalar')
+                                            ->cannotBeEmpty()
+                                            ->validate()
+                                                ->ifTrue(static fn ($v) => !class_exists($v))
+                                                ->thenInvalid('The validation class %s does not exist.')
+                                            ->end()
+                                            ->validate()
+                                                ->ifTrue(static fn ($v) => !is_a($v, DefinitionValidatorInterface::class, true))
+                                                ->thenInvalid(\sprintf('The validation class %%s is not an instance of "%s".', DefinitionValidatorInterface::class))
+                                            ->end()
+                                            ->validate()
+                                                ->ifTrue(static fn ($v) => 1 <= (new \ReflectionClass($v))->getConstructor()?->getNumberOfRequiredParameters())
+                                                ->thenInvalid('The %s validation class constructor must not have any arguments.')
                                             ->end()
                                         ->end()
                                     ->end()
@@ -448,7 +467,7 @@ class Configuration implements ConfigurationInterface
                                     ->variableNode('events_to_dispatch')
                                         ->defaultValue(null)
                                         ->validate()
-                                            ->ifTrue(function ($v) {
+                                            ->ifTrue(static function ($v) {
                                                 if (null === $v) {
                                                     return false;
                                                 }
@@ -475,14 +494,14 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('places')
                                         ->beforeNormalization()
                                             ->always()
-                                            ->then(function ($places) {
+                                            ->then(static function ($places) {
                                                 if (!\is_array($places)) {
                                                     throw new InvalidConfigurationException('The "places" option must be an array in workflow configuration.');
                                                 }
 
                                                 // It's an indexed array of shape  ['place1', 'place2']
                                                 if (isset($places[0]) && \is_string($places[0])) {
-                                                    return array_map(function (string $place) {
+                                                    return array_map(static function (string $place) {
                                                         return ['name' => $place];
                                                     }, $places);
                                                 }
@@ -522,7 +541,7 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('transitions')
                                         ->beforeNormalization()
                                             ->always()
-                                            ->then(function ($transitions) {
+                                            ->then(static function ($transitions) {
                                                 if (!\is_array($transitions)) {
                                                     throw new InvalidConfigurationException('The "transitions" option must be an array in workflow configuration.');
                                                 }
@@ -589,20 +608,20 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(function ($v) {
+                                    ->ifTrue(static function ($v) {
                                         return $v['supports'] && isset($v['support_strategy']);
                                     })
                                     ->thenInvalid('"supports" and "support_strategy" cannot be used together.')
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(function ($v) {
+                                    ->ifTrue(static function ($v) {
                                         return !$v['supports'] && !isset($v['support_strategy']);
                                     })
                                     ->thenInvalid('"supports" or "support_strategy" should be configured.')
                                 ->end()
                                 ->beforeNormalization()
                                         ->always()
-                                        ->then(function ($values) {
+                                        ->then(static function ($values) {
                                             // Special case to deal with XML when the user wants an empty array
                                             if (\array_key_exists('event_to_dispatch', $values) && null === $values['event_to_dispatch']) {
                                                 $values['events_to_dispatch'] = [];

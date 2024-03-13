@@ -1123,7 +1123,8 @@ class FrameworkExtension extends Extension
                 }
             }
             $metadataStoreDefinition->replaceArgument(2, $transitionsMetadataDefinition);
-            $container->setDefinition(\sprintf('%s.metadata_store', $workflowId), $metadataStoreDefinition);
+            $metadataStoreId = \sprintf('%s.metadata_store', $workflowId);
+            $container->setDefinition($metadataStoreId, $metadataStoreDefinition);
 
             // Create places
             $places = array_column($workflow['places'], 'name');
@@ -1134,7 +1135,8 @@ class FrameworkExtension extends Extension
             $definitionDefinition->addArgument($places);
             $definitionDefinition->addArgument($transitions);
             $definitionDefinition->addArgument($initialMarking);
-            $definitionDefinition->addArgument(new Reference(\sprintf('%s.metadata_store', $workflowId)));
+            $definitionDefinition->addArgument(new Reference($metadataStoreId));
+            $definitionDefinitionId = \sprintf('%s.definition', $workflowId);
 
             // Create MarkingStore
             $markingStoreDefinition = null;
@@ -1148,14 +1150,26 @@ class FrameworkExtension extends Extension
                 $markingStoreDefinition = new Reference($workflow['marking_store']['service']);
             }
 
+            // Validation
+            $workflow['definition_validators'][] = match ($workflow['type']) {
+                'state_machine' => Workflow\Validator\StateMachineValidator::class,
+                'workflow' => Workflow\Validator\WorkflowValidator::class,
+                 default => throw new \LogicException(\sprintf('Invalid workflow type "%s".', $workflow['type'])),
+            };
+
             // Create Workflow
             $workflowDefinition = new ChildDefinition(\sprintf('%s.abstract', $type));
-            $workflowDefinition->replaceArgument(0, new Reference(\sprintf('%s.definition', $workflowId)));
+            $workflowDefinition->replaceArgument(0, new Reference($definitionDefinitionId));
             $workflowDefinition->replaceArgument(1, $markingStoreDefinition);
             $workflowDefinition->replaceArgument(3, $name);
             $workflowDefinition->replaceArgument(4, $workflow['events_to_dispatch']);
 
-            $workflowDefinition->addTag('workflow', ['name' => $name, 'metadata' => $workflow['metadata']]);
+            $workflowDefinition->addTag('workflow', [
+                'name' => $name,
+                'metadata' => $workflow['metadata'],
+                'definition_validators' => $workflow['definition_validators'],
+                'definition_id' => $definitionDefinitionId,
+            ]);
             if ('workflow' === $type) {
                 $workflowDefinition->addTag('workflow.workflow', ['name' => $name]);
             } elseif ('state_machine' === $type) {
@@ -1164,20 +1178,9 @@ class FrameworkExtension extends Extension
 
             // Store to container
             $container->setDefinition($workflowId, $workflowDefinition);
-            $container->setDefinition(\sprintf('%s.definition', $workflowId), $definitionDefinition);
+            $container->setDefinition($definitionDefinitionId, $definitionDefinition);
             $container->registerAliasForArgument($workflowId, WorkflowInterface::class, $name.'.'.$type);
             $container->registerAliasForArgument($workflowId, WorkflowInterface::class, $name);
-
-            // Validate Workflow
-            if ('state_machine' === $workflow['type']) {
-                $validator = new Workflow\Validator\StateMachineValidator();
-            } else {
-                $validator = new Workflow\Validator\WorkflowValidator();
-            }
-
-            $trs = array_map(fn (Reference $ref): Workflow\Transition => $container->get((string) $ref), $transitions);
-            $realDefinition = new Workflow\Definition($places, $trs, $initialMarking);
-            $validator->validate($realDefinition, $name);
 
             // Add workflow to Registry
             if ($workflow['supports']) {

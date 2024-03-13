@@ -55,6 +55,7 @@ CHANGELOG
  * Allow configuring compound rate limiters
  * Make `ValidatorCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
  * Make `SerializeCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
+ * Support executing custom workflow validators during container compilation
 
 7.2
 ---
