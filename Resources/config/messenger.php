@@ -26,6 +26,7 @@ use Symfony\Component\Messenger\EventListener\StopWorkerOnCustomStopExceptionLis
 use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
 use Symfony\Component\Messenger\Handler\RedispatchMessageHandler;
 use Symfony\Component\Messenger\Middleware\AddBusNameStampMiddleware;
+use Symfony\Component\Messenger\Middleware\AddDefaultStampsMiddleware;
 use Symfony\Component\Messenger\Middleware\DeduplicateMiddleware;
 use Symfony\Component\Messenger\Middleware\DispatchAfterCurrentBusMiddleware;
 use Symfony\Component\Messenger\Middleware\FailedMessageProcessingMiddleware;
@@ -92,6 +93,8 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service('lock.factory'),
             ])
+
+        ->set('messenger.middleware.add_default_stamps_middleware', AddDefaultStampsMiddleware::class)
 
         ->set('messenger.middleware.add_bus_name_stamp_middleware', AddBusNameStampMiddleware::class)
             ->abstract()

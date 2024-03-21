@@ -134,6 +134,7 @@ use Symfony\Component\Messenger\EventListener\ResetMemoryUsageListener;
 use Symfony\Component\Messenger\Handler\BatchHandlerInterface;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Middleware\AddDefaultStampsMiddleware;
 use Symfony\Component\Messenger\Middleware\DeduplicateMiddleware;
 use Symfony\Component\Messenger\Middleware\RouterContextMiddleware;
 use Symfony\Component\Messenger\Transport\AmqpExt\AmqpTransportFactory;
@@ -2435,6 +2436,10 @@ class FrameworkExtension extends Extension
                 ['id' => 'handle_message'],
             ],
         ];
+
+        if (class_exists(AddDefaultStampsMiddleware::class)) {
+            array_unshift($defaultMiddleware['before'], ['id' => 'add_default_stamps_middleware']);
+        }
 
         if ($lockEnabled && class_exists(DeduplicateMiddleware::class) && class_exists(LockFactory::class)) {
             $defaultMiddleware['before'][] = ['id' => 'deduplicate_middleware'];
