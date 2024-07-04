@@ -10,6 +10,7 @@ CHANGELOG
  * Add support for `framework.secrets.decryption_env_var` to contain dots
  * Enable mocking non-shared services in tests
  * Add `KernelTestCase::executeCommand()` to execute a command in functional tests
+ * Add `framework.html_sanitizer.sanitizers.*.default_action` config option
 
 8.0
 ---

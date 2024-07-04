@@ -52,6 +52,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerAction;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpClient\CachingHttpClient;
@@ -2592,9 +2593,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
         // config
         $this->assertTrue($container->hasDefinition('html_sanitizer.config.custom'), '->registerHtmlSanitizerConfiguration() loads custom sanitizer');
         $this->assertSame(HtmlSanitizerConfig::class, $container->getDefinition('html_sanitizer.config.custom')->getClass());
-        $this->assertCount(23, $calls = $container->getDefinition('html_sanitizer.config.custom')->getMethodCalls());
+        $this->assertCount(24, $calls = $container->getDefinition('html_sanitizer.config.custom')->getMethodCalls());
         $this->assertSame(
             [
+                ['defaultAction', [HtmlSanitizerAction::Allow], true],
                 ['allowSafeElements', [], true],
                 ['allowStaticElements', [], true],
                 ['allowElement', ['iframe', 'src'], true],
@@ -2602,9 +2604,9 @@ abstract class FrameworkExtensionTestCase extends TestCase
                 ['allowElement', ['custom-tag-2', '*'], true],
                 ['blockElement', ['section'], true],
                 ['dropElement', ['video'], true],
-                ['allowAttribute', ['src', $this instanceof XmlFrameworkExtensionTest ? 'iframe' : ['iframe']], true],
+                ['allowAttribute', ['src', ['iframe']], true],
                 ['allowAttribute', ['data-attr', '*'], true],
-                ['dropAttribute', ['data-attr', $this instanceof XmlFrameworkExtensionTest ? 'custom-tag' : ['custom-tag']], true],
+                ['dropAttribute', ['data-attr', ['custom-tag']], true],
                 ['dropAttribute', ['data-attr-1', []], true],
                 ['dropAttribute', ['data-attr-2', '*'], true],
                 ['forceAttribute', ['a', 'rel', 'noopener noreferrer'], true],
