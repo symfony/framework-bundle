@@ -25,6 +25,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
  * A console command to display information about the current installation.
  *
  * @author Roland Franssen <franssen.roland@gmail.com>
+ * @author Joppe De Cuyper <hello@joppe.dev>
  *
  * @final
  */
@@ -83,7 +84,7 @@ EOT
             ['Timezone', date_default_timezone_get().' (<comment>'.(new \DateTimeImmutable())->format(\DateTimeInterface::W3C).'</>)'],
             ['OPcache', extension_loaded('Zend OPcache') ? (filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOLEAN) ? 'Enabled' : 'Not enabled') : 'Not installed'],
             ['APCu', extension_loaded('apcu') ? (filter_var(ini_get('apc.enabled'), FILTER_VALIDATE_BOOLEAN) ? 'Enabled' : 'Not enabled') : 'Not installed'],
-            ['Xdebug', extension_loaded('xdebug') ? (ini_get('XDEBUG_MODE') ? 'Enabled (' . ini_get('XDEBUG_MODE') . ')' : 'Not enabled') : 'Not installed']
+            ['Xdebug', extension_loaded('xdebug') ? (ini_get('XDEBUG_MODE') ? 'Enabled (mode: ' . ini_get('XDEBUG_MODE') . ')' : 'Not enabled') : 'Not installed']
         ];
 
         $io->table([], $rows);
