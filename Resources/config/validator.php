@@ -92,6 +92,7 @@ return static function (ContainerConfigurator $container) {
 
         ->set('cache.validator_expression_language')
             ->parent('cache.system')
+            ->private()
             ->tag('cache.pool')
 
         ->set('validator.expression_language_provider', ExpressionLanguageProvider::class)

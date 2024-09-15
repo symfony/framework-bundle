@@ -263,6 +263,10 @@ class FrameworkExtension extends Extension
             $container->removeAlias(PsrClockInterface::class);
         }
 
+        if (!ContainerBuilder::willBeAvailable('symfony/expression-language', ExpressionLanguage::class, ['symfony/framework-bundle'])) {
+            $container->removeDefinition('controller.expression_language');
+        }
+
         $container->registerAliasForArgument('parameter_bag', PsrContainerInterface::class);
 
         $loader->load('process.php');
