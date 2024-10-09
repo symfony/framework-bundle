@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Component\PropertyInfo\Type as LegacyType;
 use Symfony\Component\TypeInfo\Type;
 
@@ -29,9 +31,8 @@ class PropertyInfoTest extends AbstractWebTestCase
         $this->assertEquals(Type::list(Type::int()), $propertyInfo->getType(Dummy::class, 'codes'));
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testPhpDocPriorityLegacy()
     {
         static::bootKernel(['test_case' => 'Serializer']);

@@ -11,6 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Console\Descriptor;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\FooUnitEnum;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -185,12 +188,11 @@ abstract class AbstractDescriptorTestCase extends TestCase
     }
 
     /**
-     * The legacy group must be kept as deprecations will always be raised.
-     *
-     * @group legacy
-     *
-     * @dataProvider getDescribeContainerParameterTestData
+     * The #[IgnoreDeprecation] attribute must be kept as deprecations will always be raised.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    #[DataProvider('getDescribeContainerParameterTestData')]
     public function testDescribeContainerParameter($parameter, $expectedDescription, array $options)
     {
         $this->assertDescription($expectedDescription, $parameter, $options);
@@ -235,11 +237,9 @@ abstract class AbstractDescriptorTestCase extends TestCase
         return static::getDescriptionTestData(ObjectsProvider::getCallables());
     }
 
-    /**
-     * @group legacy
-     *
-     * @dataProvider getDescribeDeprecatedCallableTestData
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    #[DataProvider('getDescribeDeprecatedCallableTestData')]
     public function testDescribeDeprecatedCallable($callable, $expectedDescription)
     {
         $this->assertDescription($expectedDescription, $callable);
