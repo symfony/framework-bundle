@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Add support for `lock://` DSN in semaphore configuration to use the Lock component as a semaphore store
  * Add support for configuring JsonStreamer's `default_options`
  * Add project-scoped `flock` and `semaphore` lock store services
  * Add `createFormFlowBuilder` method to `AbstractController` and `ControllerHelper`

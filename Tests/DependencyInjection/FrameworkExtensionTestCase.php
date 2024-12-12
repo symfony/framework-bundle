@@ -79,6 +79,7 @@ use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\AuthenticationEvents;
+use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
@@ -2860,6 +2861,31 @@ abstract class FrameworkExtensionTestCase extends TestCase
         self::assertTrue($container->hasDefinition('semaphore.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
         self::assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
+    }
+
+    public function testSemaphoreWithLock()
+    {
+        $container = $this->createContainerFromFile('semaphore_lock');
+
+        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
+        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        self::assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
+    }
+
+    public function testSemaphoreWithNamedLock()
+    {
+        $container = $this->createContainerFromFile('semaphore_lock_named');
+
+        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
+        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        self::assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
+
+        self::assertTrue($container->hasDefinition('semaphore.bar.factory'));
+        $storeDef = $container->getDefinition($container->getDefinition('semaphore.bar.factory')->getArgument(0));
+        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        self::assertEquals(new Reference('lock.foo.factory'), $storeDef->getArgument(0));
     }
 
     public function testJsonStreamerEnabled()

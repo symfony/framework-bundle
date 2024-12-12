@@ -2333,12 +2333,14 @@ class FrameworkExtension extends Extension
 
         foreach ($config['resources'] as $resourceName => $resourceStore) {
             $storeDsn = $container->resolveEnvPlaceholders($resourceStore, null, $usedEnvs);
-            if (!$usedEnvs && !str_contains($resourceStore, '://')) {
-                $resourceStore = new Reference($resourceStore);
-            }
             $storeDefinition = new Definition(SemaphoreStoreInterface::class);
             $storeDefinition->setFactory([SemaphoreStoreFactory::class, 'createStore']);
-            $storeDefinition->setArguments([$resourceStore]);
+            $storeDefinition->setArguments([match (true) {
+                $usedEnvs => $resourceStore,
+                str_starts_with($storeDsn, 'lock://') => new Reference('lock.'.(substr($storeDsn, 7) ?: 'default').'.factory'),
+                !str_contains($resourceStore, '://') => new Reference($resourceStore),
+                default => $resourceStore,
+            }]);
 
             $container->setDefinition($storeDefinitionId = '.semaphore.'.$resourceName.'.store.'.$container->hash($storeDsn), $storeDefinition);
 
