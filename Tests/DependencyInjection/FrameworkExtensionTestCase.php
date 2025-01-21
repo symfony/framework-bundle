@@ -54,6 +54,8 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
+use Symfony\Component\HttpClient\CachingHttpClient;
+use Symfony\Component\HttpClient\Exception\ChunkCacheItemNotFoundException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Component\HttpClient\ScopingHttpClient;
@@ -2183,6 +2185,39 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'resolve' => [],
         ];
         $this->assertEquals($expected, $container->getDefinition('foo')->getArgument(2));
+    }
+
+    public function testCachingHttpClient()
+    {
+        if (!class_exists(ChunkCacheItemNotFoundException::class)) {
+            $this->expectException(LogicException::class);
+        }
+
+        $container = $this->createContainerFromFile('http_client_caching');
+
+        $this->assertTrue($container->hasDefinition('http_client.caching'));
+        $definition = $container->getDefinition('http_client.caching');
+        $this->assertSame(CachingHttpClient::class, $definition->getClass());
+        $this->assertSame('http_client', $definition->getDecoratedService()[0]);
+        $this->assertCount(5, $arguments = $definition->getArguments());
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('http_client.caching.inner', (string) $arguments[0]);
+        $this->assertInstanceOf(Reference::class, $arguments[1]);
+        $this->assertSame('foo', (string) $arguments[1]);
+        $this->assertArrayHasKey('headers', $arguments[2]);
+        $this->assertSame(['X-powered' => 'PHP'], $arguments[2]['headers']);
+        $this->assertFalse($arguments[3]);
+        $this->assertSame(2, $arguments[4]);
+
+        $this->assertTrue($container->hasDefinition('bar.caching'));
+        $definition = $container->getDefinition('bar.caching');
+        $this->assertSame(CachingHttpClient::class, $definition->getClass());
+        $this->assertSame('bar', $definition->getDecoratedService()[0]);
+        $arguments = $definition->getArguments();
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('bar.caching.inner', (string) $arguments[0]);
+        $this->assertInstanceOf(Reference::class, $arguments[1]);
+        $this->assertSame('baz', (string) $arguments[1]);
     }
 
     public function testHttpClientRetry()
