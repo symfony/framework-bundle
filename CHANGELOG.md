@@ -17,6 +17,7 @@ CHANGELOG
  * Enable mocking non-shared services in tests
  * Add support for setting `mock_response_factory` per scoped HTTP client
  * Add `ConsoleCommandAssertionsTrait` to `KernelTestCase` for running a command and asserting the result
+ * Add `assertSessionHasFlashMessage()` to `BrowserKitAssertionsTrait`
  * Add `framework.html_sanitizer.sanitizers.*.default_action` config option
  * Deprecate parameters `router.request_context.scheme` and `router.request_context.host`;
    use the `router.request_context.base_url` parameter or the `framework.router.default_uri` config option instead
