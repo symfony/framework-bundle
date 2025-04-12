@@ -26,6 +26,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
+use Symfony\Component\Finder\Glob;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -364,7 +365,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('workflows', 'workflow')
                     ->canBeEnabled()
                     ->beforeNormalization()
-                        ->always(function ($v) {
+                        ->always(static function ($v) {
                             if (\is_array($v) && true === $v['enabled']) {
                                 $workflows = $v;
                                 unset($workflows['enabled']);
@@ -478,15 +479,36 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->arrayNode('places', 'place')
                                         ->beforeNormalization()
-                                            ->always()
-                                            ->then(static function ($places) {
-                                                if (!\is_array($places)) {
-                                                    throw new InvalidConfigurationException('The "places" option must be an array in workflow configuration.');
+                                            ->always(static function ($places) {
+                                                if (\is_string($places)) {
+                                                    if (2 !== \count($places = explode('::', $places, 2))) {
+                                                        throw new InvalidConfigurationException('The "places" option must be a "FQCN::glob" pattern in workflow configuration.');
+                                                    }
+                                                    [$class, $pattern] = $places;
+                                                    if (!class_exists($class) && !interface_exists($class, false)) {
+                                                        throw new InvalidConfigurationException(\sprintf('The "places" option must be a "FQCN::glob" pattern in workflow configuration, but class "%s" is not found.', $class));
+                                                    }
+
+                                                    $places = [];
+                                                    $regex = Glob::toRegex($pattern, false);
+
+                                                    foreach ((new \ReflectionClass($class))->getConstants() as $name => $value) {
+                                                        if (preg_match($regex, $name)) {
+                                                            $places[] = $value;
+                                                        }
+                                                    }
+                                                    if (!$places) {
+                                                        throw new InvalidConfigurationException(\sprintf('No places found for pattern "%s::%s" in workflow configuration.', $class, $pattern));
+                                                    }
+                                                } elseif (!\is_array($places)) {
+                                                    throw new InvalidConfigurationException('The "places" option must be an array or a "FQCN::glob" pattern in workflow configuration.');
                                                 }
 
                                                 $normalizedPlaces = [];
                                                 foreach ($places as $key => $value) {
-                                                    if (!\is_array($value)) {
+                                                    if ($value instanceof \BackedEnum) {
+                                                        $value = ['name' => $value->value];
+                                                    } elseif (!\is_array($value)) {
                                                         $value = ['name' => $value];
                                                     }
                                                     $value['name'] ??= $key;
@@ -514,8 +536,7 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->arrayNode('transitions', 'transition')
                                         ->beforeNormalization()
-                                            ->always()
-                                            ->then(static function ($transitions) {
+                                            ->always(static function ($transitions) {
                                                 if (!\is_array($transitions)) {
                                                     throw new InvalidConfigurationException('The "transitions" option must be an array in workflow configuration.');
                                                 }
@@ -550,14 +571,18 @@ class Configuration implements ConfigurationInterface
                                                     ->example('is_fully_authenticated() and is_granted(\'ROLE_JOURNALIST\') and subject.getTitle() == \'My first article\'')
                                                 ->end()
                                                 ->arrayNode('from')
-                                                    ->beforeNormalization()->castToArray()->end()
+                                                    ->beforeNormalization()
+                                                        ->always(static fn ($from) => array_map(static fn ($v) => $v instanceof \BackedEnum ? $v->value : $v, \is_array($from) ? $from : [$from]))
+                                                    ->end()
                                                     ->requiresAtLeastOneElement()
                                                     ->prototype('scalar')
                                                         ->cannotBeEmpty()
                                                     ->end()
                                                 ->end()
                                                 ->arrayNode('to')
-                                                    ->beforeNormalization()->castToArray()->end()
+                                                    ->beforeNormalization()
+                                                        ->always(static fn ($to) => array_map(static fn ($v) => $v instanceof \BackedEnum ? $v->value : $v, \is_array($to) ? $to : [$to]))
+                                                    ->end()
                                                     ->requiresAtLeastOneElement()
                                                     ->prototype('scalar')
                                                         ->cannotBeEmpty()
@@ -582,28 +607,23 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return $v['supports'] && isset($v['support_strategy']);
-                                    })
+                                    ->ifTrue(static fn ($v) => $v['supports'] && isset($v['support_strategy']))
                                     ->thenInvalid('"supports" and "support_strategy" cannot be used together.')
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return !$v['supports'] && !isset($v['support_strategy']);
-                                    })
+                                    ->ifTrue(static fn ($v) => !$v['supports'] && !isset($v['support_strategy']))
                                     ->thenInvalid('"supports" or "support_strategy" should be configured.')
                                 ->end()
                                 ->beforeNormalization()
-                                        ->always()
-                                        ->then(static function ($values) {
-                                            // Special case to deal with XML when the user wants an empty array
-                                            if (\array_key_exists('event_to_dispatch', $values) && null === $values['event_to_dispatch']) {
-                                                $values['events_to_dispatch'] = [];
-                                                unset($values['event_to_dispatch']);
-                                            }
+                                    ->always(static function ($values) {
+                                        // Special case to deal with XML when the user wants an empty array
+                                        if (\array_key_exists('event_to_dispatch', $values) && null === $values['event_to_dispatch']) {
+                                            $values['events_to_dispatch'] = [];
+                                            unset($values['event_to_dispatch']);
+                                        }
 
-                                            return $values;
-                                        })
+                                        return $values;
+                                    })
                                 ->end()
                             ->end()
                         ->end()

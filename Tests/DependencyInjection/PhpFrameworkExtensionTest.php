@@ -75,7 +75,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testWorkflowValidationPlacesIsArray()
     {
         $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('The "places" option must be an array in workflow configuration.');
+        $this->expectExceptionMessage('The "places" option must be an array or a "FQCN::glob" pattern in workflow configuration.');
         $this->createContainerFromClosure(function ($container) {
             $container->loadFromExtension('framework', [
                 'workflows' => [

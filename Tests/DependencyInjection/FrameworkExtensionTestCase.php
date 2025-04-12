@@ -519,6 +519,14 @@ abstract class FrameworkExtensionTestCase extends TestCase
         ], $container->getDefinition($transitions[4])->getArguments());
     }
 
+    public function testWorkflowEnum()
+    {
+        $container = $this->createContainerFromFile('workflow_enum');
+
+        $workflowDefinition = $container->getDefinition('state_machine.enum.definition');
+        $this->assertSame(['a', 'b', 'c'], $workflowDefinition->getArgument(0));
+    }
+
     public function testWorkflowGuardExpressions()
     {
         $container = $this->createContainerFromFile('workflow_with_guard_expression');
