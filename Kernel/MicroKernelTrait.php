@@ -165,7 +165,6 @@ trait MicroKernelTrait
                     ->setPublic(true)
                 ;
             }
-            $container->setAlias($kernelClass, 'kernel')->setPublic(true);
 
             $kernelDefinition = $container->getDefinition('kernel');
             $kernelDefinition->addTag('routing.route_loader');
@@ -198,6 +197,8 @@ trait MicroKernelTrait
                 $kernelLoader->registerAliasesForSinglyImplementedInterfaces();
                 AbstractConfigurator::$valuePreProcessor = $valuePreProcessor;
             }
+
+            $container->setAlias($kernelClass, 'kernel')->setPublic(true);
         });
     }
 
