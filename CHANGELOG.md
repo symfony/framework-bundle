@@ -11,6 +11,7 @@ CHANGELOG
  * Add `assertEmailAddressNotContains()` to the `MailerAssertionsTrait`
  * Add `framework.type_info.aliases` option
  * Add `KernelBrowser::getSession()`
+ * Add autoconfiguration tag `kernel.uri_signer` to `Symfony\Component\HttpFoundation\UriSigner`
 
 7.3
 ---

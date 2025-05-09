@@ -101,6 +101,7 @@ use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpClient\UriTemplateHttpClient;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\AsTargetedValueResolver;
 use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
@@ -108,6 +109,7 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\HttpKernel\EventListener\IsSignatureValidAttributeListener;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStateChecker;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
@@ -287,6 +289,9 @@ class FrameworkExtension extends Extension
 
         if (!class_exists(RunProcessMessageHandler::class)) {
             $container->removeDefinition('process.messenger.process_message_handler');
+        }
+        if (!class_exists(IsSignatureValidAttributeListener::class)) {
+            $container->removeDefinition('controller.is_signature_valid_attribute_listener');
         }
 
         if ($this->hasConsole()) {
@@ -762,6 +767,8 @@ class FrameworkExtension extends Extension
             ->addTag('mime.mime_type_guesser');
         $container->registerForAutoconfiguration(LoggerAwareInterface::class)
             ->addMethodCall('setLogger', [new Reference('logger')]);
+        $container->registerForAutoconfiguration(UriSigner::class)
+            ->addTag('kernel.uri_signer');
 
         $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition, AsEventListener $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
             $tagAttributes = get_object_vars($attribute);
