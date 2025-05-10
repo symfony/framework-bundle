@@ -56,7 +56,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 return static function (ContainerConfigurator $container) {
     $container->parameters()
-        ->set('serializer.mapping.cache.file', '%kernel.cache_dir%/serialization.php')
+        ->set('serializer.mapping.cache.file', '%kernel.build_dir%/serialization.php')
     ;
 
     $container->services()
