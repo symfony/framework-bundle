@@ -92,6 +92,7 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Webhook\Client\RequestParser;
 use Symfony\Component\Webhook\Controller\WebhookController;
+use Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass;
 use Symfony\Component\Workflow\Exception\InvalidDefinitionException;
 use Symfony\Component\Workflow\Metadata\InMemoryMetadataStore;
 use Symfony\Component\Workflow\WorkflowEvents;
@@ -291,7 +292,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         DefinitionValidator::$called = false;
 
         $container = $this->createContainerFromFile('workflows', compile: false);
-        $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
+        $container->addCompilerPass(new WorkflowValidatorPass());
         $container->compile();
 
         $this->assertTrue($container->hasDefinition('workflow.article'), 'Workflow is registered as a service');
@@ -410,7 +411,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->expectException(InvalidDefinitionException::class);
         $this->expectExceptionMessage('A transition from a place/state must have an unique name. Multiple transitions named "go" from place/state "first" were found on StateMachine "my_workflow".');
         $container = $this->createContainerFromFile('workflow_not_valid', compile: false);
-        $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
+        $container->addCompilerPass(new WorkflowValidatorPass());
         $container->compile();
     }
 

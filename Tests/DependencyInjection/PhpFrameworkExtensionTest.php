@@ -20,7 +20,10 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\RateLimiter\CompoundRateLimiterFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Workflow\Definition;
+use Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass;
 use Symfony\Component\Workflow\Exception\InvalidDefinitionException;
+use Symfony\Component\Workflow\Validator\DefinitionValidatorInterface;
 
 class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 {
@@ -128,7 +131,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
                     ],
                 ],
             ]);
-            $container->addCompilerPass(new \Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass());
+            $container->addCompilerPass(new WorkflowValidatorPass());
         });
     }
 
@@ -456,13 +459,13 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     }
 }
 
-class WorkflowValidatorWithConstructor implements \Symfony\Component\Workflow\Validator\DefinitionValidatorInterface
+class WorkflowValidatorWithConstructor implements DefinitionValidatorInterface
 {
     public function __construct(bool $enabled)
     {
     }
 
-    public function validate(\Symfony\Component\Workflow\Definition $definition, string $name): void
+    public function validate(Definition $definition, string $name): void
     {
     }
 }
