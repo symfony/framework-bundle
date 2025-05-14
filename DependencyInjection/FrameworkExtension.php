@@ -216,6 +216,7 @@ use Symfony\Component\Validator\Mapping\Loader\PropertyInfoLoader;
 use Symfony\Component\Validator\ObjectInitializerInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Webhook\Controller\WebhookController;
+use Symfony\Component\WebLink\HttpHeaderParser;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
 use Symfony\Component\Workflow;
 use Symfony\Component\Workflow\WorkflowInterface;
@@ -497,6 +498,11 @@ class FrameworkExtension extends Extension
             }
 
             $loader->load('web_link.php');
+
+            // Require symfony/web-link 7.4
+            if (!class_exists(HttpHeaderParser::class)) {
+                $container->removeDefinition('web_link.http_header_parser');
+            }
         }
 
         if ($this->readConfigEnabled('uid', $container, $config['uid'])) {
