@@ -45,7 +45,6 @@ return static function (ContainerConfigurator $container) {
                 tagged_iterator('mailer.transport_factory'),
             ])
 
-        ->set('mailer.default_transport', TransportInterface::class)
         ->alias('mailer.default_transport', 'mailer.transports')
         ->alias(TransportInterface::class, 'mailer.default_transport')
 
