@@ -9,7 +9,13 @@
     <framework:config http-method-override="false" handle-all-throwables="true">
         <framework:annotations enabled="false" />
         <framework:php-errors log="true" />
-        <framework:csrf-protection field-name="_custom_form" />
+        <framework:csrf-protection enabled="true" />
+        <framework:form>
+            <framework:csrf-protection>
+                <framework:field-attr name="data-foo">bar</framework:field-attr>
+                <framework:field-attr name="data-bar">baz</framework:field-attr>
+            </framework:csrf-protection>
+        </framework:form>
         <framework:session storage-factory-id="session.storage.factory.native" />
     </framework:config>
 </container>

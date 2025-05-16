@@ -79,7 +79,7 @@
         <xsd:attribute name="field-name" type="xsd:string" />
     </xsd:complexType>
 
-    <xsd:complexType name="field_attr">
+    <xsd:complexType name="field_attr" mixed="true">
         <xsd:attribute name="name" type="xsd:string" use="required"/>
     </xsd:complexType>
 

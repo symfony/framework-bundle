@@ -1413,6 +1413,17 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertFalse($container->getParameter('form.type_extension.csrf.enabled'));
     }
 
+    public function testFormCsrfFieldAttr()
+    {
+        $container = $this->createContainerFromFile('form_csrf_field_attr');
+
+        $expected = [
+            'data-foo' => 'bar',
+            'data-bar' => 'baz',
+        ];
+        $this->assertSame($expected, $container->getParameter('form.type_extension.csrf.field_attr'));
+    }
+
     public function testStopwatchEnabledWithDebugModeEnabled()
     {
         $container = $this->createContainerFromFile('default_config', [

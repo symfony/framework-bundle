@@ -252,6 +252,7 @@ class Configuration implements ConfigurationInterface
                                 ->arrayNode('field_attr')
                                     ->performNoDeepMerging()
                                     ->normalizeKeys(false)
+                                    ->useAttributeAsKey('name')
                                     ->scalarPrototype()->end()
                                     ->defaultValue(['data-controller' => 'csrf-protection'])
                                 ->end()
