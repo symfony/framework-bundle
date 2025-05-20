@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle;
 
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddDebugLogProcessorPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AssetsContextPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
@@ -200,6 +201,14 @@ class FrameworkBundle extends Bundle
             $container->addCompilerPass(new CacheCollectorPass(), PassConfig::TYPE_BEFORE_REMOVING);
             $this->addCompilerPassIfExists($container, WorkflowDebugPass::class);
         }
+    }
+
+    /**
+     * @internal
+     */
+    public static function considerProfilerEnabled(): bool
+    {
+        return !($GLOBALS['app'] ?? null) instanceof Application || empty($_GET) && \in_array('--profile', $_SERVER['argv'] ?? [], true);
     }
 
     private function addCompilerPassIfExists(ContainerBuilder $container, string $class, string $type = PassConfig::TYPE_BEFORE_OPTIMIZATION, int $priority = 0): void
