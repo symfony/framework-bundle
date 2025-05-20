@@ -642,6 +642,14 @@ class FrameworkExtension extends Extension
             $loader->load('mime_type.php');
         }
 
+        if (ContainerBuilder::willBeAvailable('symfony/object-mapper', ObjectMapperInterface::class, ['symfony/framework-bundle'])) {
+            $loader->load('object_mapper.php');
+            $container->registerForAutoconfiguration(TransformCallableInterface::class)
+                ->addTag('object_mapper.transform_callable');
+            $container->registerForAutoconfiguration(ConditionCallableInterface::class)
+                ->addTag('object_mapper.condition_callable');
+        }
+
         $container->registerForAutoconfiguration(PackageInterface::class)
             ->addTag('assets.package');
         $container->registerForAutoconfiguration(AssetCompilerInterface::class)
@@ -879,14 +887,6 @@ class FrameworkExtension extends Extension
 
         if (!ContainerBuilder::willBeAvailable('symfony/translation', Translator::class, ['symfony/framework-bundle', 'symfony/form'])) {
             $container->removeDefinition('form.type_extension.upload.validator');
-        }
-
-        if (ContainerBuilder::willBeAvailable('symfony/object-mapper', ObjectMapperInterface::class, ['symfony/framework-bundle'])) {
-            $loader->load('object_mapper.php');
-            $container->registerForAutoconfiguration(TransformCallableInterface::class)
-                ->addTag('object_mapper.transform_callable');
-            $container->registerForAutoconfiguration(ConditionCallableInterface::class)
-                ->addTag('object_mapper.condition_callable');
         }
     }
 
