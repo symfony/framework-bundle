@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\FrameworkBundle\EventListener\ConsoleProfilerListener;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\HttpKernel\Debug\VirtualRequestStack;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\FileProfilerStorage;
@@ -61,7 +62,7 @@ return static function (ContainerConfigurator $container) {
         ->set('profiler.state_checker', ProfilerStateChecker::class)
             ->args([
                 service_locator(['profiler' => service('profiler')->ignoreOnUninitialized()]),
-                param('kernel.runtime_mode.web'),
+                inline_service('bool')->factory([FrameworkBundle::class, 'considerProfilerEnabled']),
             ])
 
         ->set('profiler.is_disabled_state_checker', 'Closure')
