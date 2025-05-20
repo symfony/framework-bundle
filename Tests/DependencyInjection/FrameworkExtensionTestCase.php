@@ -2611,6 +2611,14 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertTrue($container->has('json_streamer.stream_writer'));
     }
 
+    public function testObjectMapperEnabled()
+    {
+        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', []);
+        });
+        $this->assertTrue($container->has('object_mapper'));
+    }
+
     protected function createContainer(array $data = [])
     {
         return new ContainerBuilder(new EnvPlaceholderParameterBag(array_merge([
