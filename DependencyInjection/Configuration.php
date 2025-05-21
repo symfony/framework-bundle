@@ -1290,7 +1290,7 @@ class Configuration implements ConfigurationInterface
                 ->then(function ($v) {
                     $v['property_info']['with_constructor_extractor'] = false;
 
-                    trigger_deprecation('symfony/framework-bundle', '7.3', 'Not setting the "with_constructor_extractor" option explicitly is deprecated because its default value will change in version 8.0.');
+                    trigger_deprecation('symfony/framework-bundle', '7.3', 'Not setting the "property_info.with_constructor_extractor" option explicitly is deprecated because its default value will change in version 8.0.');
 
                     return $v;
                 })
