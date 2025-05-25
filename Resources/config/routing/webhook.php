@@ -24,7 +24,7 @@ return function (RoutingConfigurator $routes): void {
     }
 
     $routes->add('_webhook_controller', '/{type}')
-        ->controller('webhook_controller::handle')
+        ->controller('webhook.controller::handle')
         ->requirements(['type' => '.+'])
     ;
 };
