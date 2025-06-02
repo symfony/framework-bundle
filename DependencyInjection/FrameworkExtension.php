@@ -302,6 +302,10 @@ class FrameworkExtension extends Extension
         // Load Cache configuration first as it is used by other components
         $loader->load('cache.php');
 
+        if (!interface_exists(NamespacedPoolInterface::class)) {
+            $container->removeAlias(NamespacedPoolInterface::class);
+        }
+
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
