@@ -38,7 +38,6 @@ return static function (ContainerConfigurator $container) {
                 tagged_locator('json_streamer.value_transformer'),
                 service('json_streamer.read.property_metadata_loader'),
                 param('.json_streamer.stream_readers_dir'),
-                param('.json_streamer.lazy_ghosts_dir'),
             ])
         ->alias(JsonStreamWriter::class, 'json_streamer.stream_writer')
         ->alias(JsonStreamReader::class, 'json_streamer.stream_reader')
@@ -106,13 +105,6 @@ return static function (ContainerConfigurator $container) {
                 param('.json_streamer.stream_writers_dir'),
                 param('.json_streamer.stream_readers_dir'),
                 service('logger')->ignoreOnInvalid(),
-            ])
-            ->tag('kernel.cache_warmer')
-
-        ->set('.json_streamer.cache_warmer.lazy_ghost', LazyGhostCacheWarmer::class)
-            ->args([
-                abstract_arg('streamable class names'),
-                param('.json_streamer.lazy_ghosts_dir'),
             ])
             ->tag('kernel.cache_warmer')
     ;

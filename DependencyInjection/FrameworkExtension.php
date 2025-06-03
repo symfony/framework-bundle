@@ -2131,11 +2131,6 @@ class FrameworkExtension extends Extension
 
         $container->setParameter('.json_streamer.stream_writers_dir', '%kernel.cache_dir%/json_streamer/stream_writer');
         $container->setParameter('.json_streamer.stream_readers_dir', '%kernel.cache_dir%/json_streamer/stream_reader');
-        $container->setParameter('.json_streamer.lazy_ghosts_dir', '%kernel.cache_dir%/json_streamer/lazy_ghost');
-
-        if (\PHP_VERSION_ID >= 80400) {
-            $container->removeDefinition('.json_streamer.cache_warmer.lazy_ghost');
-        }
     }
 
     private function registerPropertyInfoConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
