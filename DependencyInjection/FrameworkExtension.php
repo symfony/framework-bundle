@@ -2303,7 +2303,7 @@ class FrameworkExtension extends Extension
         }
 
         // BC layer Scheduler < 7.3
-        if (!class_exists(SchedulerTriggerNormalizer::class)) {
+        if (!ContainerBuilder::willBeAvailable('symfony/serializer', DenormalizerInterface::class, ['symfony/framework-bundle', 'symfony/scheduler']) || !class_exists(SchedulerTriggerNormalizer::class)) {
             $container->removeDefinition('serializer.normalizer.scheduler_trigger');
         }
     }
