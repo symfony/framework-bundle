@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Test;
 
-use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -121,11 +120,8 @@ abstract class KernelTestCase extends TestCase
 
     /**
      * Shuts the kernel down if it was used in the test - called by the tearDown method by default.
-     *
-     * @afterClass
      */
-    #[AfterClass]
-    public static function ensureKernelShutdown()
+    protected static function ensureKernelShutdown()
     {
         if (null !== static::$kernel) {
             static::$kernel->boot();
