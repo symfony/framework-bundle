@@ -6,4 +6,3 @@ framework:
         log: true
     property_info:
         enabled: true
-        with_constructor_extractor: false

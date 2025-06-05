@@ -5,10 +5,7 @@ $container->loadFromExtension('framework', [
     'http_method_override' => false,
     'handle_all_throwables' => true,
     'php_errors' => ['log' => true],
-    'property_info' => [
-        'enabled' => true,
-        'with_constructor_extractor' => true,
-    ],
+    'property_info' => ['enabled' => true],
     'validation' => [
         'email_validation_mode' => 'html5',
         'auto_mapping' => [
