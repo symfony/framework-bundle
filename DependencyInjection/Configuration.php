@@ -1067,7 +1067,7 @@ class Configuration implements ConfigurationInterface
                             ->validate()->castToArray()->end()
                         ->end()
                         ->scalarNode('translation_domain')->defaultValue('validators')->end()
-                        ->enumNode('email_validation_mode')->values((class_exists(Email::class) ? Email::VALIDATION_MODES : ['html5-allow-no-tld', 'html5', 'strict']) + ['loose'])->end()
+                        ->enumNode('email_validation_mode')->values(array_merge(class_exists(Email::class) ? Email::VALIDATION_MODES : ['html5-allow-no-tld', 'html5', 'strict'], ['loose']))->end()
                         ->arrayNode('mapping')
                             ->addDefaultsIfNotSet()
                             ->fixXmlConfig('path')
