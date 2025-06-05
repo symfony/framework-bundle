@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Symfony\Component\JsonStreamer\CacheWarmer\LazyGhostCacheWarmer;
 use Symfony\Component\JsonStreamer\CacheWarmer\StreamerCacheWarmer;
 use Symfony\Component\JsonStreamer\JsonStreamReader;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
