@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Test;
 
-use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -33,6 +32,14 @@ abstract class KernelTestCase extends TestCase
     protected static bool $booted = false;
 
     protected function tearDown(): void
+    {
+        static::ensureKernelShutdown();
+        static::$class = null;
+        static::$kernel = null;
+        static::$booted = false;
+    }
+
+    public static function tearDownAfterClass(): void
     {
         static::ensureKernelShutdown();
         static::$class = null;
@@ -113,11 +120,8 @@ abstract class KernelTestCase extends TestCase
 
     /**
      * Shuts the kernel down if it was used in the test - called by the tearDown method by default.
-     *
-     * @afterClass
      */
-    #[AfterClass]
-    public static function ensureKernelShutdown()
+    protected static function ensureKernelShutdown()
     {
         if (null !== static::$kernel) {
             static::$kernel->boot();
