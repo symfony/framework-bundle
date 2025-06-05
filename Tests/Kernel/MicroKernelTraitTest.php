@@ -14,7 +14,6 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\Kernel;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -184,29 +183,5 @@ class MicroKernelTraitTest extends TestCase
         $response = $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, false);
 
         $this->assertSame('OK', $response->getContent());
-    }
-}
-
-abstract class MinimalKernel extends Kernel
-{
-    use MicroKernelTrait;
-
-    private string $cacheDir;
-
-    public function __construct(string $cacheDir)
-    {
-        parent::__construct('test', false);
-
-        $this->cacheDir = sys_get_temp_dir().'/'.$cacheDir;
-    }
-
-    public function getCacheDir(): string
-    {
-        return $this->cacheDir;
-    }
-
-    public function getLogDir(): string
-    {
-        return $this->cacheDir;
     }
 }
