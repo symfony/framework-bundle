@@ -74,10 +74,7 @@ $container->loadFromExtension('framework', [
             ],
         ],
     ],
-    'property_info' => [
-        'enabled' => true,
-        'with_constructor_extractor' => true,
-    ],
+    'property_info' => true,
     'type_info' => true,
     'ide' => 'file%%link%%format',
     'request' => [

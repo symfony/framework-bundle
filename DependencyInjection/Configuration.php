@@ -1281,19 +1281,10 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->booleanNode('with_constructor_extractor')
                             ->info('Registers the constructor extractor.')
+                            ->defaultTrue()
                         ->end()
                     ->end()
                 ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(fn ($v) => $v['property_info']['enabled'] && !isset($v['property_info']['with_constructor_extractor']))
-                ->then(function ($v) {
-                    $v['property_info']['with_constructor_extractor'] = false;
-
-                    trigger_deprecation('symfony/framework-bundle', '7.3', 'Not setting the "property_info.with_constructor_extractor" option explicitly is deprecated because its default value will change in version 8.0.');
-
-                    return $v;
-                })
             ->end()
         ;
     }

@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+8.0
+---
+
+ * Enable the property info constructor extractor by default
+
 7.3
 ---
 

@@ -7,6 +7,5 @@ $container->loadFromExtension('framework', [
     'php_errors' => ['log' => true],
     'property_info' => [
         'enabled' => true,
-        'with_constructor_extractor' => false,
     ],
 ]);
