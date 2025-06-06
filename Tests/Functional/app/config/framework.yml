@@ -13,8 +13,6 @@ framework:
         storage_factory_id: session.storage.factory.mock_file
         cookie_secure: auto
         cookie_samesite: lax
-    profiler:
-        collect_serializer_data: true
 
 services:
     logger: { class: Psr\Log\NullLogger }

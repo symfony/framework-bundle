@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+8.1
+---
+
+ * Deprecate setting the `framework.profiler.collect_serializer_data` config option
+
 8.0
 ---
 
