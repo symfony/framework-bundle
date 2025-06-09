@@ -82,7 +82,7 @@ class AboutCommandTest extends TestCase
     private function createCommandTester(TestAppKernel $kernel): CommandTester
     {
         $application = new Application($kernel);
-        $application->add(new AboutCommand());
+        $application->addCommand(new AboutCommand());
 
         return new CommandTester($application->find('about'));
     }

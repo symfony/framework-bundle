@@ -132,7 +132,7 @@ EOL
     {
         $application = $this->createApplication($debug);
 
-        $application->add(new ConfigDumpReferenceCommand());
+        $application->addCommand(new ConfigDumpReferenceCommand());
         $tester = new CommandCompletionTester($application->get('config:dump-reference'));
         $suggestions = $tester->complete($input);
         $this->assertSame($expectedSuggestions, $suggestions);

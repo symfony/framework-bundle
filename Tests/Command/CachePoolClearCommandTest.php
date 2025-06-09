@@ -36,7 +36,7 @@ class CachePoolClearCommandTest extends TestCase
     public function testComplete(array $input, array $expectedSuggestions)
     {
         $application = new Application($this->getKernel());
-        $application->add(new CachePoolClearCommand(new Psr6CacheClearer(['foo' => $this->cachePool]), ['foo']));
+        $application->addCommand(new CachePoolClearCommand(new Psr6CacheClearer(['foo' => $this->cachePool]), ['foo']));
         $tester = new CommandCompletionTester($application->get('cache:pool:clear'));
 
         $suggestions = $tester->complete($input);

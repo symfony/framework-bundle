@@ -46,7 +46,7 @@ class CachePoolListCommandTest extends AbstractWebTestCase
     private function createCommandTester(array $poolNames)
     {
         $application = new Application(static::$kernel);
-        $application->add(new CachePoolListCommand($poolNames));
+        $application->addCommand(new CachePoolListCommand($poolNames));
 
         return new CommandTester($application->find('cache:pool:list'));
     }
