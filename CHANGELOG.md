@@ -6,6 +6,11 @@ CHANGELOG
 
  * Enable the property info constructor extractor by default
 
+7.4
+---
+
+ * Deprecate `Symfony\Bundle\FrameworkBundle\Console\Application::add()` in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
+
 7.3
 ---
 

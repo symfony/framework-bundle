@@ -90,7 +90,7 @@ class CachePoolDeleteCommandTest extends TestCase
     public function testComplete(array $input, array $expectedSuggestions)
     {
         $application = new Application($this->getKernel());
-        $application->add(new CachePoolDeleteCommand(new Psr6CacheClearer(['foo' => $this->cachePool]), ['foo']));
+        $application->addCommand(new CachePoolDeleteCommand(new Psr6CacheClearer(['foo' => $this->cachePool]), ['foo']));
         $tester = new CommandCompletionTester($application->get('cache:pool:delete'));
 
         $suggestions = $tester->complete($input);
@@ -125,7 +125,7 @@ class CachePoolDeleteCommandTest extends TestCase
     private function getCommandTester(KernelInterface $kernel): CommandTester
     {
         $application = new Application($kernel);
-        $application->add(new CachePoolDeleteCommand(new Psr6CacheClearer(['foo' => $this->cachePool])));
+        $application->addCommand(new CachePoolDeleteCommand(new Psr6CacheClearer(['foo' => $this->cachePool])));
 
         return new CommandTester($application->find('cache:pool:delete'));
     }

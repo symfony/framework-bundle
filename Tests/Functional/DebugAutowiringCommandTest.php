@@ -122,7 +122,7 @@ class DebugAutowiringCommandTest extends AbstractWebTestCase
     public function testComplete(array $input, array $expectedSuggestions)
     {
         $kernel = static::bootKernel(['test_case' => 'ContainerDebug', 'root_config' => 'config.yml']);
-        $command = (new Application($kernel))->add(new DebugAutowiringCommand());
+        $command = (new Application($kernel))->addCommand(new DebugAutowiringCommand());
 
         $tester = new CommandCompletionTester($command);
 

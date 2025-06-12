@@ -241,7 +241,7 @@ class ConfigDebugCommandTest extends AbstractWebTestCase
     {
         $application = $this->createApplication($debug);
 
-        $application->add(new ConfigDebugCommand());
+        $application->addCommand(new ConfigDebugCommand());
         $tester = new CommandCompletionTester($application->get('debug:config'));
         $suggestions = $tester->complete($input);
 

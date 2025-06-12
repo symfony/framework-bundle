@@ -223,7 +223,7 @@ class TranslationDebugCommandTest extends TestCase
         $command = new TranslationDebugCommand($translator, $loader, $extractor, $this->translationDir.'/translations', $this->translationDir.'/templates', $transPaths, $codePaths, $enabledLocales);
 
         $application = new Application($kernel);
-        $application->add($command);
+        $application->addCommand($command);
 
         return $application->find('debug:translation');
     }

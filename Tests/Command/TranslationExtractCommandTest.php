@@ -304,7 +304,7 @@ class TranslationExtractCommandTest extends TestCase
         $command = new TranslationExtractCommand($writer, $loader, $extractor, 'en', $this->translationDir.'/translations', $this->translationDir.'/templates', $transPaths, $codePaths);
 
         $application = new Application($kernel);
-        $application->add($command);
+        $application->addCommand($command);
 
         return new CommandTester($application->find('translation:extract'));
     }
