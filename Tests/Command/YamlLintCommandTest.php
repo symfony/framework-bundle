@@ -107,12 +107,7 @@ EOF;
     {
         if (!$application) {
             $application = new BaseApplication();
-            $command = new YamlLintCommand();
-            if (method_exists($application, 'addCommand')) {
-                $application->addCommand($command);
-            } else {
-                $application->add($command);
-            }
+            $application->addCommand(new YamlLintCommand());
         }
 
         $command = $application->find('lint:yaml');

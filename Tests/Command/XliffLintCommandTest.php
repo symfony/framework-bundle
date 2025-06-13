@@ -59,12 +59,7 @@ EOF;
     {
         if (!$application) {
             $application = new BaseApplication();
-            $command = new XliffLintCommand();
-            if (method_exists($application, 'addCommand')) {
-                $application->addCommand($command);
-            } else {
-                $application->add($command);
-            }
+            $application->addCommand(new XliffLintCommand());
         }
 
         $command = $application->find('lint:xliff');

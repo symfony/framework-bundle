@@ -25,12 +25,7 @@ class WorkflowDumpCommandTest extends TestCase
     public function testComplete(array $input, array $expectedSuggestions)
     {
         $application = new Application();
-        $command = new WorkflowDumpCommand(new ServiceLocator([]));
-        if (method_exists($application, 'addCommand')) {
-            $application->addCommand($command);
-        } else {
-            $application->add($command);
-        }
+        $application->addCommand(new WorkflowDumpCommand(new ServiceLocator([])));
 
         $tester = new CommandCompletionTester($application->find('workflow:dump'));
         $suggestions = $tester->complete($input, 2);
