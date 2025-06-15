@@ -62,6 +62,10 @@ EOF
                 $io->error(\sprintf('The secret "%s" does not exist.', $name));
 
                 return self::INVALID;
+            } elseif (null === $secrets[$name]) {
+                $io->error(\sprintf('The secret "%s" could not be decrypted.', $name));
+
+                return self::INVALID;
             }
 
             $io->writeln($secrets[$name]);
