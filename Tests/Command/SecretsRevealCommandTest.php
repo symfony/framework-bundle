@@ -46,6 +46,19 @@ class SecretsRevealCommandTest extends TestCase
         $this->assertStringContainsString('The secret "undefinedKey" does not exist.', trim($tester->getDisplay(true)));
     }
 
+    public function testFailedDecrypt()
+    {
+        $vault = $this->createMock(AbstractVault::class);
+        $vault->method('list')->willReturn(['secretKey' => null]);
+
+        $command = new SecretsRevealCommand($vault);
+
+        $tester = new CommandTester($command);
+        $this->assertSame(Command::INVALID, $tester->execute(['name' => 'secretKey']));
+
+        $this->assertStringContainsString('The secret "secretKey" could not be decrypted.', trim($tester->getDisplay(true)));
+    }
+
     /**
      * @backupGlobals enabled
      */
