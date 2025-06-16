@@ -288,6 +288,9 @@ class XmlDescriptor extends Descriptor
         return $dom;
     }
 
+    /**
+     * @param (callable(string):bool)|null $filter
+     */
     private function getContainerServicesDocument(ContainerBuilder $container, ?string $tag = null, bool $showHidden = false, ?callable $filter = null): \DOMDocument
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');

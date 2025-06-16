@@ -576,6 +576,9 @@ class TextDescriptor extends Descriptor
         return trim($configAsString);
     }
 
+    /**
+     * @param (callable():ContainerBuilder)|null $getContainer
+     */
     private function formatControllerLink(mixed $controller, string $anchorText, ?callable $getContainer = null): string
     {
         if (null === $this->fileLinkFormatter) {
