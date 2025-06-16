@@ -292,5 +292,6 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         foreach (Email::VALIDATION_MODES as $mode) {
             yield [$mode];
         }
+        yield ['loose'];
     }
 }
