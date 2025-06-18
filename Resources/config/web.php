@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\ControllerResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\TemplateController;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -145,6 +146,11 @@ return static function (ContainerConfigurator $container) {
 
         ->set('controller.cache_attribute_listener', CacheAttributeListener::class)
             ->tag('kernel.event_subscriber')
+
+        ->set('controller.helper', ControllerHelper::class)
+            ->tag('container.service_subscriber')
+
+        ->alias(ControllerHelper::class, 'controller.helper')
 
     ;
 };
