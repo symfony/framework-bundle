@@ -1102,6 +1102,28 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('messenger.bus.commands', (string) $container->getAlias('messenger.default_bus'));
     }
 
+    public function testMessengerWithAddBusNameStampMiddleware()
+    {
+        $container = $this->createContainerFromFile('messenger_bus_name_stamp');
+
+        $this->assertTrue($container->has('messenger.bus.commands'));
+        $this->assertEquals([
+            ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.commands']],
+            ['id' => 'send_message', 'arguments' => []],
+            ['id' => 'handle_message', 'arguments' => []],
+        ], $container->getParameter('messenger.bus.commands.middleware'));
+        $this->assertTrue($container->has('messenger.bus.events'));
+        $this->assertSame([], $container->getDefinition('messenger.bus.events')->getArgument(0));
+        $this->assertEquals([
+            ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.events']],
+            ['id' => 'reject_redelivered_message_middleware'],
+            ['id' => 'dispatch_after_current_bus'],
+            ['id' => 'failed_message_processing_middleware'],
+            ['id' => 'send_message', 'arguments' => [true]],
+            ['id' => 'handle_message', 'arguments' => [false]],
+        ], $container->getParameter('messenger.bus.events.middleware'));
+    }
+
     public function testMessengerMiddlewareFactoryErroneousFormat()
     {
         $this->expectException(\InvalidArgumentException::class);
