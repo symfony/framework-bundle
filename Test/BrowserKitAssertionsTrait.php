@@ -28,24 +28,31 @@ use Symfony\Component\HttpFoundation\Test\Constraint as ResponseConstraint;
  */
 trait BrowserKitAssertionsTrait
 {
-    public static function assertResponseIsSuccessful(string $message = '', bool $verbose = true): void
+    private static bool $defaultVerboseMode = true;
+
+    public static function setBrowserKitAssertionsAsVerbose(bool $verbose): void
     {
-        self::assertThatForResponse(new ResponseConstraint\ResponseIsSuccessful($verbose), $message);
+        self::$defaultVerboseMode = $verbose;
     }
 
-    public static function assertResponseStatusCodeSame(int $expectedCode, string $message = '', bool $verbose = true): void
+    public static function assertResponseIsSuccessful(string $message = '', ?bool $verbose = null): void
     {
-        self::assertThatForResponse(new ResponseConstraint\ResponseStatusCodeSame($expectedCode, $verbose), $message);
+        self::assertThatForResponse(new ResponseConstraint\ResponseIsSuccessful($verbose ?? self::$defaultVerboseMode), $message);
     }
 
-    public static function assertResponseFormatSame(?string $expectedFormat, string $message = ''): void
+    public static function assertResponseStatusCodeSame(int $expectedCode, string $message = '', ?bool $verbose = null): void
     {
-        self::assertThatForResponse(new ResponseConstraint\ResponseFormatSame(self::getRequest(), $expectedFormat), $message);
+        self::assertThatForResponse(new ResponseConstraint\ResponseStatusCodeSame($expectedCode, $verbose ?? self::$defaultVerboseMode), $message);
     }
 
-    public static function assertResponseRedirects(?string $expectedLocation = null, ?int $expectedCode = null, string $message = '', bool $verbose = true): void
+    public static function assertResponseFormatSame(?string $expectedFormat, string $message = '', ?bool $verbose = null): void
     {
-        $constraint = new ResponseConstraint\ResponseIsRedirected($verbose);
+        self::assertThatForResponse(new ResponseConstraint\ResponseFormatSame(self::getRequest(), $expectedFormat, $verbose ?? self::$defaultVerboseMode), $message);
+    }
+
+    public static function assertResponseRedirects(?string $expectedLocation = null, ?int $expectedCode = null, string $message = '', ?bool $verbose = null): void
+    {
+        $constraint = new ResponseConstraint\ResponseIsRedirected($verbose ?? self::$defaultVerboseMode);
         if ($expectedLocation) {
             if (class_exists(ResponseConstraint\ResponseHeaderLocationSame::class)) {
                 $locationConstraint = new ResponseConstraint\ResponseHeaderLocationSame(self::getRequest(), $expectedLocation);
@@ -100,9 +107,9 @@ trait BrowserKitAssertionsTrait
         ), $message);
     }
 
-    public static function assertResponseIsUnprocessable(string $message = '', bool $verbose = true): void
+    public static function assertResponseIsUnprocessable(string $message = '', ?bool $verbose = null): void
     {
-        self::assertThatForResponse(new ResponseConstraint\ResponseIsUnprocessable($verbose), $message);
+        self::assertThatForResponse(new ResponseConstraint\ResponseIsUnprocessable($verbose ?? self::$defaultVerboseMode), $message);
     }
 
     public static function assertBrowserHasCookie(string $name, string $path = '/', ?string $domain = null, string $message = ''): void
