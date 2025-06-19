@@ -2176,15 +2176,17 @@ class FrameworkExtension extends Extension
                 $defaultMiddleware['after'][0]['arguments'] = [$bus['default_middleware']['allow_no_senders']];
                 $defaultMiddleware['after'][1]['arguments'] = [$bus['default_middleware']['allow_no_handlers']];
 
-                // argument to add_bus_name_stamp_middleware
-                $defaultMiddleware['before'][0]['arguments'] = [$busId];
-
                 $middleware = array_merge($defaultMiddleware['before'], $middleware, $defaultMiddleware['after']);
             }
 
-            foreach ($middleware as $middlewareItem) {
+            foreach ($middleware as $key => $middlewareItem) {
                 if (!$validationEnabled && \in_array($middlewareItem['id'], ['validation', 'messenger.middleware.validation'], true)) {
                     throw new LogicException('The Validation middleware is only available when the Validator component is installed and enabled. Try running "composer require symfony/validator".');
+                }
+
+                // argument to add_bus_name_stamp_middleware
+                if ('add_bus_name_stamp_middleware' === $middlewareItem['id']) {
+                    $middleware[$key]['arguments'] = [$busId];
                 }
             }
 
