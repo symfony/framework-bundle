@@ -3114,7 +3114,6 @@ class FrameworkExtension extends Extension
             NotifierBridge\Sevenio\SevenIoTransportFactory::class => 'notifier.transport_factory.sevenio',
             NotifierBridge\Sinch\SinchTransportFactory::class => 'notifier.transport_factory.sinch',
             NotifierBridge\Slack\SlackTransportFactory::class => 'notifier.transport_factory.slack',
-            NotifierBridge\Sms77\Sms77TransportFactory::class => 'notifier.transport_factory.sms77',
             NotifierBridge\Smsapi\SmsapiTransportFactory::class => 'notifier.transport_factory.smsapi',
             NotifierBridge\SmsBiuras\SmsBiurasTransportFactory::class => 'notifier.transport_factory.sms-biuras',
             NotifierBridge\Smsbox\SmsboxTransportFactory::class => 'notifier.transport_factory.smsbox',
