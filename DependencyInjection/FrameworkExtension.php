@@ -1426,6 +1426,7 @@ class FrameworkExtension extends Extension
                 ->addTag('assets.package', ['package' => $name]);
             $container->setDefinition('assets._package_'.$name, $packageDefinition);
             $container->registerAliasForArgument('assets._package_'.$name, PackageInterface::class, $name.'.package');
+            $container->registerAliasForArgument('assets._package_'.$name, PackageInterface::class, $name);
         }
     }
 
@@ -2247,6 +2248,7 @@ class FrameworkExtension extends Extension
                 $container->setAlias(LockFactory::class, new Alias('lock.factory', false));
             } else {
                 $container->registerAliasForArgument('lock.'.$resourceName.'.factory', LockFactory::class, $resourceName.'.lock.factory');
+                $container->registerAliasForArgument('lock.'.$resourceName.'.factory', LockFactory::class, $resourceName);
             }
         }
     }
@@ -2282,6 +2284,7 @@ class FrameworkExtension extends Extension
                 $container->setAlias(SemaphoreFactory::class, new Alias('semaphore.factory', false));
             } else {
                 $container->registerAliasForArgument('semaphore.'.$resourceName.'.factory', SemaphoreFactory::class, $resourceName.'.semaphore.factory');
+                $container->registerAliasForArgument('semaphore.'.$resourceName.'.factory', SemaphoreFactory::class, $resourceName);
             }
         }
     }
@@ -3307,7 +3310,8 @@ class FrameworkExtension extends Extension
 
             if (interface_exists(RateLimiterFactoryInterface::class)) {
                 $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter');
-                $factoryAlias->setDeprecated('symfony/dependency-injection', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
+                $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name);
+                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
             }
         }
 
