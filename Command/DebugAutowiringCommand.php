@@ -184,7 +184,7 @@ EOF
             return '';
         }
 
-        return (string) $this->fileLinkFormatter->format($r->getFileName(), $r->getStartLine());
+        return $r->getFileName() ? ($this->fileLinkFormatter->format($r->getFileName(), $r->getStartLine()) ?: '') : '';
     }
 
     public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void
