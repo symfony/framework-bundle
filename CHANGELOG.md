@@ -10,6 +10,7 @@ CHANGELOG
 7.4
 ---
 
+ * Allow using their name without added suffix when using `#[Target]` for custom services
  * Deprecate `Symfony\Bundle\FrameworkBundle\Console\Application::add()` in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
  * Add `assertEmailAddressNotContains()` to the `MailerAssertionsTrait`
 
