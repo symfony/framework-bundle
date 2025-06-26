@@ -61,6 +61,7 @@ use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
@@ -3310,8 +3311,12 @@ class FrameworkExtension extends Extension
 
             if (interface_exists(RateLimiterFactoryInterface::class)) {
                 $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter');
-                $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name);
-                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
+                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', \sprintf('The "%%alias_id%%" autowiring alias is deprecated and will be removed in 8.0, use "%s $%s" instead.', RateLimiterFactoryInterface::class, (new Target($name.'.limiter'))->getParsedName()));
+                $internalAliasId = \sprintf('.%s $%s.limiter', RateLimiterFactory::class, $name);
+
+                if ($container->hasAlias($internalAliasId)) {
+                    $container->getAlias($internalAliasId)->setDeprecated('symfony/framework-bundle', '7.3', \sprintf('The "%%alias_id%%" autowiring alias is deprecated and will be removed in 8.0, use "%s $%s" instead.', RateLimiterFactoryInterface::class, (new Target($name.'.limiter'))->getParsedName()));
+                }
             }
         }
 
