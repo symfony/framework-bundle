@@ -1190,8 +1190,7 @@ class FrameworkExtension extends Extension
             // Store to container
             $container->setDefinition($workflowId, $workflowDefinition);
             $container->setDefinition($definitionDefinitionId, $definitionDefinition);
-            $container->registerAliasForArgument($workflowId, WorkflowInterface::class, $name.'.'.$type);
-            $container->registerAliasForArgument($workflowId, WorkflowInterface::class, $name);
+            $container->registerAliasForArgument($workflowId, WorkflowInterface::class, $name.'.'.$type, $name);
 
             // Add workflow to Registry
             if ($workflow['supports']) {
@@ -1426,8 +1425,7 @@ class FrameworkExtension extends Extension
             $packageDefinition = $this->createPackageDefinition($package['base_path'], $package['base_urls'], $version)
                 ->addTag('assets.package', ['package' => $name]);
             $container->setDefinition('assets._package_'.$name, $packageDefinition);
-            $container->registerAliasForArgument('assets._package_'.$name, PackageInterface::class, $name.'.package');
-            $container->registerAliasForArgument('assets._package_'.$name, PackageInterface::class, $name);
+            $container->registerAliasForArgument('assets._package_'.$name, PackageInterface::class, $name.'.package', $name);
         }
     }
 
@@ -2243,8 +2241,7 @@ class FrameworkExtension extends Extension
                 $container->setAlias('lock.factory', new Alias('lock.'.$resourceName.'.factory', false));
                 $container->setAlias(LockFactory::class, new Alias('lock.factory', false));
             } else {
-                $container->registerAliasForArgument('lock.'.$resourceName.'.factory', LockFactory::class, $resourceName.'.lock.factory');
-                $container->registerAliasForArgument('lock.'.$resourceName.'.factory', LockFactory::class, $resourceName);
+                $container->registerAliasForArgument('lock.'.$resourceName.'.factory', LockFactory::class, $resourceName.'.lock.factory', $resourceName);
             }
         }
     }
@@ -2279,8 +2276,7 @@ class FrameworkExtension extends Extension
                 $container->setAlias('semaphore.factory', new Alias('semaphore.'.$resourceName.'.factory', false));
                 $container->setAlias(SemaphoreFactory::class, new Alias('semaphore.factory', false));
             } else {
-                $container->registerAliasForArgument('semaphore.'.$resourceName.'.factory', SemaphoreFactory::class, $resourceName.'.semaphore.factory');
-                $container->registerAliasForArgument('semaphore.'.$resourceName.'.factory', SemaphoreFactory::class, $resourceName);
+                $container->registerAliasForArgument('semaphore.'.$resourceName.'.factory', SemaphoreFactory::class, $resourceName.'.semaphore.factory', $resourceName);
             }
         }
     }
@@ -3304,13 +3300,11 @@ class FrameworkExtension extends Extension
             $factoryAlias = $container->registerAliasForArgument($limiterId, RateLimiterFactory::class, $name.'.limiter');
 
             if (interface_exists(RateLimiterFactoryInterface::class)) {
-                $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter');
-                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', \sprintf('The "%%alias_id%%" autowiring alias is deprecated and will be removed in 8.0, use "%s $%s" instead.', RateLimiterFactoryInterface::class, (new Target($name.'.limiter'))->getParsedName()));
-                $internalAliasId = \sprintf('.%s $%s.limiter', RateLimiterFactory::class, $name);
+                $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter', $name);
 
-                if ($container->hasAlias($internalAliasId)) {
-                    $container->getAlias($internalAliasId)->setDeprecated('symfony/framework-bundle', '7.3', \sprintf('The "%%alias_id%%" autowiring alias is deprecated and will be removed in 8.0, use "%s $%s" instead.', RateLimiterFactoryInterface::class, (new Target($name.'.limiter'))->getParsedName()));
-                }
+                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
+                $container->getAlias(\sprintf('.%s $%s.limiter', RateLimiterFactory::class, $name))
+                    ->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
             }
         }
 
@@ -3335,7 +3329,7 @@ class FrameworkExtension extends Extension
                 )))
             ;
 
-            $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter');
+            $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter', $name);
         }
     }
 

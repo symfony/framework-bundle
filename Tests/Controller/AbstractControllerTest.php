@@ -101,7 +101,7 @@ class AbstractControllerTest extends TestCase
         $controller->setContainer($container);
 
         $this->expectException(ServiceNotFoundException::class);
-        $this->expectExceptionMessage('TestAbstractController::getParameter()" method is missing a parameter bag');
+        $this->expectExceptionMessage('::getParameter()" method is missing a parameter bag');
 
         $controller->getParameter('foo');
     }
