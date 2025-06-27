@@ -137,7 +137,7 @@ EOF
                     }
                     $target = substr($id, \strlen($previousId) + 3);
 
-                    if ($previousId.' $'.(new Target($target))->getParsedName() === $serviceId) {
+                    if ($container->findDefinition($id) === $container->findDefinition($serviceId)) {
                         $serviceLine .= ' - <fg=magenta>target:</><fg=cyan>'.$target.'</>';
                         break;
                     }
