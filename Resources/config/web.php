@@ -146,6 +146,7 @@ return static function (ContainerConfigurator $container) {
 
         ->set('controller.cache_attribute_listener', CacheAttributeListener::class)
             ->tag('kernel.event_subscriber')
+            ->tag('kernel.reset', ['method' => '?reset'])
 
         ->set('controller.helper', ControllerHelper::class)
             ->tag('container.service_subscriber')
