@@ -80,7 +80,7 @@ final class ContainerLintCommand extends Command
 
         $kernel = $this->getApplication()->getKernel();
         $container = $kernel->getContainer();
-        $file = $container->isDebug() ? $container->getParameter('debug.container.dump') : false;
+        $file = $kernel->isDebug() ? $container->getParameter('debug.container.dump') : false;
 
         if (!$file || !(new ConfigCache($file, true))->isFresh()) {
             if (!$kernel instanceof Kernel) {
