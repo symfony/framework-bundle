@@ -10,6 +10,7 @@ CHANGELOG
  * Make `SerializerCacheWarmer` class `final`
  * Make `Translator` class `final`
  * Make `ConfigBuilderCacheWarmer` class `final`
+ * Make `TranslationsCacheWarmer` class `final`
 
 7.4
 ---
