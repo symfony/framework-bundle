@@ -9,6 +9,7 @@ CHANGELOG
  * Make `Router` class `final`
  * Make `SerializerCacheWarmer` class `final`
  * Make `Translator` class `final`
+ * Make `ConfigBuilderCacheWarmer` class `final`
 
 7.4
 ---
