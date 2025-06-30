@@ -8,6 +8,7 @@ CHANGELOG
  * Remove deprecated `Symfony\Bundle\FrameworkBundle\Console\Application::add()` method in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
  * Make `Router` class `final`
  * Make `SerializerCacheWarmer` class `final`
+ * Make `Translator` class `final`
 
 7.4
 ---
