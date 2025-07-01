@@ -24,7 +24,6 @@ use Symfony\Component\DependencyInjection\Compiler\CheckAliasValidityPass;
 use Symfony\Component\DependencyInjection\Compiler\CheckTypeDeclarationsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\ResolveFactoryClassPass;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -80,7 +79,7 @@ final class ContainerLintCommand extends Command
 
         $kernel = $this->getApplication()->getKernel();
         $container = $kernel->getContainer();
-        $file = $container->isDebug() ? $container->getParameter('debug.container.dump') : false;
+        $file = $kernel->isDebug() ? $container->getParameter('debug.container.dump') : false;
 
         if (!$file || !(new ConfigCache($file, true))->isFresh()) {
             if (!$kernel instanceof Kernel) {
