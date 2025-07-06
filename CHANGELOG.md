@@ -4,6 +4,7 @@ CHANGELOG
 8.0
 ---
 
+ * Remove `errors.xml` and `webhook.xml` routing configuration files (use their PHP equivalent instead)
  * Enable the property info constructor extractor by default
  * Remove deprecated `Symfony\Bundle\FrameworkBundle\Console\Application::add()` method in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
  * Make `Router` class `final`
