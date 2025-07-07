@@ -1165,7 +1165,7 @@ class FrameworkExtension extends Extension
             $workflow['definition_validators'][] = match ($workflow['type']) {
                 'state_machine' => Workflow\Validator\StateMachineValidator::class,
                 'workflow' => Workflow\Validator\WorkflowValidator::class,
-                 default => throw new \LogicException(\sprintf('Invalid workflow type "%s".', $workflow['type'])),
+                default => throw new \LogicException(\sprintf('Invalid workflow type "%s".', $workflow['type'])),
             };
 
             // Create Workflow
