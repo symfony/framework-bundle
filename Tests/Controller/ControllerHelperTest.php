@@ -19,7 +19,7 @@ class ControllerHelperTest extends AbstractControllerTest
 {
     protected function createController()
     {
-        return new class() extends ControllerHelper {
+        return new class extends ControllerHelper {
             public function __construct()
             {
             }
@@ -36,26 +36,26 @@ class ControllerHelperTest extends AbstractControllerTest
         $r = new \ReflectionClass(ControllerHelper::class);
         $m = $r->getMethod('getSubscribedServices');
         $helperSrc = file($r->getFileName());
-        $helperSrc = implode('', array_slice($helperSrc, $m->getStartLine() - 1, $r->getEndLine() - $m->getStartLine()));
+        $helperSrc = implode('', \array_slice($helperSrc, $m->getStartLine() - 1, $r->getEndLine() - $m->getStartLine()));
 
         $r = new \ReflectionClass(AbstractController::class);
         $m = $r->getMethod('getSubscribedServices');
         $abstractSrc = file($r->getFileName());
         $code = [
-            implode('', array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1)),
+            implode('', \array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1)),
         ];
 
         foreach ($r->getMethods(\ReflectionMethod::IS_PROTECTED) as $m) {
             if ($m->getDocComment()) {
                 $code[] = '    '.$m->getDocComment();
             }
-            $code[] = substr_replace(implode('', array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1)), 'public', 4, 9);
+            $code[] = substr_replace(implode('', \array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1)), 'public', 4, 9);
         }
         foreach ($r->getMethods(\ReflectionMethod::IS_PRIVATE) as $m) {
             if ($m->getDocComment()) {
                 $code[] = '    '.$m->getDocComment();
             }
-            $code[] = implode('', array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1));
+            $code[] = implode('', \array_slice($abstractSrc, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1));
         }
         $code = implode("\n", $code);
 
