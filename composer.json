@@ -30,6 +30,7 @@
         "symfony/http-foundation": "^7.4|^8.0",
         "symfony/http-kernel": "^7.4|^8.0",
         "symfony/polyfill-mbstring": "^1.0",
+        "symfony/polyfill-php85": "^1.32",
         "symfony/routing": "^7.4|^8.0"
     },
     "require-dev": {

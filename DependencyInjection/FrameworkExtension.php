@@ -61,7 +61,6 @@ use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
-use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
@@ -3317,13 +3316,13 @@ class FrameworkExtension extends Extension
                 throw new LogicException(\sprintf('Compound rate limiter "%s" requires at least one sub-limiter.', $name));
             }
 
-            if (\array_diff($limiterConfig['limiters'], $limiters)) {
+            if (array_diff($limiterConfig['limiters'], $limiters)) {
                 throw new LogicException(\sprintf('Compound rate limiter "%s" requires at least one sub-limiter to be configured.', $name));
             }
 
             $container->register($limiterId = 'limiter.'.$name, CompoundRateLimiterFactory::class)
                 ->addTag('rate_limiter', ['name' => $name])
-                ->addArgument(new IteratorArgument(\array_map(
+                ->addArgument(new IteratorArgument(array_map(
                     static fn (string $name) => new Reference('limiter.'.$name),
                     $limiterConfig['limiters']
                 )))

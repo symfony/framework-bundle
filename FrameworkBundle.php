@@ -103,8 +103,7 @@ class FrameworkBundle extends Bundle
         $_ENV['DOCTRINE_DEPRECATIONS'] = $_SERVER['DOCTRINE_DEPRECATIONS'] ??= 'trigger';
 
         if (class_exists(SymfonyRuntime::class)) {
-            $handler = set_error_handler('var_dump');
-            restore_error_handler();
+            $handler = get_error_handler();
         } else {
             $handler = [ErrorHandler::register(null, false)];
         }
