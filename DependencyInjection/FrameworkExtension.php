@@ -1159,7 +1159,7 @@ class FrameworkExtension extends Extension
             $workflow['definition_validators'][] = match ($workflow['type']) {
                 'state_machine' => Workflow\Validator\StateMachineValidator::class,
                 'workflow' => Workflow\Validator\WorkflowValidator::class,
-                 default => throw new \LogicException(\sprintf('Invalid workflow type "%s".', $workflow['type'])),
+                default => throw new \LogicException(\sprintf('Invalid workflow type "%s".', $workflow['type'])),
             };
 
             // Create Workflow
@@ -3320,13 +3320,13 @@ class FrameworkExtension extends Extension
                 throw new LogicException(\sprintf('Compound rate limiter "%s" requires at least one sub-limiter.', $name));
             }
 
-            if (\array_diff($limiterConfig['limiters'], $limiters)) {
+            if (array_diff($limiterConfig['limiters'], $limiters)) {
                 throw new LogicException(\sprintf('Compound rate limiter "%s" requires at least one sub-limiter to be configured.', $name));
             }
 
             $container->register($limiterId = 'limiter.'.$name, CompoundRateLimiterFactory::class)
                 ->addTag('rate_limiter', ['name' => $name])
-                ->addArgument(new IteratorArgument(\array_map(
+                ->addArgument(new IteratorArgument(array_map(
                     static fn (string $name) => new Reference('limiter.'.$name),
                     $limiterConfig['limiters']
                 )))
