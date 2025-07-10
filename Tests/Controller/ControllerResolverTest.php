@@ -33,9 +33,9 @@ class ControllerResolverTest extends ContainerControllerResolverTest
     {
         $resolver = $this->createControllerResolver();
         $request = Request::create('/');
-        $request->attributes->set('_controller', sprintf('%s::testAction', ContainerAwareController::class));
+        $request->attributes->set('_controller', \sprintf('%s::testAction', ContainerAwareController::class));
 
-        $this->expectDeprecation(sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
+        $this->expectDeprecation(\sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
         $controller = $resolver->getController($request);
 
         $this->assertInstanceOf(ContainerAwareController::class, $controller[0]);
@@ -52,7 +52,7 @@ class ControllerResolverTest extends ContainerControllerResolverTest
         $request = Request::create('/');
         $request->attributes->set('_controller', ContainerAwareController::class);
 
-        $this->expectDeprecation(sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
+        $this->expectDeprecation(\sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
         $controller = $resolver->getController($request);
 
         $this->assertInstanceOf(ContainerAwareController::class, $controller);
@@ -76,7 +76,7 @@ class ControllerResolverTest extends ContainerControllerResolverTest
         $request = Request::create('/');
         $request->attributes->set('_controller', TestAbstractController::class.'::testAction');
 
-        $this->expectDeprecation(sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
+        $this->expectDeprecation(\sprintf('Since symfony/dependency-injection 6.4: Relying on "Symfony\Component\DependencyInjection\ContainerAwareInterface" to get the container in "%s" is deprecated, register the controller as a service and use dependency injection instead.', ContainerAwareController::class));
         $this->assertSame([$controller, 'testAction'], $resolver->getController($request));
         $this->assertSame($container, $controller->getContainer());
     }

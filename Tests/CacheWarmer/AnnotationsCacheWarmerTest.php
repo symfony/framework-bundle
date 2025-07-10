@@ -49,7 +49,7 @@ class AnnotationsCacheWarmerTest extends TestCase
 
     public function testAnnotationsCacheWarmerWithDebugDisabled()
     {
-        file_put_contents($this->cacheDir.'/annotations.map', sprintf('<?php return %s;', var_export([__CLASS__], true)));
+        file_put_contents($this->cacheDir.'/annotations.map', \sprintf('<?php return %s;', var_export([__CLASS__], true)));
         $cacheFile = tempnam($this->cacheDir, __FUNCTION__);
         $reader = new AnnotationReader();
 
@@ -72,7 +72,7 @@ class AnnotationsCacheWarmerTest extends TestCase
 
     public function testAnnotationsCacheWarmerWithDebugEnabled()
     {
-        file_put_contents($this->cacheDir.'/annotations.map', sprintf('<?php return %s;', var_export([__CLASS__], true)));
+        file_put_contents($this->cacheDir.'/annotations.map', \sprintf('<?php return %s;', var_export([__CLASS__], true)));
         $cacheFile = tempnam($this->cacheDir, __FUNCTION__);
         $reader = new AnnotationReader();
 
@@ -103,7 +103,7 @@ class AnnotationsCacheWarmerTest extends TestCase
     {
         $this->assertFalse(class_exists($annotatedClass = 'C\C\C', false));
 
-        file_put_contents($this->cacheDir.'/annotations.map', sprintf('<?php return %s;', var_export([$annotatedClass], true)));
+        file_put_contents($this->cacheDir.'/annotations.map', \sprintf('<?php return %s;', var_export([$annotatedClass], true)));
 
         $this->expectDeprecation('Since symfony/framework-bundle 6.4: The "Symfony\Bundle\FrameworkBundle\CacheWarmer\AnnotationsCacheWarmer" class is deprecated without replacement.');
         $warmer = new AnnotationsCacheWarmer(new AnnotationReader(), tempnam($this->cacheDir, __FUNCTION__));
@@ -130,7 +130,7 @@ class AnnotationsCacheWarmerTest extends TestCase
 
         $this->assertFalse(class_exists($annotatedClass = 'AClassThatDoesNotExist_FWB_CacheWarmer_AnnotationsCacheWarmerTest', false));
 
-        file_put_contents($this->cacheDir.'/annotations.map', sprintf('<?php return %s;', var_export([$annotatedClass], true)));
+        file_put_contents($this->cacheDir.'/annotations.map', \sprintf('<?php return %s;', var_export([$annotatedClass], true)));
         $this->expectDeprecation('Since symfony/framework-bundle 6.4: The "Symfony\Bundle\FrameworkBundle\CacheWarmer\AnnotationsCacheWarmer" class is deprecated without replacement.');
         $warmer = new AnnotationsCacheWarmer(new AnnotationReader(), tempnam($this->cacheDir, __FUNCTION__));
 

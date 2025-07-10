@@ -45,7 +45,7 @@ class WorkflowGuardListenerPass implements CompilerPassInterface
 
         foreach ($servicesNeeded as $service) {
             if (!$container->has($service)) {
-                throw new LogicException(sprintf('The "%s" service is needed to be able to use the workflow guard listener.', $service));
+                throw new LogicException(\sprintf('The "%s" service is needed to be able to use the workflow guard listener.', $service));
             }
         }
     }

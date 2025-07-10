@@ -41,7 +41,7 @@ class LoggingTranslatorPass implements CompilerPassInterface
             $class = $container->getParameterBag()->resolveValue($definition->getClass());
 
             if (!$r = $container->getReflectionClass($class)) {
-                throw new InvalidArgumentException(sprintf('Class "%s" used for service "%s" cannot be found.', $class, $translatorAlias));
+                throw new InvalidArgumentException(\sprintf('Class "%s" used for service "%s" cannot be found.', $class, $translatorAlias));
             }
             if ($r->isSubclassOf(TranslatorInterface::class) && $r->isSubclassOf(TranslatorBagInterface::class)) {
                 $container->getDefinition('translator.logging')->setDecoratedService('translator');

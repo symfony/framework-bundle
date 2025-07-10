@@ -148,7 +148,7 @@ final class ConsoleProfilerListener implements EventSubscriberInterface
 
             if ($this->urlGenerator && $output) {
                 $token = $p->getToken();
-                $output->writeln(sprintf(
+                $output->writeln(\sprintf(
                     'See profile <href=%s>%s</>',
                     $this->urlGenerator->generate('_profiler', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL),
                     $token
