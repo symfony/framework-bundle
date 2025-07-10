@@ -276,10 +276,10 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
         $this->createContainerFromClosure(function (ContainerBuilder $container) use ($mode) {
             $container->loadFromExtension('framework', [
-                    'annotations' => false,
-                    'http_method_override' => false,
-                    'handle_all_throwables' => true,
-                    'php_errors' => ['log' => true],
+                'annotations' => false,
+                'http_method_override' => false,
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
                 'validation' => [
                     'email_validation_mode' => $mode,
                 ],
