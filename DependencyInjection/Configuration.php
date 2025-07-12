@@ -2563,7 +2563,7 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static fn ($v) => !\in_array($v['policy'], ['no_limit', 'compound']) && !isset($v['limit']))
+                                    ->ifTrue(static fn ($v) => !\in_array($v['policy'], ['no_limit', 'compound'], true) && !isset($v['limit']))
                                     ->thenInvalid('A limit must be provided when using a policy different than "compound" or "no_limit".')
                                 ->end()
                             ->end()
