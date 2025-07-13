@@ -10,6 +10,7 @@ CHANGELOG
  * Deprecate `Symfony\Bundle\FrameworkBundle\Console\Application::add()` in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
  * Add `assertEmailAddressNotContains()` to the `MailerAssertionsTrait`
  * Add `framework.type_info.aliases` option
+ * Add `KernelBrowser::getSession()`
 
 7.3
 ---
