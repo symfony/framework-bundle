@@ -236,7 +236,7 @@ class AbstractControllerTest extends TestCase
         $controller = $this->createController();
         $controller->setContainer($container);
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $response = $controller->file(new File(__FILE__));
         $this->assertInstanceOf(BinaryFileResponse::class, $response);
         $this->assertSame(200, $response->getStatusCode());
@@ -251,7 +251,7 @@ class AbstractControllerTest extends TestCase
     {
         $controller = $this->createController();
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $response = $controller->file(new File(__FILE__), null, ResponseHeaderBag::DISPOSITION_INLINE);
 
         $this->assertInstanceOf(BinaryFileResponse::class, $response);
@@ -267,7 +267,7 @@ class AbstractControllerTest extends TestCase
     {
         $controller = $this->createController();
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $fileName = 'test.php';
         $response = $controller->file(new File(__FILE__), $fileName);
 
@@ -284,7 +284,7 @@ class AbstractControllerTest extends TestCase
     {
         $controller = $this->createController();
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $fileName = 'test.php';
         $response = $controller->file(new File(__FILE__), $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
 
@@ -301,7 +301,7 @@ class AbstractControllerTest extends TestCase
     {
         $controller = $this->createController();
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $response = $controller->file(__FILE__);
 
         $this->assertInstanceOf(BinaryFileResponse::class, $response);
@@ -317,7 +317,7 @@ class AbstractControllerTest extends TestCase
     {
         $controller = $this->createController();
 
-        /* @var BinaryFileResponse $response */
+        /** @var BinaryFileResponse $response */
         $response = $controller->file(__FILE__, 'test.php');
 
         $this->assertInstanceOf(BinaryFileResponse::class, $response);
