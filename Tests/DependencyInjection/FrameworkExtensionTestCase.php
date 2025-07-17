@@ -146,12 +146,6 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromFile('property_accessor');
 
-        if (!method_exists(PropertyAccessor::class, 'createCache')) {
-            $this->assertFalse($container->hasDefinition('cache.property_access'));
-
-            return;
-        }
-
         $cache = $container->getDefinition('cache.property_access');
         $this->assertSame([PropertyAccessor::class, 'createCache'], $cache->getFactory(), 'PropertyAccessor::createCache() should be used in non-debug mode');
         $this->assertSame(AdapterInterface::class, $cache->getClass());
@@ -160,12 +154,6 @@ abstract class FrameworkExtensionTestCase extends TestCase
     public function testPropertyAccessCacheWithDebug()
     {
         $container = $this->createContainerFromFile('property_accessor', ['kernel.debug' => true]);
-
-        if (!method_exists(PropertyAccessor::class, 'createCache')) {
-            $this->assertFalse($container->hasDefinition('cache.property_access'));
-
-            return;
-        }
 
         $cache = $container->getDefinition('cache.property_access');
         $this->assertNull($cache->getFactory());
@@ -1891,12 +1879,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(TagAwareAdapter::class, $tagAwareDefinition->getClass());
         $this->assertCachePoolServiceDefinitionIsCreated($container, (string) $tagAwareDefinition->getArgument(0), 'cache.adapter.array', 410);
 
-        if (method_exists(TagAwareAdapter::class, 'setLogger')) {
-            $this->assertEquals([
-                ['setLogger', [new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)]],
-            ], $tagAwareDefinition->getMethodCalls());
-            $this->assertSame([['channel' => 'cache']], $tagAwareDefinition->getTag('monolog.logger'));
-        }
+        $this->assertEquals([
+            ['setLogger', [new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)]],
+        ], $tagAwareDefinition->getMethodCalls());
+        $this->assertSame([['channel' => 'cache']], $tagAwareDefinition->getTag('monolog.logger'));
     }
 
     public function testRedisTagAwareAdapter()

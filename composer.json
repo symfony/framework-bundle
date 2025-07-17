@@ -75,8 +75,7 @@
         "symfony/workflow": "^7.4|^8.0",
         "symfony/web-link": "^7.4|^8.0",
         "symfony/webhook": "^7.4|^8.0",
-        "symfony/yaml": "^7.4|^8.0",
-        "twig/twig": "^3.12"
+        "symfony/yaml": "^7.4|^8.0"
     },
     "conflict": {
         "doctrine/persistence": "<1.3",

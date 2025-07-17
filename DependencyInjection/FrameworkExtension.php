@@ -36,7 +36,6 @@ use Symfony\Bundle\MercureBundle\MercureBundle;
 use Symfony\Component\Asset\PackageInterface;
 use Symfony\Component\AssetMapper\AssetMapper;
 use Symfony\Component\AssetMapper\Compiler\AssetCompilerInterface;
-use Symfony\Component\AssetMapper\Compressor\CompressorInterface;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -82,7 +81,6 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Glob;
-use Symfony\Component\Form\Extension\HtmlSanitizer\Type\TextTypeHtmlSanitizerExtension;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormTypeExtensionInterface;
 use Symfony\Component\Form\FormTypeGuesserInterface;
@@ -90,7 +88,6 @@ use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
-use Symfony\Component\HttpClient\Messenger\PingWebhookMessageHandler;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
 use Symfony\Component\HttpClient\RetryableHttpClient;
@@ -118,10 +115,6 @@ use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\StoreFactory;
 use Symfony\Component\Mailer\Bridge as MailerBridge;
 use Symfony\Component\Mailer\Command\MailerTestCommand;
-use Symfony\Component\Mailer\EventListener\DkimSignedMessageListener;
-use Symfony\Component\Mailer\EventListener\MessengerTransportListener;
-use Symfony\Component\Mailer\EventListener\SmimeEncryptedMessageListener;
-use Symfony\Component\Mailer\EventListener\SmimeSignedMessageListener;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mercure\HubRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessage;
@@ -186,10 +179,8 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
-use Symfony\Component\Serializer\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NumberNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\String\LazyString;
@@ -197,7 +188,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Translation\Bridge as TranslationBridge;
 use Symfony\Component\Translation\Command\TranslationLintCommand as BaseTranslationLintCommand;
 use Symfony\Component\Translation\Command\XliffLintCommand as BaseXliffLintCommand;
-use Symfony\Component\Translation\Extractor\PhpAstExtractor;
 use Symfony\Component\Translation\LocaleSwitcher;
 use Symfony\Component\Translation\PseudoLocalizationTranslator;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -216,7 +206,6 @@ use Symfony\Component\Validator\Mapping\Loader\PropertyInfoLoader;
 use Symfony\Component\Validator\ObjectInitializerInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Webhook\Controller\WebhookController;
-use Symfony\Component\WebLink\HttpHeaderParser;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
 use Symfony\Component\Workflow;
 use Symfony\Component\Workflow\WorkflowInterface;
@@ -302,10 +291,6 @@ class FrameworkExtension extends Extension
 
         // Load Cache configuration first as it is used by other components
         $loader->load('cache.php');
-
-        if (!interface_exists(NamespacedPoolInterface::class)) {
-            $container->removeAlias(NamespacedPoolInterface::class);
-        }
 
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
@@ -502,11 +487,6 @@ class FrameworkExtension extends Extension
             }
 
             $loader->load('web_link.php');
-
-            // Require symfony/web-link 7.4
-            if (!class_exists(HttpHeaderParser::class)) {
-                $container->removeDefinition('web_link.http_header_parser');
-            }
         }
 
         if ($this->readConfigEnabled('uid', $container, $config['uid'])) {
@@ -557,7 +537,7 @@ class FrameworkExtension extends Extension
                 $container->removeDefinition('form.type_extension.form.validator');
                 $container->removeDefinition('form.type_guesser.validator');
             }
-            if (!$this->readConfigEnabled('html_sanitizer', $container, $config['html_sanitizer']) || !class_exists(TextTypeHtmlSanitizerExtension::class)) {
+            if (!$this->readConfigEnabled('html_sanitizer', $container, $config['html_sanitizer'])) {
                 $container->removeDefinition('form.type_extension.form.html_sanitizer');
             }
         } else {
@@ -592,26 +572,6 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('console.command.messenger_failed_messages_show');
             $container->removeDefinition('console.command.messenger_failed_messages_remove');
             $container->removeDefinition('cache.messenger.restart_workers_signal');
-
-            if ($container->hasDefinition('messenger.transport.amqp.factory') && !class_exists(MessengerBridge\Amqp\Transport\AmqpTransportFactory::class)) {
-                if (class_exists(\Symfony\Component\Messenger\Transport\AmqpExt\AmqpTransportFactory::class)) {
-                    $container->getDefinition('messenger.transport.amqp.factory')
-                        ->setClass(\Symfony\Component\Messenger\Transport\AmqpExt\AmqpTransportFactory::class)
-                        ->addTag('messenger.transport_factory');
-                } else {
-                    $container->removeDefinition('messenger.transport.amqp.factory');
-                }
-            }
-
-            if ($container->hasDefinition('messenger.transport.redis.factory') && !class_exists(MessengerBridge\Redis\Transport\RedisTransportFactory::class)) {
-                if (class_exists(\Symfony\Component\Messenger\Transport\RedisExt\RedisTransportFactory::class)) {
-                    $container->getDefinition('messenger.transport.redis.factory')
-                        ->setClass(\Symfony\Component\Messenger\Transport\RedisExt\RedisTransportFactory::class)
-                        ->addTag('messenger.transport_factory');
-                } else {
-                    $container->removeDefinition('messenger.transport.redis.factory');
-                }
-            }
         }
 
         // notifier depends on messenger, mailer being registered
@@ -1504,24 +1464,19 @@ class FrameworkExtension extends Extension
             ->replaceArgument(4, $config['importmap_script_attributes'])
         ;
 
-        if (interface_exists(CompressorInterface::class)) {
-            $compressors = [];
-            foreach ($config['precompress']['formats'] as $format) {
-                $compressors[$format] = new Reference("asset_mapper.compressor.$format");
-            }
+        $compressors = [];
+        foreach ($config['precompress']['formats'] as $format) {
+            $compressors[$format] = new Reference("asset_mapper.compressor.$format");
+        }
 
-            $container->getDefinition('asset_mapper.compressor')->replaceArgument(0, $compressors ?: null);
+        $container->getDefinition('asset_mapper.compressor')->replaceArgument(0, $compressors ?: null);
 
-            if ($config['precompress']['enabled']) {
-                $container
-                    ->getDefinition('asset_mapper.local_public_assets_filesystem')
-                    ->addArgument(new Reference('asset_mapper.compressor'))
-                    ->addArgument($config['precompress']['extensions'])
-                ;
-            }
-        } else {
-            $container->removeDefinition('asset_mapper.compressor');
-            $container->removeDefinition('asset_mapper.assets.command.compress');
+        if ($config['precompress']['enabled']) {
+            $container
+                ->getDefinition('asset_mapper.local_public_assets_filesystem')
+                ->addArgument(new Reference('asset_mapper.compressor'))
+                ->addArgument($config['precompress']['extensions'])
+            ;
         }
     }
 
@@ -1588,7 +1543,7 @@ class FrameworkExtension extends Extension
         }
 
         // don't use ContainerBuilder::willBeAvailable() as these are not needed in production
-        if (interface_exists(Parser::class) && class_exists(PhpAstExtractor::class)) {
+        if (interface_exists(Parser::class)) {
             $container->removeDefinition('translation.extractor.php');
         } else {
             $container->removeDefinition('translation.extractor.php_ast');
@@ -2025,16 +1980,6 @@ class FrameworkExtension extends Extension
 
         if (!class_exists(Headers::class)) {
             $container->removeDefinition('serializer.normalizer.mime_message');
-        }
-
-        // BC layer Serializer < 7.3
-        if (!class_exists(NumberNormalizer::class)) {
-            $container->removeDefinition('serializer.normalizer.number');
-        }
-
-        // BC layer Serializer < 7.2
-        if (!class_exists(SnakeCaseToCamelCaseNameConverter::class)) {
-            $container->removeDefinition('serializer.name_converter.snake_case_to_camel_case');
         }
 
         if ($container->getParameter('kernel.debug')) {
@@ -2648,10 +2593,7 @@ class FrameworkExtension extends Extension
                 $container->registerAliasForArgument($tagAwareId, TagAwareCacheInterface::class, $pool['name'] ?? $name);
                 $container->registerAliasForArgument($name, CacheInterface::class, $pool['name'] ?? $name);
                 $container->registerAliasForArgument($name, CacheItemPoolInterface::class, $pool['name'] ?? $name);
-
-                if (interface_exists(NamespacedPoolInterface::class)) {
-                    $container->registerAliasForArgument($name, NamespacedPoolInterface::class, $pool['name'] ?? $name);
-                }
+                $container->registerAliasForArgument($name, NamespacedPoolInterface::class, $pool['name'] ?? $name);
             }
 
             $definition->setPublic($pool['public']);
@@ -2688,10 +2630,6 @@ class FrameworkExtension extends Extension
         $defaultUriTemplateVars = $options['vars'] ?? [];
         unset($options['vars']);
         $container->getDefinition('http_client.transport')->setArguments([$options, $config['max_host_connections'] ?? 6]);
-
-        if (!class_exists(PingWebhookMessageHandler::class)) {
-            $container->removeDefinition('http_client.messenger.ping_webhook_handler');
-        }
 
         if (!$hasPsr18 = ContainerBuilder::willBeAvailable('psr/http-client', ClientInterface::class, ['symfony/framework-bundle', 'symfony/http-client'])) {
             $container->removeDefinition('psr18.http_client');
@@ -2795,10 +2733,6 @@ class FrameworkExtension extends Extension
 
     private function registerThrottlingHttpClient(string $rateLimiter, string $name, ContainerBuilder $container): void
     {
-        if (!class_exists(ThrottlingHttpClient::class)) {
-            throw new LogicException('Rate limiter support cannot be enabled as version 7.1+ of the HttpClient component is required.');
-        }
-
         if (!$this->isInitializedConfigEnabled('rate_limiter')) {
             throw new LogicException('Rate limiter cannot be used within HttpClient as the RateLimiter component is not enabled.');
         }
@@ -2941,14 +2875,7 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('mailer.message_listener');
         }
 
-        if (!class_exists(MessengerTransportListener::class)) {
-            $container->removeDefinition('mailer.messenger_transport_listener');
-        }
-
         if ($config['dkim_signer']['enabled']) {
-            if (!class_exists(DkimSignedMessageListener::class)) {
-                throw new LogicException('DKIM signed messages support cannot be enabled as this version of the Mailer component does not support it.');
-            }
             $dkimSigner = $container->getDefinition('mailer.dkim_signer');
             $dkimSigner->setArgument(0, $config['dkim_signer']['key']);
             $dkimSigner->setArgument(1, $config['dkim_signer']['domain']);
@@ -2961,9 +2888,6 @@ class FrameworkExtension extends Extension
         }
 
         if ($config['smime_signer']['enabled']) {
-            if (!class_exists(SmimeSignedMessageListener::class)) {
-                throw new LogicException('SMIME signed messages support cannot be enabled as this version of the Mailer component does not support it.');
-            }
             $smimeSigner = $container->getDefinition('mailer.smime_signer');
             $smimeSigner->setArgument(0, $config['smime_signer']['certificate']);
             $smimeSigner->setArgument(1, $config['smime_signer']['key']);
@@ -2976,9 +2900,6 @@ class FrameworkExtension extends Extension
         }
 
         if ($config['smime_encrypter']['enabled']) {
-            if (!class_exists(SmimeEncryptedMessageListener::class)) {
-                throw new LogicException('S/MIME encrypted messages support cannot be enabled as this version of the Mailer component does not support it.');
-            }
             $container->setAlias('mailer.smime_encrypter.repository', $config['smime_encrypter']['repository']);
             $container->setParameter('mailer.smime_encrypter.cipher', $config['smime_encrypter']['cipher']);
         } else {
@@ -3305,10 +3226,6 @@ class FrameworkExtension extends Extension
                 $container->getAlias(\sprintf('.%s $%s.limiter', RateLimiterFactory::class, $name))
                     ->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
             }
-        }
-
-        if ($compoundLimiters && !class_exists(CompoundRateLimiterFactory::class)) {
-            throw new LogicException('Configuring compound rate limiters is only available in symfony/rate-limiter 7.3+.');
         }
 
         foreach ($compoundLimiters as $name => $limiterConfig) {

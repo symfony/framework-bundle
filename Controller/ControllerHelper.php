@@ -219,13 +219,8 @@ class ControllerHelper implements ServiceSubscriberInterface
      */
     public function denyAccessUnlessGranted(mixed $attribute, mixed $subject = null, string $message = 'Access Denied.'): void
     {
-        if (class_exists(AccessDecision::class)) {
-            $accessDecision = $this->getAccessDecision($attribute, $subject);
-            $isGranted = $accessDecision->isGranted;
-        } else {
-            $accessDecision = null;
-            $isGranted = $this->isGranted($attribute, $subject);
-        }
+        $accessDecision = $this->getAccessDecision($attribute, $subject);
+        $isGranted = $accessDecision->isGranted;
 
         if (!$isGranted) {
             $e = $this->createAccessDeniedException(3 > \func_num_args() && $accessDecision ? $accessDecision->getMessage() : $message);

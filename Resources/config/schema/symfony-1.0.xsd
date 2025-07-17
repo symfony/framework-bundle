@@ -339,7 +339,6 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="html5" />
             <xsd:enumeration value="html5-allow-no-tld" />
-            <xsd:enumeration value="loose" />
             <xsd:enumeration value="strict" />
         </xsd:restriction>
     </xsd:simpleType>
