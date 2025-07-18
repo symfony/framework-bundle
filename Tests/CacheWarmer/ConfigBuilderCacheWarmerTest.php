@@ -365,12 +365,7 @@ class TestKernel extends Kernel implements CompilerPassInterface
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(static function (ContainerBuilder $container) {
-            $container->loadFromExtension('framework', [
-                'annotations' => false,
-                'handle_all_throwables' => true,
-                'http_method_override' => false,
-                'php_errors' => ['log' => true],
-            ]);
+            $container->loadFromExtension('framework', []);
         });
     }
 

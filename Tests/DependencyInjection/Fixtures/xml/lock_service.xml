@@ -9,9 +9,7 @@
         <service id="my_service" class="\Redis" />
     </services>
 
-    <framework:config http-method-override="false" handle-all-throwables="true">
-        <framework:annotations enabled="false" />
-        <framework:php-errors log="true" />
+    <framework:config>
         <framework:lock>
             <framework:resource>my_service</framework:resource>
         </framework:lock>

@@ -58,7 +58,6 @@ $container->loadFromExtension('framework', [
         'enabled' => true,
         'email_validation_mode' => 'html5',
     ],
-    'annotations' => false,
     'serializer' => [
         'enabled' => true,
         'enable_attributes' => true,

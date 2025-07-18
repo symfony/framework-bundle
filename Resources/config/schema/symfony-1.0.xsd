@@ -23,7 +23,6 @@
             <xsd:element name="request" type="request" minOccurs="0" maxOccurs="1" />
             <xsd:element name="translator" type="translator" minOccurs="0" maxOccurs="1" />
             <xsd:element name="validation" type="validation" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="annotations" type="annotations" minOccurs="0" maxOccurs="1" />
             <xsd:element name="property-access" type="property_access" minOccurs="0" maxOccurs="1" />
             <xsd:element name="scheduler" type="scheduler" minOccurs="0" maxOccurs="1" />
             <xsd:element name="serializer" type="serializer" minOccurs="0" maxOccurs="1" />
@@ -133,7 +132,6 @@
         <xsd:attribute name="strict-requirements" type="xsd:string" />
         <xsd:attribute name="utf8" type="xsd:boolean" />
         <xsd:attribute name="default-uri" type="xsd:string" />
-        <xsd:attribute name="cache-dir" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="session">
@@ -155,8 +153,6 @@
         <xsd:attribute name="gc-probability" type="xsd:string" />
         <xsd:attribute name="save-path" type="xsd:string" />
         <xsd:attribute name="metadata-update-threshold" type="xsd:nonNegativeInteger" />
-        <xsd:attribute name="sid-length" type="sid_length" />
-        <xsd:attribute name="sid-bits-per-character" type="sid_bits_per_character" />
     </xsd:complexType>
 
     <xsd:complexType name="request">
@@ -313,7 +309,6 @@
         </xsd:choice>
 
         <xsd:attribute name="enabled" type="xsd:boolean" />
-        <xsd:attribute name="cache" type="xsd:string" />
         <xsd:attribute name="enable-attributes" type="xsd:boolean" />
         <xsd:attribute name="static-method" type="xsd:boolean" />
         <xsd:attribute name="translation-domain" type="xsd:string" />
@@ -347,13 +342,6 @@
     <xsd:complexType name="not-compromised-password">
         <xsd:attribute name="enabled" type="xsd:boolean" />
         <xsd:attribute name="endpoint" type="xsd:string" />
-    </xsd:complexType>
-
-    <xsd:complexType name="annotations">
-        <xsd:attribute name="cache" type="xsd:string" />
-        <xsd:attribute name="debug" type="xsd:string" />
-        <xsd:attribute name="file-cache-dir" type="xsd:string" />
-        <xsd:attribute name="enabled" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:complexType name="property_access">
@@ -569,21 +557,6 @@
             <xsd:enumeration value="none" />
             <xsd:enumeration value="lax" />
             <xsd:enumeration value="strict" />
-        </xsd:restriction>
-    </xsd:simpleType>
-
-    <xsd:simpleType name="sid_bits_per_character">
-        <xsd:restriction base="xsd:positiveInteger">
-            <xsd:enumeration value="4" />
-            <xsd:enumeration value="5" />
-            <xsd:enumeration value="6" />
-        </xsd:restriction>
-    </xsd:simpleType>
-
-    <xsd:simpleType name="sid_length">
-        <xsd:restriction base="xsd:positiveInteger">
-            <xsd:minInclusive value="22" />
-            <xsd:maxInclusive value="256" />
         </xsd:restriction>
     </xsd:simpleType>
 

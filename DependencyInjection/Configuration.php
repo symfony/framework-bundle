@@ -162,7 +162,6 @@ class Configuration implements ConfigurationInterface
         $this->addAssetMapperSection($rootNode, $enableIfStandalone);
         $this->addTranslatorSection($rootNode, $enableIfStandalone);
         $this->addValidationSection($rootNode, $enableIfStandalone);
-        $this->addAnnotationsSection($rootNode);
         $this->addSerializerSection($rootNode, $enableIfStandalone);
         $this->addPropertyAccessSection($rootNode, $willBeAvailable);
         $this->addTypeInfoSection($rootNode, $enableIfStandalone);
@@ -650,10 +649,6 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('resource')->isRequired()->end()
                         ->scalarNode('type')->end()
-                        ->scalarNode('cache_dir')
-                            ->defaultValue('%kernel.build_dir%')
-                            ->setDeprecated('symfony/framework-bundle', '7.1', 'Setting the "%path%.%node%" configuration option is deprecated. It will be removed in version 8.0.')
-                        ->end()
                         ->scalarNode('default_uri')
                             ->info('The default URI used to generate URLs in a non-HTTP context.')
                             ->defaultNull()
@@ -714,16 +709,6 @@ class Configuration implements ConfigurationInterface
                         ->integerNode('metadata_update_threshold')
                             ->defaultValue(0)
                             ->info('Seconds to wait between 2 session metadata updates.')
-                        ->end()
-                        ->integerNode('sid_length')
-                            ->min(22)
-                            ->max(256)
-                            ->setDeprecated('symfony/framework-bundle', '7.2', 'Setting the "%path%.%node%" configuration option is deprecated. It will be removed in version 8.0. No alternative is provided as PHP 8.4 has deprecated the related option.')
-                        ->end()
-                        ->integerNode('sid_bits_per_character')
-                            ->min(4)
-                            ->max(6)
-                            ->setDeprecated('symfony/framework-bundle', '7.2', 'Setting the "%path%.%node%" configuration option is deprecated. It will be removed in version 8.0. No alternative is provided as PHP 8.4 has deprecated the related option.')
                         ->end()
                     ->end()
                 ->end()
@@ -1085,9 +1070,6 @@ class Configuration implements ConfigurationInterface
                     ->info('Validation configuration')
                     ->{$enableIfStandalone('symfony/validator', Validation::class)}()
                     ->children()
-                        ->scalarNode('cache')
-                            ->setDeprecated('symfony/framework-bundle', '7.3', 'Setting the "%path%.%node%" configuration option is deprecated. It will be removed in version 8.0.')
-                        ->end()
                         ->booleanNode('enable_attributes')->{class_exists(FullStack::class) ? 'defaultFalse' : 'defaultTrue'}()->end()
                         ->arrayNode('static_method')
                             ->defaultValue(['loadValidatorMetadata'])
@@ -1163,20 +1145,6 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addAnnotationsSection(ArrayNodeDefinition $rootNode): void
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('annotations')
-                    ->canBeEnabled()
-                    ->validate()
-                        ->ifTrue(static fn (array $v) => $v['enabled'])
-                        ->thenInvalid('Enabling the doctrine/annotations integration is not supported anymore.')
                 ->end()
             ->end()
         ;
