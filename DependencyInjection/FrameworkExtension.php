@@ -3296,15 +3296,7 @@ class FrameworkExtension extends Extension
             $limiterConfig['id'] = $name;
             $limiter->replaceArgument(0, $limiterConfig);
 
-            $factoryAlias = $container->registerAliasForArgument($limiterId, RateLimiterFactory::class, $name.'.limiter');
-
-            if (interface_exists(RateLimiterFactoryInterface::class)) {
-                $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter', $name);
-
-                $factoryAlias->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
-                $container->getAlias(\sprintf('.%s $%s.limiter', RateLimiterFactory::class, $name))
-                    ->setDeprecated('symfony/framework-bundle', '7.3', 'The "%alias_id%" autowiring alias is deprecated and will be removed in 8.0, use "RateLimiterFactoryInterface" instead.');
-            }
+            $container->registerAliasForArgument($limiterId, RateLimiterFactoryInterface::class, $name.'.limiter', $name);
         }
 
         if ($compoundLimiters && !class_exists(CompoundRateLimiterFactory::class)) {
