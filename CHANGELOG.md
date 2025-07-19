@@ -13,6 +13,7 @@ CHANGELOG
  * Make `ConfigBuilderCacheWarmer` class `final`
  * Make `TranslationsCacheWarmer` class `final`
  * Make `ValidatorCacheWarmer` class `final`
+ * Remove autowiring aliases for `RateLimiterFactory`; use `RateLimiterFactoryInterface` instead
 
 7.4
 ---
