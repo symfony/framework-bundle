@@ -73,7 +73,6 @@ return static function (ContainerConfigurator $container) {
             ])
 
         ->load('Symfony\Component\Validator\Constraints\\', $validatorsDir.'/*Validator.php')
-            ->exclude($validatorsDir.'/ExpressionLanguageSyntaxValidator.php')
             ->abstract()
             ->tag('container.excluded')
             ->tag('validator.constraint_validator')
