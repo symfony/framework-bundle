@@ -354,7 +354,7 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('only_exceptions')->defaultFalse()->end()
                         ->booleanNode('only_main_requests')->defaultFalse()->end()
                         ->scalarNode('dsn')->defaultValue('file:%kernel.cache_dir%/profiler')->end()
-                        ->booleanNode('collect_serializer_data')->info('Enables the serializer data collector and profiler panel.')->defaultFalse()->end()
+                        ->enumNode('collect_serializer_data')->values([true])->defaultTrue()->end() // to be @deprecated in Symfony 8.1
                     ->end()
                 ->end()
             ->end()

@@ -25,7 +25,6 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Notifier\Notifier;
 use Symfony\Component\RateLimiter\Policy\TokenBucketLimiter;
 use Symfony\Component\RemoteEvent\RemoteEvent;
@@ -688,7 +687,7 @@ class ConfigurationTest extends TestCase
                 'dsn' => 'file:%kernel.cache_dir%/profiler',
                 'collect' => true,
                 'collect_parameter' => null,
-                'collect_serializer_data' => false,
+                'collect_serializer_data' => true,
             ],
             'translator' => [
                 'enabled' => !class_exists(FullStack::class),
