@@ -359,12 +359,10 @@ class AbstractControllerTest extends TestCase
             ->expects($this->once())
             ->method('isGranted')
             ->willReturnCallback(function ($attribute, $subject, ?AccessDecision $accessDecision = null) {
-                if (class_exists(AccessDecision::class)) {
-                    $this->assertInstanceOf(AccessDecision::class, $accessDecision);
-                    $accessDecision->votes[] = $vote = new Vote();
-                    $vote->result = VoterInterface::ACCESS_DENIED;
-                    $vote->reasons[] = 'Why should I.';
-                }
+                $this->assertInstanceOf(AccessDecision::class, $accessDecision);
+                $accessDecision->votes[] = $vote = new Vote();
+                $vote->result = VoterInterface::ACCESS_DENIED;
+                $vote->reasons[] = 'Why should I.';
 
                 return false;
             });
@@ -376,14 +374,12 @@ class AbstractControllerTest extends TestCase
         $controller->setContainer($container);
 
         $this->expectException(AccessDeniedException::class);
-        $this->expectExceptionMessage('Access Denied.'.(class_exists(AccessDecision::class) ? ' Why should I.' : ''));
+        $this->expectExceptionMessage('Access Denied. Why should I.');
 
         try {
             $controller->denyAccessUnlessGranted('foo');
         } catch (AccessDeniedException $e) {
-            if (class_exists(AccessDecision::class)) {
-                $this->assertFalse($e->getAccessDecision()->isGranted);
-            }
+            $this->assertFalse($e->getAccessDecision()->isGranted);
 
             throw $e;
         }

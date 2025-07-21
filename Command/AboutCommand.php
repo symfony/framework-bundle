@@ -52,11 +52,7 @@ EOT
         /** @var KernelInterface $kernel */
         $kernel = $this->getApplication()->getKernel();
 
-        if (method_exists($kernel, 'getBuildDir')) {
-            $buildDir = $kernel->getBuildDir();
-        } else {
-            $buildDir = $kernel->getCacheDir();
-        }
+        $buildDir = $kernel->getBuildDir();
 
         $xdebugMode = getenv('XDEBUG_MODE') ?: \ini_get('xdebug.mode');
 

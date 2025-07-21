@@ -21,10 +21,6 @@ class PropertyInfoTest extends AbstractWebTestCase
 
         $propertyInfo = static::getContainer()->get('property_info');
 
-        if (!method_exists($propertyInfo, 'getType')) {
-            $this->markTestSkipped();
-        }
-
         $this->assertEquals(Type::list(Type::int()), $propertyInfo->getType(Dummy::class, 'codes'));
     }
 }

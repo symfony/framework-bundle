@@ -134,7 +134,7 @@ class ConfigurationTest extends TestCase
             'precompress' => [
                 'enabled' => false,
                 'formats' => [],
-                'extensions' => interface_exists(CompressorInterface::class) ? CompressorInterface::DEFAULT_EXTENSIONS : [],
+                'extensions' => CompressorInterface::DEFAULT_EXTENSIONS,
             ],
         ];
 
@@ -794,7 +794,7 @@ class ConfigurationTest extends TestCase
                 'precompress' => [
                     'enabled' => false,
                     'formats' => [],
-                    'extensions' => interface_exists(CompressorInterface::class) ? CompressorInterface::DEFAULT_EXTENSIONS : [],
+                    'extensions' => CompressorInterface::DEFAULT_EXTENSIONS,
                 ],
             ],
             'cache' => [
@@ -834,7 +834,7 @@ class ConfigurationTest extends TestCase
                 ],
             ],
             'messenger' => [
-                'enabled' => !class_exists(FullStack::class) && interface_exists(MessageBusInterface::class),
+                'enabled' => !class_exists(FullStack::class),
                 'routing' => [],
                 'transports' => [],
                 'failure_transport' => null,

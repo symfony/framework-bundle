@@ -479,7 +479,7 @@ class Configuration implements ConfigurationInterface
                                                     if (!\is_string($value)) {
                                                         return true;
                                                     }
-                                                    if (class_exists(WorkflowEvents::class) && !\in_array($value, WorkflowEvents::ALIASES, true)) {
+                                                    if (!\in_array($value, WorkflowEvents::ALIASES, true)) {
                                                         return true;
                                                     }
                                                 }
@@ -954,7 +954,7 @@ class Configuration implements ConfigurationInterface
                                     ->info('Array of extensions to compress. The entire list must be provided, no merging occurs.')
                                     ->prototype('scalar')->end()
                                     ->performNoDeepMerging()
-                                    ->defaultValue(interface_exists(CompressorInterface::class) ? CompressorInterface::DEFAULT_EXTENSIONS : [])
+                                    ->defaultValue(CompressorInterface::DEFAULT_EXTENSIONS)
                                 ->end()
                             ->end()
                         ->end()
@@ -1078,7 +1078,7 @@ class Configuration implements ConfigurationInterface
                             ->validate()->castToArray()->end()
                         ->end()
                         ->scalarNode('translation_domain')->defaultValue('validators')->end()
-                        ->enumNode('email_validation_mode')->values(array_merge(class_exists(Email::class) ? Email::VALIDATION_MODES : ['html5-allow-no-tld', 'html5', 'strict'], ['loose']))->defaultValue('html5')->end()
+                        ->enumNode('email_validation_mode')->values(Email::VALIDATION_MODES)->defaultValue('html5')->end()
                         ->arrayNode('mapping')
                             ->addDefaultsIfNotSet()
                             ->fixXmlConfig('path')
