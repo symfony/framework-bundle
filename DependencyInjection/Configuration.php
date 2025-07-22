@@ -953,7 +953,7 @@ class Configuration implements ConfigurationInterface
                                     ->info('Array of extensions to compress. The entire list must be provided, no merging occurs.')
                                     ->prototype('scalar')->end()
                                     ->performNoDeepMerging()
-                                    ->defaultValue(CompressorInterface::DEFAULT_EXTENSIONS)
+                                    ->defaultValue(interface_exists(CompressorInterface::class) ? CompressorInterface::DEFAULT_EXTENSIONS : [])
                                 ->end()
                             ->end()
                         ->end()
