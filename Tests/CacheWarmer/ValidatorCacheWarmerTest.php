@@ -20,6 +20,23 @@ use Symfony\Component\Validator\ValidatorBuilder;
 
 class ValidatorCacheWarmerTest extends TestCase
 {
+    private PhpArrayAdapter $arrayPool;
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        if (isset($this->arrayPool)) {
+            $this->arrayPool->clear();
+            unset($this->arrayPool);
+        }
+    }
+
+    private function getArrayPool(string $file): PhpArrayAdapter
+    {
+        return $this->arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+    }
+
     public function testWarmUp()
     {
         $validatorBuilder = new ValidatorBuilder();
@@ -36,7 +53,7 @@ class ValidatorCacheWarmerTest extends TestCase
 
         $this->assertFileExists($file);
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
         $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Person')->isHit());
         $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Author')->isHit());
@@ -61,7 +78,7 @@ class ValidatorCacheWarmerTest extends TestCase
         $this->assertFileExists($file);
         $this->assertFileDoesNotExist($cacheDir.'/cache-validator.php');
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
         $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Person')->isHit());
         $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Author')->isHit());
@@ -83,10 +100,10 @@ class ValidatorCacheWarmerTest extends TestCase
 
         $this->assertFileDoesNotExist($file);
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
-        $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Person')->isHit());
-        $this->assertTrue($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Author')->isHit());
+        $this->assertFalse($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Person')->isHit());
+        $this->assertFalse($arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Author')->isHit());
     }
 
     public function testWarmUpWithAnnotations()
@@ -103,7 +120,7 @@ class ValidatorCacheWarmerTest extends TestCase
 
         $this->assertFileExists($file);
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
         $item = $arrayPool->getItem('Symfony.Bundle.FrameworkBundle.Tests.Fixtures.Validation.Category');
         $this->assertTrue($item->isHit());

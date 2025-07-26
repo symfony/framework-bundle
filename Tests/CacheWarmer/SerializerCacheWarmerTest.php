@@ -21,6 +21,23 @@ use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
 
 class SerializerCacheWarmerTest extends TestCase
 {
+    private PhpArrayAdapter $arrayPool;
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        if (isset($this->arrayPool)) {
+            $this->arrayPool->clear();
+            unset($this->arrayPool);
+        }
+    }
+
+    private function getArrayPool(string $file): PhpArrayAdapter
+    {
+        return $this->arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+    }
+
     /**
      * @dataProvider loaderProvider
      */
@@ -34,7 +51,7 @@ class SerializerCacheWarmerTest extends TestCase
 
         $this->assertFileExists($file);
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
         $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Person')->isHit());
         $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Author')->isHit());
@@ -56,7 +73,7 @@ class SerializerCacheWarmerTest extends TestCase
         $this->assertFileExists($file);
         $this->assertFileDoesNotExist($cacheDir.'/cache-serializer.php');
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
         $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Person')->isHit());
         $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Author')->isHit());
@@ -75,10 +92,10 @@ class SerializerCacheWarmerTest extends TestCase
 
         $this->assertFileDoesNotExist($file);
 
-        $arrayPool = new PhpArrayAdapter($file, new NullAdapter());
+        $arrayPool = $this->getArrayPool($file);
 
-        $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Person')->isHit());
-        $this->assertTrue($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Author')->isHit());
+        $this->assertFalse($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Person')->isHit());
+        $this->assertFalse($arrayPool->getItem('Symfony_Bundle_FrameworkBundle_Tests_Fixtures_Serialization_Author')->isHit());
     }
 
     public static function loaderProvider(): array
