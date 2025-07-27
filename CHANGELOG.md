@@ -14,6 +14,7 @@ CHANGELOG
  * Add support for configuring workflow places with glob patterns matching consts/backed enums
  * Add support for configuring the `CachingHttpClient`
  * Add support for weighted transitions in workflows
+ * Add support for union types with `Symfony\Component\EventDispatcher\Attribute\AsEventListener`
 
 7.3
 ---
