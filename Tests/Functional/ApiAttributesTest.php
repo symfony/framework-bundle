@@ -405,6 +405,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
@@ -439,6 +440,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                         <parameters>
                             <item key="{{ value }}">"H"</item>
                             <item key="{{ limit }}">10</item>
+                            <item key="{{ min }}">10</item>
                             <item key="{{ value_length }}">1</item>
                         </parameters>
                         <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
@@ -476,6 +478,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
@@ -646,6 +649,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
@@ -680,6 +684,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                         <parameters>
                             <item key="{{ value }}">"H"</item>
                             <item key="{{ limit }}">10</item>
+                            <item key="{{ min }}">10</item>
                             <item key="{{ value_length }}">1</item>
                         </parameters>
                         <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
@@ -717,6 +722,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
@@ -892,6 +898,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
@@ -926,6 +933,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                         <parameters>
                             <item key="{{ value }}">"H"</item>
                             <item key="{{ limit }}">10</item>
+                            <item key="{{ min }}">10</item>
                             <item key="{{ value_length }}">1</item>
                         </parameters>
                         <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
@@ -963,6 +971,7 @@ class ApiAttributesTest extends AbstractWebTestCase
                             "parameters": {
                                 "{{ value }}": "\"\"",
                                 "{{ limit }}": "10",
+                                "{{ min }}": "10",
                                 "{{ value_length }}": "0"
                             },
                             "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
