@@ -24,6 +24,7 @@ use Symfony\Component\DependencyInjection\Compiler\CheckAliasValidityPass;
 use Symfony\Component\DependencyInjection\Compiler\CheckTypeDeclarationsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\ResolveFactoryClassPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveParameterPlaceHoldersPass;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
@@ -49,8 +50,10 @@ final class ContainerLintCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $errorIo = $io->getErrorStyle();
 
+        $resolveEnvVars = $input->getOption('resolve-env-vars');
+
         try {
-            $container = $this->getContainerBuilder();
+            $container = $this->getContainerBuilder($resolveEnvVars);
         } catch (RuntimeException $e) {
             $errorIo->error($e->getMessage());
 
@@ -60,7 +63,7 @@ final class ContainerLintCommand extends Command
         $container->setParameter('container.build_time', time());
 
         try {
-            $container->compile((bool) $input->getOption('resolve-env-vars'));
+            $container->compile($resolveEnvVars);
         } catch (InvalidArgumentException $e) {
             $errorIo->error($e->getMessage());
 
@@ -72,7 +75,7 @@ final class ContainerLintCommand extends Command
         return 0;
     }
 
-    private function getContainerBuilder(): ContainerBuilder
+    private function getContainerBuilder(bool $resolveEnvVars): ContainerBuilder
     {
         if (isset($this->container)) {
             return $this->container;
@@ -99,16 +102,22 @@ final class ContainerLintCommand extends Command
 
             (new XmlFileLoader($container = new ContainerBuilder($parameterBag = new EnvPlaceholderParameterBag()), new FileLocator()))->load($kernelContainer->getParameter('debug.container.dump'));
 
-            $refl = new \ReflectionProperty($parameterBag, 'resolved');
-            $refl->setValue($parameterBag, true);
+            if ($resolveEnvVars) {
+                $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveParameterPlaceHoldersPass(), new ResolveFactoryClassPass()]);
+            } else {
+                $refl = new \ReflectionProperty($parameterBag, 'resolved');
+                $refl->setValue($parameterBag, true);
+
+                $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveFactoryClassPass()]);
+            }
 
             $container->getCompilerPassConfig()->setBeforeOptimizationPasses([]);
-            $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveFactoryClassPass()]);
             $container->getCompilerPassConfig()->setBeforeRemovingPasses([]);
         }
 
         $container->setParameter('container.build_hash', 'lint_container');
         $container->setParameter('container.build_id', 'lint_container');
+        $container->setParameter('container.runtime_mode', 'web=0');
 
         $container->addCompilerPass(new CheckAliasValidityPass(), PassConfig::TYPE_BEFORE_REMOVING, -100);
         $container->addCompilerPass(new CheckTypeDeclarationsPass(true), PassConfig::TYPE_AFTER_REMOVING, -100);
