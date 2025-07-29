@@ -24,27 +24,28 @@ class ContainerLintCommandTest extends AbstractWebTestCase
     /**
      * @dataProvider containerLintProvider
      */
-    public function testLintContainer(string $configFile, string $expectedOutput)
+    public function testLintContainer(string $configFile, bool $resolveEnvVars, int $expectedExitCode, string $expectedOutput)
     {
         $kernel = static::createKernel([
-            'test_case' => 'ContainerDebug',
+            'test_case' => 'ContainerLint',
             'root_config' => $configFile,
             'debug' => true,
         ]);
         $this->application = new Application($kernel);
 
         $tester = $this->createCommandTester();
-        $exitCode = $tester->execute([]);
+        $exitCode = $tester->execute(['--resolve-env-vars' => $resolveEnvVars]);
 
-        $this->assertSame(0, $exitCode);
+        $this->assertSame($expectedExitCode, $exitCode);
         $this->assertStringContainsString($expectedOutput, $tester->getDisplay());
     }
 
     public static function containerLintProvider(): array
     {
         return [
-            'default container' => ['config.yml', 'The container was linted successfully'],
-            'missing dump file' => ['no_dump.yml', 'The container was linted successfully'],
+            ['escaped_percent.yml', false, 0, 'The container was linted successfully'],
+            ['missing_env_var.yml', false, 0, 'The container was linted successfully'],
+            ['missing_env_var.yml', true, 1, 'Environment variable not found: "BAR"'],
         ];
     }
 
