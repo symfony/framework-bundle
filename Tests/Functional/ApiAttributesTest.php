@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -216,15 +217,14 @@ class ApiAttributesTest extends AbstractWebTestCase
     /**
      * @dataProvider mapRequestPayloadProvider
      */
-    public function testMapRequestPayload(string $uri, string $format, array $parameters, ?string $content, string $expectedResponse, int $expectedStatusCode)
+    public function testMapRequestPayload(string $uri, string $format, array $parameters, ?string $content, callable $responseAssertion, int $expectedStatusCode)
     {
         $client = self::createClient(['test_case' => 'ApiAttributesTest']);
 
-        [$acceptHeader, $assertion] = [
-            'html' => ['text/html', self::assertStringContainsString(...)],
-            'json' => ['application/json', self::assertJsonStringEqualsJsonString(...)],
-            'xml' => ['text/xml', self::assertXmlStringEqualsXmlString(...)],
-            'dummy' => ['application/dummy', self::assertStringContainsString(...)],
+        $acceptHeader = [
+            'json' => 'application/json',
+            'xml' => 'text/xml',
+            'dummy' => 'application/dummy',
         ][$format];
 
         $client->request(
@@ -238,12 +238,7 @@ class ApiAttributesTest extends AbstractWebTestCase
 
         $response = $client->getResponse();
         $responseContent = $response->getContent();
-
-        if ($expectedResponse) {
-            $assertion($expectedResponse, $responseContent);
-        } else {
-            self::assertSame('', $responseContent);
-        }
+        $responseAssertion($responseContent);
 
         self::assertSame($expectedStatusCode, $response->getStatusCode());
     }
@@ -255,7 +250,9 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => [],
             'content' => '',
-            'expectedResponse' => '',
+            'responseAssertion' => static function (string $response) {
+                self::assertSame('', $response);
+            },
             'expectedStatusCode' => 204,
         ];
 
@@ -269,12 +266,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -288,12 +289,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>true</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <response>
-                    <comment>Hello everyone!</comment>
-                    <approved>1</approved>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                self::assertXmlStringEqualsXmlString(<<<'XML'
+                    <response>
+                        <comment>Hello everyone!</comment>
+                        <approved>1</approved>
+                    </response>
+                    XML,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -302,12 +307,16 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => 'Hello everyone!', 'approved' => '0'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -321,14 +330,18 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false,
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
-                    "title": "An error occurred",
-                    "status": 400,
-                    "detail": "Bad Request"
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
+                        "title": "An error occurred",
+                        "status": 400,
+                        "detail": "Bad Request"
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 400,
         ];
 
@@ -337,7 +350,9 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'dummy',
             'parameters' => [],
             'content' => 'Hello',
-            'expectedResponse' => '415 Unsupported Media Type',
+            'responseAssertion' => static function (string $response) {
+                self::assertStringContainsString('415 Unsupported Media Type', $response);
+            },
             'expectedStatusCode' => 415,
         ];
 
@@ -351,24 +366,28 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": "string instead of bool"
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "approved: This value should be of type bool.",
-                    "violations": [
-                        {
-                            "propertyPath": "approved",
-                            "title": "This value should be of type bool.",
-                            "template": "This value should be of type {{ type }}.",
-                            "parameters": {
-                                "{{ type }}": "bool"
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "type": "https:\/\/symfony.com\/errors\/validation",
+                        "title": "Validation Failed",
+                        "status": 422,
+                        "detail": "approved: This value should be of type bool.",
+                        "violations": [
+                            {
+                                "propertyPath": "approved",
+                                "title": "This value should be of type bool.",
+                                "template": "This value should be of type {{ type }}.",
+                                "parameters": {
+                                    "{{ type }}": "bool"
+                                }
                             }
-                        }
-                    ]
-                }
-                JSON,
+                        ]
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -382,36 +401,20 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": true
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -425,26 +428,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>false</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <?xml version="1.0"?>
-                <response>
-                    <type>https://symfony.com/errors/validation</type>
-                    <title>Validation Failed</title>
-                    <status>422</status>
-                    <detail>comment: This value is too short. It should have 10 characters or more.</detail>
-                    <violations>
-                        <propertyPath>comment</propertyPath>
-                        <title>This value is too short. It should have 10 characters or more.</title>
-                        <template>This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.</template>
-                        <parameters>
-                            <item key="{{ value }}">"H"</item>
-                            <item key="{{ limit }}">10</item>
-                            <item key="{{ value_length }}">1</item>
-                        </parameters>
-                        <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
-                    </violations>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                $crawler = new Crawler($response);
+
+                self::assertSame('https://symfony.com/errors/validation', $crawler->filterXPath('response/type')->text());
+                self::assertSame('Validation Failed', $crawler->filterXPath('response/title')->text());
+                self::assertSame('422', $crawler->filterXPath('response/status')->text());
+                self::assertSame('comment: This value is too short. It should have 10 characters or more.', $crawler->filterXPath('response/detail')->text());
+                self::assertCount(1, $crawler->filterXPath('response/violations'));
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $crawler->filterXPath('response/violations/type')->text());
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -453,36 +446,20 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => '', 'approved' => '1'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -491,12 +468,16 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => [],
             'content' => '',
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -510,12 +491,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -529,12 +514,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>true</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <response>
-                    <comment>Hello everyone!</comment>
-                    <approved>1</approved>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                self::assertXmlStringEqualsXmlString(<<<'XML'
+                    <response>
+                        <comment>Hello everyone!</comment>
+                        <approved>1</approved>
+                    </response>
+                    XML,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -543,12 +532,16 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => 'Hello everyone!', 'approved' => '0'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -562,14 +555,18 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false,
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
-                    "title": "An error occurred",
-                    "status": 400,
-                    "detail": "Bad Request"
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
+                        "title": "An error occurred",
+                        "status": 400,
+                        "detail": "Bad Request"
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 400,
         ];
 
@@ -578,7 +575,9 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'dummy',
             'parameters' => [],
             'content' => 'Hello',
-            'expectedResponse' => '415 Unsupported Media Type',
+            'responseAssertion' => static function (string $response) {
+                self::assertStringContainsString('415 Unsupported Media Type', $response);
+            },
             'expectedStatusCode' => 415,
         ];
 
@@ -592,24 +591,19 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": "string instead of bool"
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "approved: This value should be of type bool.",
-                    "violations": [
-                        {
-                            "propertyPath": "approved",
-                            "title": "This value should be of type bool.",
-                            "template": "This value should be of type {{ type }}.",
-                            "parameters": {
-                                "{{ type }}": "bool"
-                            }
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame('approved: This value should be of type bool.', $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(1, $json['violations']);
+                self::assertSame('approved', $json['violations'][0]['propertyPath'] ?? null);
+},
             'expectedStatusCode' => 422,
         ];
 
@@ -623,36 +617,20 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": true
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -666,26 +644,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>false</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <?xml version="1.0"?>
-                <response>
-                    <type>https://symfony.com/errors/validation</type>
-                    <title>Validation Failed</title>
-                    <status>422</status>
-                    <detail>comment: This value is too short. It should have 10 characters or more.</detail>
-                    <violations>
-                        <propertyPath>comment</propertyPath>
-                        <title>This value is too short. It should have 10 characters or more.</title>
-                        <template>This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.</template>
-                        <parameters>
-                            <item key="{{ value }}">"H"</item>
-                            <item key="{{ limit }}">10</item>
-                            <item key="{{ value_length }}">1</item>
-                        </parameters>
-                        <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
-                    </violations>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                $crawler = new Crawler($response);
+
+                self::assertSame('https://symfony.com/errors/validation', $crawler->filterXPath('response/type')->text());
+                self::assertSame('Validation Failed', $crawler->filterXPath('response/title')->text());
+                self::assertSame('422', $crawler->filterXPath('response/status')->text());
+                self::assertSame('comment: This value is too short. It should have 10 characters or more.', $crawler->filterXPath('response/detail')->text());
+                self::assertCount(1, $crawler->filterXPath('response/violations'));
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $crawler->filterXPath('response/violations/type')->text());
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -694,56 +662,41 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => '', 'approved' => '1'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
-
-        $expectedStatusCode = 400;
-        $expectedResponse = <<<'JSON'
-                {
-                  "type":"https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
-                  "title":"An error occurred",
-                  "status":400,
-                  "detail":"Bad Request"
-                }
-                JSON;
 
         yield 'empty request mapping non-nullable attribute without default value' => [
             'uri' => '/map-request-to-non-nullable-attribute-without-default-value.json',
             'format' => 'json',
             'parameters' => [],
             'content' => '',
-            'expectedResponse' => $expectedResponse,
-            'expectedStatusCode' => $expectedStatusCode,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                      "type":"https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
+                      "title":"An error occurred",
+                      "status":400,
+                      "detail":"Bad Request"
+                    }
+                    JSON,
+                    $response
+                );
+            },
+            'expectedStatusCode' => 400,
         ];
 
         yield 'valid request with json content mapping non-nullable attribute without default value' => [
@@ -756,12 +709,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -775,12 +732,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>true</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <response>
-                    <comment>Hello everyone!</comment>
-                    <approved>1</approved>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                self::assertXmlStringEqualsXmlString(<<<'XML'
+                    <response>
+                        <comment>Hello everyone!</comment>
+                        <approved>1</approved>
+                    </response>
+                    XML,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -789,12 +750,16 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => 'Hello everyone!', 'approved' => '0'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "comment": "Hello everyone!",
-                    "approved": false
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "comment": "Hello everyone!",
+                        "approved": false
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 200,
         ];
 
@@ -808,14 +773,18 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": false,
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
-                    "title": "An error occurred",
-                    "status": 400,
-                    "detail": "Bad Request"
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJsonStringEqualsJsonString(<<<'JSON'
+                    {
+                        "type": "https:\/\/tools.ietf.org\/html\/rfc2616#section-10",
+                        "title": "An error occurred",
+                        "status": 400,
+                        "detail": "Bad Request"
+                    }
+                    JSON,
+                    $response
+                );
+            },
             'expectedStatusCode' => 400,
         ];
 
@@ -824,7 +793,9 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'dummy',
             'parameters' => [],
             'content' => 'Hello',
-            'expectedResponse' => '415 Unsupported Media Type',
+            'responseAssertion' => static function (string $response) {
+                self::assertStringContainsString('415 Unsupported Media Type', $response);
+            },
             'expectedStatusCode' => 415,
         ];
 
@@ -838,24 +809,19 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": "string instead of bool"
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "approved: This value should be of type bool.",
-                    "violations": [
-                        {
-                            "propertyPath": "approved",
-                            "title": "This value should be of type bool.",
-                            "template": "This value should be of type {{ type }}.",
-                            "parameters": {
-                                "{{ type }}": "bool"
-                            }
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame('approved: This value should be of type bool.', $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(1, $json['violations']);
+                self::assertSame('approved', $json['violations'][0]['propertyPath'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -869,36 +835,20 @@ class ApiAttributesTest extends AbstractWebTestCase
                     "approved": true
                 }
                 JSON,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -912,26 +862,16 @@ class ApiAttributesTest extends AbstractWebTestCase
                     <approved>false</approved>
                 </request>
                 XML,
-            'expectedResponse' => <<<'XML'
-                <?xml version="1.0"?>
-                <response>
-                    <type>https://symfony.com/errors/validation</type>
-                    <title>Validation Failed</title>
-                    <status>422</status>
-                    <detail>comment: This value is too short. It should have 10 characters or more.</detail>
-                    <violations>
-                        <propertyPath>comment</propertyPath>
-                        <title>This value is too short. It should have 10 characters or more.</title>
-                        <template>This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.</template>
-                        <parameters>
-                            <item key="{{ value }}">"H"</item>
-                            <item key="{{ limit }}">10</item>
-                            <item key="{{ value_length }}">1</item>
-                        </parameters>
-                        <type>urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45</type>
-                    </violations>
-                </response>
-                XML,
+            'responseAssertion' => static function (string $response) {
+                $crawler = new Crawler($response);
+
+                self::assertSame('https://symfony.com/errors/validation', $crawler->filterXPath('response/type')->text());
+                self::assertSame('Validation Failed', $crawler->filterXPath('response/title')->text());
+                self::assertSame('422', $crawler->filterXPath('response/status')->text());
+                self::assertSame('comment: This value is too short. It should have 10 characters or more.', $crawler->filterXPath('response/detail')->text());
+                self::assertCount(1, $crawler->filterXPath('response/violations'));
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $crawler->filterXPath('response/violations/type')->text());
+            },
             'expectedStatusCode' => 422,
         ];
 
@@ -940,36 +880,20 @@ class ApiAttributesTest extends AbstractWebTestCase
             'format' => 'json',
             'parameters' => ['comment' => '', 'approved' => '1'],
             'content' => null,
-            'expectedResponse' => <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 422,
-                    "detail": "comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.",
-                    "violations": [
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value should not be blank.",
-                            "template": "This value should not be blank.",
-                            "parameters": {
-                                "{{ value }}": "\"\""
-                            },
-                            "type": "urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3"
-                        },
-                        {
-                            "propertyPath": "comment",
-                            "title": "This value is too short. It should have 10 characters or more.",
-                            "template": "This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.",
-                            "parameters": {
-                                "{{ value }}": "\"\"",
-                                "{{ limit }}": "10",
-                                "{{ value_length }}": "0"
-                            },
-                            "type": "urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45"
-                        }
-                    ]
-                }
-                JSON,
+            'responseAssertion' => static function (string $response) {
+                self::assertJson($response);
+
+                $json = json_decode($response, true);
+
+                self::assertSame('https://symfony.com/errors/validation', $json['type'] ?? null);
+                self::assertSame('Validation Failed', $json['title'] ?? null);
+                self::assertSame(422, $json['status'] ?? null);
+                self::assertSame("comment: This value should not be blank.\ncomment: This value is too short. It should have 10 characters or more.", $json['detail'] ?? null);
+                self::assertIsArray($json['violations'] ?? null);
+                self::assertCount(2, $json['violations']);
+                self::assertSame('urn:uuid:c1051bb4-d103-4f74-8988-acbcafc7fdc3', $json['violations'][0]['type'] ?? null);
+                self::assertSame('urn:uuid:9ff3fdc4-b214-49db-8718-39c315e33d45', $json['violations'][1]['type'] ?? null);
+            },
             'expectedStatusCode' => 422,
         ];
     }
