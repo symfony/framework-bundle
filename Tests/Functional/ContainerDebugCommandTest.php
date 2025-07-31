@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\BackslashClass;
 use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\ContainerExcluded;
@@ -18,9 +20,7 @@ use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\Console\Tester\CommandCompletionTester;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
-/**
- * @group functional
- */
+#[Group('functional')]
 class ContainerDebugCommandTest extends AbstractWebTestCase
 {
     public function testDumpContainerIfNotExists()
@@ -113,9 +113,7 @@ class ContainerDebugCommandTest extends AbstractWebTestCase
         $this->assertStringNotContainsString(ContainerExcluded::class, $tester->getDisplay());
     }
 
-    /**
-     * @dataProvider provideIgnoreBackslashWhenFindingService
-     */
+    #[DataProvider('provideIgnoreBackslashWhenFindingService')]
     public function testIgnoreBackslashWhenFindingService(string $validServiceId)
     {
         static::bootKernel(['test_case' => 'ContainerDebug', 'root_config' => 'config.yml']);
@@ -282,9 +280,7 @@ TXT
         ];
     }
 
-    /**
-     * @dataProvider provideCompletionSuggestions
-     */
+    #[DataProvider('provideCompletionSuggestions')]
     public function testComplete(array $input, array $expectedSuggestions, array $notExpectedSuggestions = [])
     {
         static::bootKernel(['test_case' => 'ContainerDebug', 'root_config' => 'config.yml', 'debug' => true]);

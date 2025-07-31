@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Command;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Command\TranslationExtractCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -177,9 +178,7 @@ class TranslationExtractCommandTest extends TestCase
         $this->assertEquals($expectedPaths, $filteredTransPaths);
     }
 
-    /**
-     * @dataProvider removeNoFillProvider
-     */
+    #[DataProvider('removeNoFillProvider')]
     public function testRemoveNoFillTranslationsMethod($noFillCounter, $messages)
     {
         // Preparing mock
