@@ -47,10 +47,10 @@ class TextDescriptorTest extends AbstractDescriptorTestCase
     }
 
     #[DataProvider('getDescribeRouteWithControllerLinkTestData')]
-    public function testDescribeRouteWithControllerLink(Route $route, $expectedDescription)
+    public function testDescribeRouteWithControllerLink(Route $route, $expectedDescription, $file)
     {
         static::$fileLinkFormatter = new FileLinkFormatter('myeditor://open?file=%f&line=%l');
-        parent::testDescribeRoute($route, str_replace('[:file:]', __FILE__, $expectedDescription));
+        parent::testDescribeRoute($route, str_replace('[:file:]', __FILE__, $expectedDescription), $file);
     }
 }
 
