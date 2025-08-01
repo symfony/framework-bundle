@@ -61,6 +61,7 @@
         "symfony/process": "^7.4|^8.0",
         "symfony/property-info": "^7.4|^8.0",
         "symfony/rate-limiter": "^7.4|^8.0",
+        "symfony/runtime": "^7.4|^8.0",
         "symfony/scheduler": "^7.4|^8.0",
         "symfony/security-bundle": "^7.4|^8.0",
         "symfony/semaphore": "^7.4|^8.0",
@@ -94,5 +95,10 @@
             "/Tests/"
         ]
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": false
+        }
+    }
 }
