@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,9 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class ApiAttributesTest extends AbstractWebTestCase
 {
-    /**
-     * @dataProvider mapQueryStringProvider
-     */
+    #[DataProvider('mapQueryStringProvider')]
     public function testMapQueryString(string $uri, array $query, string $expectedResponse, int $expectedStatusCode)
     {
         $client = self::createClient(['test_case' => 'ApiAttributesTest']);
@@ -214,9 +213,7 @@ class ApiAttributesTest extends AbstractWebTestCase
         ];
     }
 
-    /**
-     * @dataProvider mapRequestPayloadProvider
-     */
+    #[DataProvider('mapRequestPayloadProvider')]
     public function testMapRequestPayload(string $uri, string $format, array $parameters, ?string $content, callable $responseAssertion, int $expectedStatusCode)
     {
         $client = self::createClient(['test_case' => 'ApiAttributesTest']);

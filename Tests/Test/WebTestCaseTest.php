@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\FrameworkBundle\Tests\Test;
 
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Attributes\RequiresMethod;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -192,9 +193,7 @@ class WebTestCaseTest extends TestCase
         $this->getClientTester()->assertBrowserCookieValueSame('foo', 'babar', false, '/path');
     }
 
-    /**
-     * @requires function \Symfony\Component\BrowserKit\History::isFirstPage
-     */
+    #[RequiresMethod(History::class, 'isFirstPage')]
     public function testAssertBrowserHistoryIsOnFirstPage()
     {
         $this->createHistoryTester('isFirstPage', true)->assertBrowserHistoryIsOnFirstPage();
@@ -203,9 +202,7 @@ class WebTestCaseTest extends TestCase
         $this->createHistoryTester('isFirstPage', false)->assertBrowserHistoryIsOnFirstPage();
     }
 
-    /**
-     * @requires function \Symfony\Component\BrowserKit\History::isFirstPage
-     */
+    #[RequiresMethod(History::class, 'isFirstPage')]
     public function testAssertBrowserHistoryIsNotOnFirstPage()
     {
         $this->createHistoryTester('isFirstPage', false)->assertBrowserHistoryIsNotOnFirstPage();
@@ -214,9 +211,7 @@ class WebTestCaseTest extends TestCase
         $this->createHistoryTester('isFirstPage', true)->assertBrowserHistoryIsNotOnFirstPage();
     }
 
-    /**
-     * @requires function \Symfony\Component\BrowserKit\History::isLastPage
-     */
+    #[RequiresMethod(History::class, 'isLastPage')]
     public function testAssertBrowserHistoryIsOnLastPage()
     {
         $this->createHistoryTester('isLastPage', true)->assertBrowserHistoryIsOnLastPage();
@@ -225,9 +220,7 @@ class WebTestCaseTest extends TestCase
         $this->createHistoryTester('isLastPage', false)->assertBrowserHistoryIsOnLastPage();
     }
 
-    /**
-     * @requires function \Symfony\Component\BrowserKit\History::isLastPage
-     */
+    #[RequiresMethod(History::class, 'isLastPage')]
     public function testAssertBrowserHistoryIsNotOnLastPage()
     {
         $this->createHistoryTester('isLastPage', false)->assertBrowserHistoryIsNotOnLastPage();

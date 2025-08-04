@@ -11,6 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\TestWith;
 use Symfony\Bundle\FrameworkBundle\Command\ConfigDumpReferenceCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -18,15 +21,11 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Tester\CommandCompletionTester;
 use Symfony\Component\Console\Tester\CommandTester;
 
-/**
- * @group functional
- */
+#[Group('functional')]
 class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
 {
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testShowList(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -43,10 +42,8 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
         $this->assertStringContainsString('  test_dump', $tester->getDisplay());
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testDumpKernelExtension(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -57,10 +54,8 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
         $this->assertStringContainsString('    bar', $tester->getDisplay());
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testDumpBundleName(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -71,10 +66,8 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
         $this->assertStringContainsString('    custom:', $tester->getDisplay());
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testDumpExtensionConfigWithoutBundle(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -84,10 +77,8 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
         $this->assertStringContainsString('enabled:              true', $tester->getDisplay());
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testDumpAtPath(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -108,10 +99,8 @@ EOL
             , $tester->getDisplay(true));
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testDumpAtPathXml(bool $debug)
     {
         $tester = $this->createCommandTester($debug);
@@ -125,9 +114,7 @@ EOL
         $this->assertStringContainsString('[ERROR] The "path" option is only available for the "yaml" format.', $tester->getDisplay());
     }
 
-    /**
-     * @dataProvider provideCompletionSuggestions
-     */
+    #[DataProvider('provideCompletionSuggestions')]
     public function testComplete(bool $debug, array $input, array $expectedSuggestions)
     {
         $application = $this->createApplication($debug);

@@ -11,13 +11,14 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 class SessionTest extends AbstractWebTestCase
 {
     /**
      * Tests session attributes persist.
-     *
-     * @dataProvider getConfigs
      */
+    #[DataProvider('getConfigs')]
     public function testWelcome($config, $insulate)
     {
         $client = $this->createClient(['test_case' => 'Session', 'root_config' => $config]);
@@ -48,9 +49,8 @@ class SessionTest extends AbstractWebTestCase
 
     /**
      * Tests flash messages work in practice.
-     *
-     * @dataProvider getConfigs
      */
+    #[DataProvider('getConfigs')]
     public function testFlash($config, $insulate)
     {
         $client = $this->createClient(['test_case' => 'Session', 'root_config' => $config]);
@@ -72,9 +72,8 @@ class SessionTest extends AbstractWebTestCase
     /**
      * See if two separate insulated clients can run without
      * polluting each other's session data.
-     *
-     * @dataProvider getConfigs
      */
+    #[DataProvider('getConfigs')]
     public function testTwoClients($config, $insulate)
     {
         // start first client
@@ -128,9 +127,7 @@ class SessionTest extends AbstractWebTestCase
         $this->assertStringContainsString('Welcome back client2, nice to meet you.', $crawler2->text());
     }
 
-    /**
-     * @dataProvider getConfigs
-     */
+    #[DataProvider('getConfigs')]
     public function testCorrectCacheControlHeadersForCacheableAction($config, $insulate)
     {
         $client = $this->createClient(['test_case' => 'Session', 'root_config' => $config]);

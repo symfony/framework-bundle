@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -123,9 +124,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         });
     }
 
-    /**
-     * @dataProvider provideWorkflowValidationCustomTests
-     */
+    #[DataProvider('provideWorkflowValidationCustomTests')]
     public function testWorkflowValidationCustomBroken(string $class, string $message)
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -379,9 +378,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         });
     }
 
-    /**
-     * @dataProvider emailValidationModeProvider
-     */
+    #[DataProvider('emailValidationModeProvider')]
     public function testValidatorEmailValidationMode(string $mode)
     {
         $this->expectNotToPerformAssertions();
