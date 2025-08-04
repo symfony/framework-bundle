@@ -45,6 +45,7 @@ use Symfony\Component\Console\EventListener\ErrorListener;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\Dotenv\Command\DebugCommand as DotenvDebugCommand;
 use Symfony\Component\ErrorHandler\Command\ErrorDumpCommand;
+use Symfony\Component\Form\Command\DebugCommand;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\Command\DebugCommand as MessengerDebugCommand;
 use Symfony\Component\Messenger\Command\FailedMessagesRemoveCommand;
@@ -327,7 +328,7 @@ return static function (ContainerConfigurator $container) {
             ])
             ->tag('console.command')
 
-        ->set('console.command.form_debug', \Symfony\Component\Form\Command\DebugCommand::class)
+        ->set('console.command.form_debug', DebugCommand::class)
             ->args([
                 service('form.registry'),
                 [], // All form types namespaces are stored here by FormPass
