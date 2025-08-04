@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
 use Doctrine\DBAL\Connection;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Configuration;
 use Symfony\Bundle\FullStack;
@@ -61,9 +62,7 @@ class ConfigurationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getTestInvalidSessionName
-     */
+    #[DataProvider('getTestInvalidSessionName')]
     public function testInvalidSessionName($sessionName)
     {
         $processor = new Processor();
@@ -153,9 +152,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($defaultConfig, $config['asset_mapper']);
     }
 
-    /**
-     * @dataProvider provideImportmapPolyfillTests
-     */
+    #[DataProvider('provideImportmapPolyfillTests')]
     public function testAssetMapperPolyfillValue(mixed $polyfillValue, bool $isValid, mixed $expected)
     {
         $processor = new Processor();
@@ -189,9 +186,7 @@ class ConfigurationTest extends TestCase
         yield [false, true, false];
     }
 
-    /**
-     * @dataProvider provideValidAssetsPackageNameConfigurationTests
-     */
+    #[DataProvider('provideValidAssetsPackageNameConfigurationTests')]
     public function testValidAssetsPackageNameConfiguration($packageName)
     {
         $processor = new Processor();
@@ -221,9 +216,7 @@ class ConfigurationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideInvalidAssetConfigurationTests
-     */
+    #[DataProvider('provideInvalidAssetConfigurationTests')]
     public function testInvalidAssetsConfiguration(array $assetConfig, $expectedMessage)
     {
         $processor = new Processor();
@@ -275,9 +268,7 @@ class ConfigurationTest extends TestCase
         yield [$createPackageConfig($config), 'You cannot use both "version" and "json_manifest_path" at the same time under "assets" packages.'];
     }
 
-    /**
-     * @dataProvider provideValidLockConfigurationTests
-     */
+    #[DataProvider('provideValidLockConfigurationTests')]
     public function testValidLockConfiguration($lockConfig, $processedConfig)
     {
         $processor = new Processor();
@@ -375,9 +366,7 @@ class ConfigurationTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider provideValidSemaphoreConfigurationTests
-     */
+    #[DataProvider('provideValidSemaphoreConfigurationTests')]
     public function testValidSemaphoreConfiguration($semaphoreConfig, $processedConfig)
     {
         $processor = new Processor();

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
@@ -1934,9 +1935,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         }
     }
 
-    /**
-     * @dataProvider appRedisTagAwareConfigProvider
-     */
+    #[DataProvider('appRedisTagAwareConfigProvider')]
     public function testAppRedisTagAwareAdapter(string $configFile)
     {
         $container = $this->createContainerFromFile($configFile);
@@ -1980,9 +1979,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         }
     }
 
-    /**
-     * @dataProvider appRedisTagAwareConfigProvider
-     */
+    #[DataProvider('appRedisTagAwareConfigProvider')]
     public function testCacheTaggableTagAppliedToRedisAwareAppPool(string $configFile)
     {
         $container = $this->createContainerFromFile($configFile);
@@ -2222,9 +2219,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideMailer
-     */
+    #[DataProvider('provideMailer')]
     public function testMailer(string $configFile, array $expectedTransports, array $expectedRecipients, array $expectedAllowedRecipients)
     {
         $container = $this->createContainerFromFile($configFile);

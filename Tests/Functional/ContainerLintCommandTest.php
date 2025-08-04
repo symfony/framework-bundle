@@ -11,20 +11,18 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Argument\ArgumentTrait;
 
-/**
- * @group functional
- */
+#[Group('functional')]
 class ContainerLintCommandTest extends AbstractWebTestCase
 {
     private Application $application;
 
-    /**
-     * @dataProvider containerLintProvider
-     */
+    #[DataProvider('containerLintProvider')]
     public function testLintContainer(string $configFile, bool $resolveEnvVars, int $expectedExitCode, string $expectedOutput)
     {
         $kernel = static::createKernel([
