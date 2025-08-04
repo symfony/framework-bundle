@@ -13,6 +13,7 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\Argument\ArgumentTrait;
 
 /**
  * @group functional
@@ -40,14 +41,12 @@ class ContainerLintCommandTest extends AbstractWebTestCase
         $this->assertStringContainsString($expectedOutput, $tester->getDisplay());
     }
 
-    public static function containerLintProvider(): array
+    public static function containerLintProvider(): iterable
     {
-        return [
-            ['escaped_percent.yml', false, 0, 'The container was linted successfully'],
-            ['escaped_percent.yml', true, 0, 'The container was linted successfully'],
-            ['missing_env_var.yml', false, 0, 'The container was linted successfully'],
-            ['missing_env_var.yml', true, 1, 'Environment variable not found: "BAR"'],
-        ];
+        yield ['escaped_percent.yml', false, 0, 'The container was linted successfully'];
+        yield ['escaped_percent.yml', true, 0, 'The container was linted successfully'];
+        yield ['missing_env_var.yml', false, 0, 'The container was linted successfully'];
+        yield ['missing_env_var.yml', true, 1, 'Environment variable not found: "BAR"'];
     }
 
     private function createCommandTester(): CommandTester
