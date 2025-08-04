@@ -44,6 +44,7 @@ class ContainerLintCommandTest extends AbstractWebTestCase
     {
         return [
             ['escaped_percent.yml', false, 0, 'The container was linted successfully'],
+            ['escaped_percent.yml', true, 0, 'The container was linted successfully'],
             ['missing_env_var.yml', false, 0, 'The container was linted successfully'],
             ['missing_env_var.yml', true, 1, 'Environment variable not found: "BAR"'],
         ];

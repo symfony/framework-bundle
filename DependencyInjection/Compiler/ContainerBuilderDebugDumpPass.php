@@ -54,7 +54,7 @@ class ContainerBuilderDebugDumpPass implements CompilerPassInterface
 
             if (($bag = $container->getParameterBag()) instanceof EnvPlaceholderParameterBag) {
                 (new ResolveEnvPlaceholdersPass(null))->process($dump);
-                $dump->__construct(new EnvPlaceholderParameterBag($container->resolveEnvPlaceholders($bag->all())));
+                $dump->__construct(new EnvPlaceholderParameterBag($container->resolveEnvPlaceholders($this->escapeParameters($bag->all()))));
             }
 
             $fs = new Filesystem();
@@ -67,5 +67,19 @@ class ContainerBuilderDebugDumpPass implements CompilerPassInterface
                 @unlink($file);
             }
         }
+    }
+
+    private function escapeParameters(array $parameters): array
+    {
+        $params = [];
+        foreach ($parameters as $k => $v) {
+            $params[$k] = match (true) {
+                \is_array($v) => $this->escapeParameters($v),
+                \is_string($v) => str_replace('%', '%%', $v),
+                default => $v,
+            };
+        }
+
+        return $params;
     }
 }
