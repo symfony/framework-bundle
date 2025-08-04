@@ -14,6 +14,7 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LogLevel;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Fixtures\Workflow\Validator\DefinitionValidator;
@@ -59,6 +60,10 @@ use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpKernel\DependencyInjection\LoggerPass;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Fragment\FragmentUriGeneratorInterface;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransportFactory;
@@ -599,8 +604,8 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $definition = $container->getDefinition('debug.error_handler_configurator');
         $this->assertEquals(new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE), $definition->getArgument(0));
         $this->assertSame([
-            \E_NOTICE => \Psr\Log\LogLevel::ERROR,
-            \E_WARNING => \Psr\Log\LogLevel::ERROR,
+            \E_NOTICE => LogLevel::ERROR,
+            \E_WARNING => LogLevel::ERROR,
         ], $definition->getArgument(1));
     }
 
@@ -611,35 +616,35 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $configuration = $container->getDefinition('exception_listener')->getArgument(3);
 
         $this->assertSame([
-            \Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class,
-            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class,
-            \Symfony\Component\HttpKernel\Exception\ConflictHttpException::class,
-            \Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException::class,
+            BadRequestHttpException::class,
+            NotFoundHttpException::class,
+            ConflictHttpException::class,
+            ServiceUnavailableHttpException::class,
         ], array_keys($configuration));
 
         $this->assertEqualsCanonicalizing([
             'log_channel' => null,
             'log_level' => 'info',
             'status_code' => 422,
-        ], $configuration[\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class]);
+        ], $configuration[BadRequestHttpException::class]);
 
         $this->assertEqualsCanonicalizing([
             'log_channel' => null,
             'log_level' => 'info',
             'status_code' => null,
-        ], $configuration[\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class]);
+        ], $configuration[NotFoundHttpException::class]);
 
         $this->assertEqualsCanonicalizing([
             'log_channel' => null,
             'log_level' => 'info',
             'status_code' => null,
-        ], $configuration[\Symfony\Component\HttpKernel\Exception\ConflictHttpException::class]);
+        ], $configuration[ConflictHttpException::class]);
 
         $this->assertEqualsCanonicalizing([
             'log_channel' => null,
             'log_level' => null,
             'status_code' => 500,
-        ], $configuration[\Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException::class]);
+        ], $configuration[ServiceUnavailableHttpException::class]);
     }
 
     public function testRouter()
