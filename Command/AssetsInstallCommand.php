@@ -23,7 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -119,7 +118,6 @@ EOT
         $copyUsed = false;
         $exitCode = 0;
         $validAssetDirs = [];
-        /** @var BundleInterface $bundle */
         foreach ($kernel->getBundles() as $bundle) {
             if (!is_dir($originDir = $bundle->getPath().'/Resources/public') && !is_dir($originDir = $bundle->getPath().'/public')) {
                 continue;
