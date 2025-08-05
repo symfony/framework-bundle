@@ -59,7 +59,7 @@ EOF
         $vault = $input->getOption('local') ? $this->localVault : $this->vault;
 
         if (null === $vault) {
-            $io->success('The local vault is disabled.');
+            $io->error('The local vault is disabled.');
 
             return 1;
         }
