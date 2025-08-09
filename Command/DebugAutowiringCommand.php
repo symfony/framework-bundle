@@ -47,16 +47,16 @@ class DebugAutowiringCommand extends ContainerDebugCommand
                 new InputOption('all', null, InputOption::VALUE_NONE, 'Show also services that are not aliased'),
             ])
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> command displays the classes and interfaces that
-you can use as type-hints for autowiring:
+                The <info>%command.name%</info> command displays the classes and interfaces that
+                you can use as type-hints for autowiring:
 
-  <info>php %command.full_name%</info>
+                  <info>php %command.full_name%</info>
 
-You can also pass a search term to filter the list:
+                You can also pass a search term to filter the list:
 
-  <info>php %command.full_name% log</info>
+                  <info>php %command.full_name% log</info>
 
-EOF
+                EOF
             )
         ;
     }

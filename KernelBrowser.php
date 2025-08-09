@@ -205,25 +205,25 @@ class KernelBrowser extends HttpKernelBrowser
         $profilerCode = '';
         if ($this->profiler) {
             $profilerCode = <<<'EOF'
-$container = $kernel->getContainer();
-$container = $container->has('test.service_container') ? $container->get('test.service_container') : $container;
-$container->get('profiler')->enable();
-EOF;
+                $container = $kernel->getContainer();
+                $container = $container->has('test.service_container') ? $container->get('test.service_container') : $container;
+                $container->get('profiler')->enable();
+                EOF;
         }
 
         $code = <<<EOF
-<?php
+            <?php
 
-error_reporting($errorReporting);
+            error_reporting($errorReporting);
 
-$requires
+            $requires
 
-\$kernel = unserialize($kernel);
-\$kernel->boot();
-$profilerCode
+            \$kernel = unserialize($kernel);
+            \$kernel->boot();
+            $profilerCode
 
-\$request = unserialize($request);
-EOF;
+            \$request = unserialize($request);
+            EOF;
 
         return $code.$this->getHandleScript();
     }
