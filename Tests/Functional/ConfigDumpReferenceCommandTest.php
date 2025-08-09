@@ -95,8 +95,9 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
                 child2:               ~
 
 
-            EOL
-            , $tester->getDisplay(true));
+            EOL,
+            $tester->getDisplay(true)
+        );
     }
 
     #[TestWith([true])]
