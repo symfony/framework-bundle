@@ -89,13 +89,13 @@ class ConfigDumpReferenceCommandTest extends AbstractWebTestCase
 
         $this->assertSame(0, $ret, 'Returns 0 in case of success');
         $this->assertSame(<<<'EOL'
-# Default configuration for extension with alias: "test" at path "array"
-array:
-    child1:               ~
-    child2:               ~
+            # Default configuration for extension with alias: "test" at path "array"
+            array:
+                child1:               ~
+                child2:               ~
 
 
-EOL
+            EOL
             , $tester->getDisplay(true));
     }
 

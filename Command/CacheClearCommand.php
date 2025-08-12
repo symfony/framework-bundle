@@ -56,12 +56,12 @@ class CacheClearCommand extends Command
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ])
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> command clears and warms up the application cache for a given environment
-and debug mode:
+                The <info>%command.name%</info> command clears and warms up the application cache for a given environment
+                and debug mode:
 
-  <info>php %command.full_name% --env=dev</info>
-  <info>php %command.full_name% --env=prod --no-debug</info>
-EOF
+                  <info>php %command.full_name% --env=dev</info>
+                  <info>php %command.full_name% --env=prod --no-debug</info>
+                EOF
             )
         ;
     }
