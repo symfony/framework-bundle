@@ -155,12 +155,12 @@ class TranslationExtractCommandTest extends TestCase
 
             if (preg_match('/\.[a-z]+$/', $transPath)) {
                 if (!realpath(\dirname($transPath))) {
-                    mkdir(\dirname($transPath), 0777, true);
+                    mkdir(\dirname($transPath), 0o777, true);
                 }
 
                 touch($transPath);
             } else {
-                mkdir($transPath, 0777, true);
+                mkdir($transPath, 0o777, true);
             }
         }
 
