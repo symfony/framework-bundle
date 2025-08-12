@@ -2809,6 +2809,7 @@ class FrameworkExtension extends Extension
             MailerBridge\Mailomat\Transport\MailomatTransportFactory::class => 'mailer.transport_factory.mailomat',
             MailerBridge\MailPace\Transport\MailPaceTransportFactory::class => 'mailer.transport_factory.mailpace',
             MailerBridge\Mailchimp\Transport\MandrillTransportFactory::class => 'mailer.transport_factory.mailchimp',
+            MailerBridge\MicrosoftGraph\Transport\MicrosoftGraphTransportFactory::class => 'mailer.transport_factory.microsoftgraph',
             MailerBridge\Postal\Transport\PostalTransportFactory::class => 'mailer.transport_factory.postal',
             MailerBridge\Postmark\Transport\PostmarkTransportFactory::class => 'mailer.transport_factory.postmark',
             MailerBridge\Mailtrap\Transport\MailtrapTransportFactory::class => 'mailer.transport_factory.mailtrap',
