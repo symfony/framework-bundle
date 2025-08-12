@@ -35,10 +35,10 @@ class XliffLintCommandTest extends TestCase
     {
         $command = new XliffLintCommand();
         $expected = <<<EOF
-Or find all files in a bundle:
+            Or find all files in a bundle:
 
-  <info>php %command.full_name% @AcmeDemoBundle</info>
-EOF;
+              <info>php %command.full_name% @AcmeDemoBundle</info>
+            EOF;
 
         $this->assertStringContainsString($expected, $command->getHelp());
     }

@@ -145,24 +145,24 @@ class ApiAttributesTest extends AbstractWebTestCase
         ];
 
         $expectedResponse = <<<'JSON'
-                {
-                    "type": "https:\/\/symfony.com\/errors\/validation",
-                    "title": "Validation Failed",
-                    "status": 404,
-                    "detail": "filter: This value should be of type Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter.",
-                    "violations": [
-                        {
-                            "parameters": {
-                                "hint": "Failed to create object because the class misses the \"filter\" property.",
-                                "{{ type }}": "Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter"
-                            },
-                            "propertyPath": "filter",
-                            "template": "This value should be of type {{ type }}.",
-                            "title": "This value should be of type Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter."
-                        }
-                    ]
-                }
-                JSON;
+            {
+                "type": "https:\/\/symfony.com\/errors\/validation",
+                "title": "Validation Failed",
+                "status": 404,
+                "detail": "filter: This value should be of type Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter.",
+                "violations": [
+                    {
+                        "parameters": {
+                            "hint": "Failed to create object because the class misses the \"filter\" property.",
+                            "{{ type }}": "Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter"
+                        },
+                        "propertyPath": "filter",
+                        "template": "This value should be of type {{ type }}.",
+                        "title": "This value should be of type Symfony\\Bundle\\FrameworkBundle\\Tests\\Functional\\Filter."
+                    }
+                ]
+            }
+            JSON;
 
         yield 'empty query string mapping non-nullable attribute without default value' => [
             'uri' => '/map-query-string-to-non-nullable-attribute-without-default-value.json',
@@ -944,11 +944,11 @@ class WithMapRequestToNullableAttributeController
 
         return new Response(
             <<<XML
-            <response>
-                <comment>{$body->comment}</comment>
-                <approved>{$body->approved}</approved>
-            </response>
-            XML
+                <response>
+                    <comment>{$body->comment}</comment>
+                    <approved>{$body->approved}</approved>
+                </response>
+                XML
         );
     }
 }
@@ -963,11 +963,11 @@ class WithMapRequestToAttributeWithDefaultValueController
 
         return new Response(
             <<<XML
-            <response>
-                <comment>{$body->comment}</comment>
-                <approved>{$body->approved}</approved>
-            </response>
-            XML
+                <response>
+                    <comment>{$body->comment}</comment>
+                    <approved>{$body->approved}</approved>
+                </response>
+                XML
         );
     }
 }
@@ -982,11 +982,11 @@ class WithMapRequestToNonNullableAttributeWithoutDefaultValueController
 
         return new Response(
             <<<XML
-            <response>
-                <comment>{$body->comment}</comment>
-                <approved>{$body->approved}</approved>
-            </response>
-            XML
+                <response>
+                    <comment>{$body->comment}</comment>
+                    <approved>{$body->approved}</approved>
+                </response>
+                XML
         );
     }
 }

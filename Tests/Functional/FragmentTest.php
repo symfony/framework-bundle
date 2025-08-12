@@ -26,14 +26,14 @@ class FragmentTest extends AbstractWebTestCase
         $client->request('GET', '/fragment_home');
 
         $this->assertEquals(<<<TXT
-bar txt
---
-html
---
-es
---
-fr
-TXT
+            bar txt
+            --
+            html
+            --
+            es
+            --
+            fr
+            TXT
             , $client->getResponse()->getContent());
     }
 

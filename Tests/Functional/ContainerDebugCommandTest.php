@@ -166,24 +166,24 @@ class ContainerDebugCommandTest extends AbstractWebTestCase
 
         $this->assertStringMatchesFormat(<<<'TXT'
 
-Symfony Container Environment Variables
-=======================================
+            Symfony Container Environment Variables
+            =======================================
 
- --------- ----------------- ------------%w
-  Name      Default value     Real value%w
- --------- ----------------- ------------%w
-  JSON      "[1, "2.5", 3]"   n/a%w
-  REAL      n/a               "value"%w
-  UNKNOWN   n/a               n/a%w
- --------- ----------------- ------------%w
+             --------- ----------------- ------------%w
+              Name      Default value     Real value%w
+             --------- ----------------- ------------%w
+              JSON      "[1, "2.5", 3]"   n/a%w
+              REAL      n/a               "value"%w
+              UNKNOWN   n/a               n/a%w
+             --------- ----------------- ------------%w
 
- // Note real values might be different between web and CLI.%w
+             // Note real values might be different between web and CLI.%w
 
- [WARNING] The following variables are missing:%w
+             [WARNING] The following variables are missing:%w
 
- * UNKNOWN
+             * UNKNOWN
 
-TXT
+            TXT
             , $tester->getDisplay(true));
 
         putenv('REAL');

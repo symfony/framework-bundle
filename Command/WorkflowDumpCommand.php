@@ -59,13 +59,13 @@ class WorkflowDumpCommand extends Command
                 new InputOption('dump-format', null, InputOption::VALUE_REQUIRED, 'The dump format ['.implode('|', self::DUMP_FORMAT_OPTIONS).']', 'dot'),
             ])
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> command dumps the graphical representation of a
-workflow in different formats
+                The <info>%command.name%</info> command dumps the graphical representation of a
+                workflow in different formats
 
-<info>DOT</info>:  %command.full_name% <workflow name> | dot -Tpng > workflow.png
-<info>PUML</info>: %command.full_name% <workflow name> --dump-format=puml | java -jar plantuml.jar -p > workflow.png
-<info>MERMAID</info>: %command.full_name% <workflow name> --dump-format=mermaid | mmdc -o workflow.svg
-EOF
+                <info>DOT</info>:  %command.full_name% <workflow name> | dot -Tpng > workflow.png
+                <info>PUML</info>: %command.full_name% <workflow name> --dump-format=puml | java -jar plantuml.jar -p > workflow.png
+                <info>MERMAID</info>: %command.full_name% <workflow name> --dump-format=mermaid | mmdc -o workflow.svg
+                EOF
             )
         ;
     }
