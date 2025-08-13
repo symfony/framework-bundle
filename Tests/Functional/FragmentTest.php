@@ -33,8 +33,9 @@ class FragmentTest extends AbstractWebTestCase
             es
             --
             fr
-            TXT
-            , $client->getResponse()->getContent());
+            TXT,
+            $client->getResponse()->getContent()
+        );
     }
 
     public static function getConfigs()
