@@ -59,7 +59,7 @@ class ContainerBuilderDebugDumpPass implements CompilerPassInterface
 
             $fs = new Filesystem();
             $fs->dumpFile($file, serialize($dump));
-            $fs->chmod($file, 0666, umask());
+            $fs->chmod($file, 0o666, umask());
         } catch (\Throwable $e) {
             $container->getCompiler()->log($this, $e->getMessage());
             // ignore serialization and file-system errors
