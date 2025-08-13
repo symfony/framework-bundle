@@ -1060,7 +1060,7 @@ class FrameworkExtension extends Extension
                         $guardsConfiguration[$eventName][] = $configuration;
                     }
                     if ($transition['metadata']) {
-                        $transitionsMetadataDefinition->addMethodCall('attach', [
+                        $transitionsMetadataDefinition->addMethodCall('offsetSet', [
                             new Reference($transitionId),
                             $transition['metadata'],
                         ]);
@@ -1080,7 +1080,7 @@ class FrameworkExtension extends Extension
                                 $guardsConfiguration[$eventName][] = $configuration;
                             }
                             if ($transition['metadata']) {
-                                $transitionsMetadataDefinition->addMethodCall('attach', [
+                                $transitionsMetadataDefinition->addMethodCall('offsetSet', [
                                     new Reference($transitionId),
                                     $transition['metadata'],
                                 ]);
