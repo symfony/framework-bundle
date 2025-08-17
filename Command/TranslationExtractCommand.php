@@ -88,7 +88,7 @@ class TranslationExtractCommand extends Command
                 the new ones into the translation files.
 
                 When new translation strings are found it can automatically add a prefix to the translation
-                message. However, if the <comment>--no-fill</comment> option is used, the <comment>--prefix</comment>
+                message. However, if the <info>--no-fill</info> option is used, the <info>--prefix</info>
                 option has no effect, since the translation values are left empty.
 
                 Example running against a Bundle (AcmeBundle)
@@ -101,12 +101,12 @@ class TranslationExtractCommand extends Command
                   <info>php %command.full_name% --dump-messages en</info>
                   <info>php %command.full_name% --force --prefix="new_" fr</info>
 
-                You can sort the output with the <comment>--sort</> flag:
+                You can sort the output with the <info>--sort</> flag:
 
                     <info>php %command.full_name% --dump-messages --sort=asc en AcmeBundle</info>
                     <info>php %command.full_name% --force --sort=desc fr</info>
 
-                You can dump a tree-like structure using the yaml format with <comment>--as-tree</> flag:
+                You can dump a tree-like structure using the yaml format with <info>--as-tree</> flag:
 
                     <info>php %command.full_name% --force --format=yaml --as-tree=3 en AcmeBundle</info>
 
