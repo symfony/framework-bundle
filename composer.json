@@ -19,7 +19,7 @@
         "php": ">=8.2",
         "composer-runtime-api": ">=2.1",
         "ext-xml": "*",
-        "symfony/cache": "^6.4|^7.0|^8.0",
+        "symfony/cache": "^6.4.12|^7.0|^8.0",
         "symfony/config": "^7.3|^8.0",
         "symfony/dependency-injection": "^7.2|^8.0",
         "symfony/deprecation-contracts": "^2.5|^3",
@@ -95,6 +95,7 @@
         "symfony/mailer": "<6.4",
         "symfony/messenger": "<6.4",
         "symfony/mime": "<6.4",
+        "symfony/polyfill-php83": "<1.30",
         "symfony/property-info": "<6.4",
         "symfony/property-access": "<6.4",
         "symfony/runtime": "<6.4.13|>=7.0,<7.1.6",
@@ -109,7 +110,7 @@
         "symfony/validator": "<6.4",
         "symfony/web-profiler-bundle": "<6.4",
         "symfony/webhook": "<7.2",
-        "symfony/workflow": "<7.3.0-beta2"
+        "symfony/workflow": "<7.3"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\FrameworkBundle\\": "" },
