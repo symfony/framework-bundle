@@ -4,6 +4,7 @@ CHANGELOG
 7.4
 ---
 
+ * Auto-register routes from attributes found on controller services
  * Add `ControllerHelper`; the helpers from AbstractController as a standalone service
  * Allow using their name without added suffix when using `#[Target]` for custom services
  * Deprecate `Symfony\Bundle\FrameworkBundle\Console\Application::add()` in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
