@@ -469,7 +469,7 @@ class FrameworkExtension extends Extension
         }
 
         if ($typeInfoEnabled = $this->readConfigEnabled('type_info', $container, $config['type_info'])) {
-            $this->registerTypeInfoConfiguration($container, $loader);
+            $this->registerTypeInfoConfiguration($config['type_info'], $container, $loader);
         }
 
         if ($propertyInfoEnabled) {
@@ -2170,7 +2170,7 @@ class FrameworkExtension extends Extension
         }
     }
 
-    private function registerTypeInfoConfiguration(ContainerBuilder $container, PhpFileLoader $loader): void
+    private function registerTypeInfoConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
     {
         if (!class_exists(Type::class)) {
             throw new LogicException('TypeInfo support cannot be enabled as the TypeInfo component is not installed. Try running "composer require symfony/type-info".');
@@ -2179,7 +2179,8 @@ class FrameworkExtension extends Extension
         $loader->load('type_info.php');
 
         if (ContainerBuilder::willBeAvailable('phpstan/phpdoc-parser', PhpDocParser::class, ['symfony/framework-bundle', 'symfony/type-info'])) {
-            $container->register('type_info.resolver.string', StringTypeResolver::class);
+            $container->register('type_info.resolver.string', StringTypeResolver::class)
+                ->setArguments([null, null, $config['aliases']]);
 
             $container->register('type_info.resolver.reflection_parameter.phpdoc_aware', PhpDocAwareReflectionTypeResolver::class)
                 ->setArguments([new Reference('type_info.resolver.reflection_parameter'), new Reference('type_info.resolver.string'), new Reference('type_info.type_context_factory')]);
@@ -2196,6 +2197,8 @@ class FrameworkExtension extends Extension
                 \ReflectionProperty::class => new Reference('type_info.resolver.reflection_property.phpdoc_aware'),
                 \ReflectionFunctionAbstract::class => new Reference('type_info.resolver.reflection_return.phpdoc_aware'),
             ] + $resolversLocator->getValues());
+
+            $container->getDefinition('type_info.type_context_factory')->replaceArgument(1, $config['aliases']);
         }
     }
 

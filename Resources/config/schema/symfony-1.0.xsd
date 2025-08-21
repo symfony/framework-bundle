@@ -382,7 +382,18 @@
     </xsd:complexType>
 
     <xsd:complexType name="type_info">
-        <xsd:attribute name="enabled" type="xsd:boolean" />
+        <xsd:sequence>
+            <xsd:element name="alias" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:simpleContent>
+                        <xsd:extension base="xsd:string">
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:extension>
+                    </xsd:simpleContent>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="enabled" type="xsd:boolean"/>
     </xsd:complexType>
 
     <xsd:complexType name="named_serializer_options">
