@@ -1601,7 +1601,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $serializerExtractorDefinition = $container->getDefinition('property_info.serializer_extractor');
 
         $this->assertEquals('serializer.mapping.class_metadata_factory', $serializerExtractorDefinition->getArgument(0)->__toString());
-        $this->assertTrue(!$serializerExtractorDefinition->isPublic() || $serializerExtractorDefinition->isPrivate());
+        $this->assertTrue($serializerExtractorDefinition->isPrivate());
         $tag = $serializerExtractorDefinition->getTag('property_info.list_extractor');
         $this->assertEquals(['priority' => -999], $tag[0]);
     }
