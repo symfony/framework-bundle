@@ -26,6 +26,7 @@ use Symfony\Component\Routing\Generator\Dumper\CompiledUrlGeneratorDumper;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Loader\AttributeDirectoryLoader;
 use Symfony\Component\Routing\Loader\AttributeFileLoader;
+use Symfony\Component\Routing\Loader\AttributeServicesLoader;
 use Symfony\Component\Routing\Loader\ContainerLoader;
 use Symfony\Component\Routing\Loader\DirectoryLoader;
 use Symfony\Component\Routing\Loader\GlobFileLoader;
@@ -95,6 +96,12 @@ return static function (ContainerConfigurator $container) {
         ->set('routing.loader.attribute', AttributeRouteControllerLoader::class)
             ->args([
                 '%kernel.environment%',
+            ])
+            ->tag('routing.loader', ['priority' => -10])
+
+        ->set('routing.loader.attribute.services', AttributeServicesLoader::class)
+            ->args([
+                abstract_arg('classes tagged with "routing.controller"'),
             ])
             ->tag('routing.loader', ['priority' => -10])
 
