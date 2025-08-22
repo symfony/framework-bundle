@@ -6,6 +6,8 @@
         http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd">
 
     <framework:config>
-        <framework:type-info enabled="true" />
+        <framework:type-info enabled="true">
+            <framework:alias name="CustomAlias">int</framework:alias>
+        </framework:type-info>
     </framework:config>
 </container>

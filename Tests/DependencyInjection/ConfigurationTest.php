@@ -730,6 +730,7 @@ class ConfigurationTest extends TestCase
             ],
             'type_info' => [
                 'enabled' => !class_exists(FullStack::class) && class_exists(Type::class),
+                'aliases' => [],
             ],
             'property_info' => [
                 'enabled' => !class_exists(FullStack::class),
