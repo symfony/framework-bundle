@@ -13,8 +13,8 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\Routing;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
-use Symfony\Component\Routing\Tests\Fixtures\AttributeFixtures\InvokableController;
-use Symfony\Component\Routing\Tests\Fixtures\AttributeFixtures\MethodActionControllers;
+use Symfony\Bundle\FrameworkBundle\Tests\Routing\Fixtures\InvokableController;
+use Symfony\Bundle\FrameworkBundle\Tests\Routing\Fixtures\MethodActionControllers;
 
 class AttributeRouteControllerLoaderTest extends TestCase
 {
