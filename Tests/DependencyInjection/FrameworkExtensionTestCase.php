@@ -93,6 +93,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Translation\DependencyInjection\TranslatorPass;
 use Symfony\Component\Translation\LocaleSwitcher;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Validator\Constraints\Traverse;
 use Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -1312,16 +1313,17 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $projectDir = $container->getParameter('kernel.project_dir');
 
         $ref = new \ReflectionClass(Form::class);
-        $xmlMappings = [
-            \dirname($ref->getFileName()).'/Resources/config/validation.xml',
-            strtr($projectDir.'/config/validator/foo.xml', '/', \DIRECTORY_SEPARATOR),
-        ];
+        $xmlMappings = [];
+        if (!$ref->getAttributes(Traverse::class)) {
+            $xmlMappings[] = \dirname($ref->getFileName()).'/Resources/config/validation.xml';
+        }
+        $xmlMappings[] = strtr($projectDir.'/config/validator/foo.xml', '/', \DIRECTORY_SEPARATOR);
 
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
 
-        $annotations = !class_exists(FullStack::class);
+        $attributes = !class_exists(FullStack::class);
 
-        $this->assertCount($annotations ? 8 : 7, $calls);
+        $this->assertCount($attributes ? 8 : 7, $calls);
         $this->assertSame('setConstraintValidatorFactory', $calls[0][0]);
         $this->assertEquals([new Reference('validator.validator_factory')], $calls[0][1]);
         $this->assertSame('setGroupProviderLocator', $calls[1][0]);
@@ -1333,7 +1335,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('addXmlMappings', $calls[4][0]);
         $this->assertSame([$xmlMappings], $calls[4][1]);
         $i = 4;
-        if ($annotations) {
+        if ($attributes) {
             $this->assertSame('enableAttributeMapping', $calls[++$i][0]);
         }
         $this->assertSame('addMethodMapping', $calls[++$i][0]);
@@ -1408,15 +1410,19 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertEquals([new Reference('validator.mapping.cache.adapter')], $calls[8][1]);
 
         $xmlMappings = $calls[4][1][0];
-        $this->assertCount(3, $xmlMappings);
-        try {
-            // Testing symfony/symfony
-            $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
-        } catch (\Exception $e) {
-            // Testing symfony/framework-bundle with deps=high
-            $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+
+        if (!(new \ReflectionClass(Form::class))->getAttributes(Traverse::class)) {
+            try {
+                // Testing symfony/symfony
+                $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
+            } catch (\Exception $e) {
+                // Testing symfony/framework-bundle with deps=high
+                $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+            }
+            array_shift($xmlMappings);
         }
-        $this->assertStringEndsWith('TestBundle/Resources/config/validation.xml', $xmlMappings[1]);
+        $this->assertCount(2, $xmlMappings);
+        $this->assertStringEndsWith('TestBundle/Resources/config/validation.xml', $xmlMappings[0]);
 
         $yamlMappings = $calls[5][1][0];
         $this->assertCount(1, $yamlMappings);
@@ -1434,16 +1440,19 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
         $xmlMappings = $calls[4][1][0];
-        $this->assertCount(3, $xmlMappings);
 
-        try {
-            // Testing symfony/symfony
-            $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
-        } catch (\Exception $e) {
-            // Testing symfony/framework-bundle with deps=high
-            $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+        if (!(new \ReflectionClass(Form::class))->getAttributes(Traverse::class)) {
+            try {
+                // Testing symfony/symfony
+                $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
+            } catch (\Exception $e) {
+                // Testing symfony/framework-bundle with deps=high
+                $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+            }
+            array_shift($xmlMappings);
         }
-        $this->assertStringEndsWith('CustomPathBundle/Resources/config/validation.xml', $xmlMappings[1]);
+        $this->assertCount(2, $xmlMappings);
+        $this->assertStringEndsWith('CustomPathBundle/Resources/config/validation.xml', $xmlMappings[0]);
 
         $yamlMappings = $calls[5][1][0];
         $this->assertCount(1, $yamlMappings);
@@ -1490,7 +1499,6 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
 
         $this->assertSame('addXmlMappings', $calls[4][0]);
-        $this->assertCount(3, $calls[4][1][0]);
 
         $this->assertSame('addYamlMappings', $calls[5][0]);
         $this->assertCount(3, $calls[5][1][0]);

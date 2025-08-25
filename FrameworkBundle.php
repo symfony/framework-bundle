@@ -75,6 +75,7 @@ use Symfony\Component\Translation\DependencyInjection\TranslatorPathsPass;
 use Symfony\Component\Validator\DependencyInjection\AddAutoMappingConfigurationPass;
 use Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass;
 use Symfony\Component\Validator\DependencyInjection\AddValidatorInitializersPass;
+use Symfony\Component\Validator\DependencyInjection\AttributeMetadataPass;
 use Symfony\Component\VarExporter\Internal\Hydrator;
 use Symfony\Component\VarExporter\Internal\Registry;
 use Symfony\Component\Workflow\DependencyInjection\WorkflowDebugPass;
@@ -155,6 +156,7 @@ class FrameworkBundle extends Bundle
         $container->addCompilerPass($registerListenersPass, PassConfig::TYPE_BEFORE_REMOVING);
         $this->addCompilerPassIfExists($container, AddConstraintValidatorsPass::class);
         $this->addCompilerPassIfExists($container, AddValidatorInitializersPass::class);
+        $this->addCompilerPassIfExists($container, AttributeMetadataPass::class);
         $this->addCompilerPassIfExists($container, AddConsoleCommandPass::class, PassConfig::TYPE_BEFORE_REMOVING);
         // must be registered before the AddConsoleCommandPass
         $container->addCompilerPass(new TranslationLintCommandPass(), PassConfig::TYPE_BEFORE_REMOVING, 10);

@@ -102,6 +102,7 @@ class UnusedTagsPass implements CompilerPassInterface
         'twig.extension',
         'twig.loader',
         'twig.runtime',
+        'validator.attribute_metadata',
         'validator.auto_mapper',
         'validator.constraint_validator',
         'validator.group_provider',
