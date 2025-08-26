@@ -78,6 +78,7 @@ class UnusedTagsPass implements CompilerPassInterface
         'proxy',
         'remote_event.consumer',
         'routing.condition_service',
+        'routing.controller',
         'routing.expression_language_function',
         'routing.expression_language_provider',
         'routing.loader',
