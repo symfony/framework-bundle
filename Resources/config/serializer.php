@@ -28,6 +28,7 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\CacheClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\LoaderChain;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
@@ -150,6 +151,9 @@ return static function (ContainerConfigurator $container) {
         // Loader
         ->set('serializer.mapping.chain_loader', LoaderChain::class)
             ->args([[]])
+
+        ->set('serializer.mapping.attribute_loader', AttributeLoader::class)
+            ->args([true, []])
 
         // Class Metadata Factory
         ->set('serializer.mapping.class_metadata_factory', ClassMetadataFactory::class)

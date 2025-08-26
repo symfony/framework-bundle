@@ -187,9 +187,10 @@ use Symfony\Component\Semaphore\PersistingStoreInterface as SemaphoreStoreInterf
 use Symfony\Component\Semaphore\Semaphore;
 use Symfony\Component\Semaphore\SemaphoreFactory;
 use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
+use Symfony\Component\Serializer\Attribute as SerializerMapping;
+use Symfony\Component\Serializer\DependencyInjection\AttributeMetadataPass as SerializerAttributeMetadataPass;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
 use Symfony\Component\Serializer\NameConverter\SnakeCaseToCamelCaseNameConverter;
@@ -2073,10 +2074,38 @@ class FrameworkExtension extends Extension
         }
 
         $serializerLoaders = [];
-        if ($config['enable_attributes'] ?? false) {
-            $attributeLoader = new Definition(AttributeLoader::class);
 
-            $serializerLoaders[] = $attributeLoader;
+        // When attributes are disabled, it means from runtime-discovery only; autoconfiguration should still happen.
+        // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
+        if (class_exists(SerializerAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug'))) {
+            // The $reflector argument hints at where the attribute could be used
+            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata');
+            };
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\Context::class, $configurator);
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\Groups::class, $configurator);
+
+            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata');
+            };
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\Ignore::class, $configurator);
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\MaxDepth::class, $configurator);
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedName::class, $configurator);
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedPath::class, $configurator);
+
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, function (ChildDefinition $definition) {
+                $definition->addTag('serializer.attribute_metadata');
+            });
+        }
+
+        if (($config['enable_attributes'] ?? false) || class_exists(SerializerAttributeMetadataPass::class)) {
+            $serializerLoaders[] = new Reference('serializer.mapping.attribute_loader');
+
+            $container->getDefinition('serializer.mapping.attribute_loader')
+                ->replaceArgument(0, $config['enable_attributes'] ?? false);
+        } else {
+            // BC with symfony/serializer < 7.4
+            $container->removeDefinition('serializer.mapping.attribute_services_loader');
         }
 
         $fileRecorder = function ($extension, $path) use (&$serializerLoaders) {

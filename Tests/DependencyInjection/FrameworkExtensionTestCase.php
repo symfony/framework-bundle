@@ -77,7 +77,6 @@ use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\AuthenticationEvents;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
 use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
@@ -1571,7 +1570,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $argument = $container->getDefinition('serializer.mapping.chain_loader')->getArgument(0);
 
         $this->assertCount(2, $argument);
-        $this->assertEquals(AttributeLoader::class, $argument[0]->getClass());
+        $this->assertEquals(new Reference('serializer.mapping.attribute_loader'), $argument[0]);
         $this->assertEquals(new Reference('serializer.name_converter.camel_case_to_snake_case'), $container->getDefinition('serializer.name_converter.metadata_aware')->getArgument(1));
         $this->assertEquals(new Reference('property_info', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE), $container->getDefinition('serializer.normalizer.object')->getArgument(3));
     }
@@ -1761,6 +1760,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $projectDir = $container->getParameter('kernel.project_dir');
         $configDir = __DIR__.'/Fixtures/TestBundle/Resources/config';
         $expectedLoaders = [
+            new Reference('serializer.mapping.attribute_loader'),
             new Definition(XmlFileLoader::class, [$configDir.'/serialization.xml']),
             new Definition(YamlFileLoader::class, [$configDir.'/serialization.yml']),
             new Definition(YamlFileLoader::class, [$projectDir.'/config/serializer/foo.yml']),
@@ -1770,15 +1770,15 @@ abstract class FrameworkExtensionTestCase extends TestCase
             new Definition(YamlFileLoader::class, [$configDir.'/serializer_mapping/serialization.yaml']),
         ];
 
-        foreach ($expectedLoaders as $definition) {
-            if (is_file($arg = $definition->getArgument(0))) {
-                $definition->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
+        foreach ($expectedLoaders as $loader) {
+            if ($loader instanceof Definition && is_file($arg = $loader->getArgument(0))) {
+                $loader->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
             }
         }
 
         $loaders = $container->getDefinition('serializer.mapping.chain_loader')->getArgument(0);
         foreach ($loaders as $loader) {
-            if (is_file($arg = $loader->getArgument(0))) {
+            if ($loader instanceof Definition && is_file($arg = $loader->getArgument(0))) {
                 $loader->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
             }
         }
