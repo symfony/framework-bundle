@@ -38,6 +38,18 @@ use Symfony\Component\Routing\RouteCollection;
  */
 class TextDescriptor extends Descriptor
 {
+    private const VERB_COLORS = [
+        'ANY' => 'default',
+        'GET' => 'blue',
+        'QUERY' => 'blue',
+        'HEAD' => 'magenta',
+        'OPTIONS' => 'blue',
+        'POST' => 'green',
+        'PUT' => 'yellow',
+        'PATCH' => 'yellow',
+        'DELETE' => 'red',
+    ];
+
     public function __construct(
         private ?FileLinkFormatter $fileLinkFormatter = null,
     ) {
@@ -45,38 +57,62 @@ class TextDescriptor extends Descriptor
 
     protected function describeRouteCollection(RouteCollection $routes, array $options = []): void
     {
-        $showControllers = isset($options['show_controllers']) && $options['show_controllers'];
+        $showAliases = $options['show_aliases'] ?? false;
+        $showControllers = $options['show_controllers'] ?? false;
 
-        $tableHeaders = ['Name', 'Method', 'Scheme', 'Host', 'Path'];
+        $tableRows = [];
+        $shouldShowScheme = false;
+        $shouldShowHost = false;
+        foreach ($routes->all() as $name => $route) {
+            $controller = $route->getDefault('_controller');
+
+            $scheme = $route->getSchemes() ? implode('|', $route->getSchemes()) : 'ANY';
+            $shouldShowScheme = $shouldShowScheme || 'ANY' !== $scheme;
+
+            $host = '' !== $route->getHost() ? $route->getHost() : 'ANY';
+            $shouldShowHost = $shouldShowHost || 'ANY' !== $host;
+
+            $row = [
+                'Name' => $name,
+                'Methods' => $this->formatMethods($route->getMethods()),
+                'Scheme' => $scheme,
+                'Host' => $host,
+                'Path' => $route->getPath(),
+            ];
+
+            if ($showControllers) {
+                $row['Controller'] = $controller ? $this->formatControllerLink($controller, $this->formatCallable($controller), $options['container'] ?? null) : '';
+            }
+
+            if ($showAliases) {
+                $row['Aliases'] = implode('|', $this->getReverseAliases($routes)[$name] ?? []);
+            }
+
+            $tableRows[] = $row;
+        }
+
+        $tableHeaders = ['Name', 'Method'];
+
+        if ($shouldShowScheme) {
+            $tableHeaders[] = 'Scheme';
+        } else {
+            array_walk($tableRows, function (&$row) { unset($row['Scheme']); });
+        }
+
+        if ($shouldShowHost) {
+            $tableHeaders[] = 'Host';
+        } else {
+            array_walk($tableRows, function (&$row) { unset($row['Host']); });
+        }
+
+        $tableHeaders[] = 'Path';
+
         if ($showControllers) {
             $tableHeaders[] = 'Controller';
         }
 
-        if ($showAliases = $options['show_aliases'] ?? false) {
+        if ($showAliases) {
             $tableHeaders[] = 'Aliases';
-        }
-
-        $tableRows = [];
-        foreach ($routes->all() as $name => $route) {
-            $controller = $route->getDefault('_controller');
-
-            $row = [
-                $name,
-                $route->getMethods() ? implode('|', $route->getMethods()) : 'ANY',
-                $route->getSchemes() ? implode('|', $route->getSchemes()) : 'ANY',
-                '' !== $route->getHost() ? $route->getHost() : 'ANY',
-                $this->formatControllerLink($controller, $route->getPath(), $options['container'] ?? null),
-            ];
-
-            if ($showControllers) {
-                $row[] = $controller ? $this->formatControllerLink($controller, $this->formatCallable($controller), $options['container'] ?? null) : '';
-            }
-
-            if ($showAliases) {
-                $row[] = implode('|', ($reverseAliases ??= $this->getReverseAliases($routes))[$name] ?? []);
-            }
-
-            $tableRows[] = $row;
         }
 
         if (isset($options['output'])) {
@@ -103,7 +139,7 @@ class TextDescriptor extends Descriptor
             ['Host', '' !== $route->getHost() ? $route->getHost() : 'ANY'],
             ['Host Regex', '' !== $route->getHost() ? $route->compile()->getHostRegex() : ''],
             ['Scheme', $route->getSchemes() ? implode('|', $route->getSchemes()) : 'ANY'],
-            ['Method', $route->getMethods() ? implode('|', $route->getMethods()) : 'ANY'],
+            ['Method', $this->formatMethods($route->getMethods())],
             ['Requirements', $route->getRequirements() ? $this->formatRouterConfig($route->getRequirements()) : 'NO CUSTOM'],
             ['Class', $route::class],
             ['Defaults', $this->formatRouterConfig($defaults)],
@@ -574,6 +610,21 @@ class TextDescriptor extends Descriptor
         }
 
         return trim($configAsString);
+    }
+
+    /**
+     * @param array<string> $methods
+     */
+    private function formatMethods(array $methods): string
+    {
+        if ([] === $methods) {
+            $methods = ['ANY'];
+        }
+
+        return implode('|', array_map(
+            fn (string $method): string => \sprintf('<fg=%s>%s</>', self::VERB_COLORS[$method] ?? 'default', $method),
+            $methods
+        ));
     }
 
     /**
