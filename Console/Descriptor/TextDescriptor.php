@@ -360,7 +360,7 @@ class TextDescriptor extends Descriptor
             $tableRows[] = ['Calls', implode(', ', $callInformation)];
         }
 
-        $tableRows[] = ['Public', $definition->isPublic() && !$definition->isPrivate() ? 'yes' : 'no'];
+        $tableRows[] = ['Public', $definition->isPublic() ? 'yes' : 'no'];
         $tableRows[] = ['Synthetic', $definition->isSynthetic() ? 'yes' : 'no'];
         $tableRows[] = ['Lazy', $definition->isLazy() ? 'yes' : 'no'];
         $tableRows[] = ['Shared', $definition->isShared() ? 'yes' : 'no'];
@@ -455,7 +455,7 @@ class TextDescriptor extends Descriptor
 
     protected function describeContainerAlias(Alias $alias, array $options = [], ?ContainerBuilder $container = null): void
     {
-        if ($alias->isPublic() && !$alias->isPrivate()) {
+        if ($alias->isPublic()) {
             $options['output']->comment(\sprintf('This service is a <info>public</info> alias for the service <info>%s</info>', (string) $alias));
         } else {
             $options['output']->comment(\sprintf('This service is a <comment>private</comment> alias for the service <info>%s</info>', (string) $alias));

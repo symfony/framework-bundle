@@ -354,7 +354,7 @@ class XmlDescriptor extends Descriptor
             }
         }
 
-        $serviceXML->setAttribute('public', $definition->isPublic() && !$definition->isPrivate() ? 'true' : 'false');
+        $serviceXML->setAttribute('public', $definition->isPublic() ? 'true' : 'false');
         $serviceXML->setAttribute('synthetic', $definition->isSynthetic() ? 'true' : 'false');
         $serviceXML->setAttribute('lazy', $definition->isLazy() ? 'true' : 'false');
         $serviceXML->setAttribute('shared', $definition->isShared() ? 'true' : 'false');
@@ -477,7 +477,7 @@ class XmlDescriptor extends Descriptor
         }
 
         $aliasXML->setAttribute('service', (string) $alias);
-        $aliasXML->setAttribute('public', $alias->isPublic() && !$alias->isPrivate() ? 'true' : 'false');
+        $aliasXML->setAttribute('public', $alias->isPublic() ? 'true' : 'false');
 
         return $dom;
     }
