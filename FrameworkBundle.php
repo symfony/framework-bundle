@@ -65,6 +65,7 @@ use Symfony\Component\Routing\DependencyInjection\RoutingControllerPass;
 use Symfony\Component\Routing\DependencyInjection\RoutingResolverPass;
 use Symfony\Component\Runtime\SymfonyRuntime;
 use Symfony\Component\Scheduler\DependencyInjection\AddScheduleMessengerPass;
+use Symfony\Component\Serializer\DependencyInjection\AttributeMetadataPass as SerializerAttributeMetadataPass;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
 use Symfony\Component\Translation\DependencyInjection\DataCollectorTranslatorPass;
 use Symfony\Component\Translation\DependencyInjection\LoggingTranslatorPass;
@@ -75,6 +76,7 @@ use Symfony\Component\Translation\DependencyInjection\TranslatorPathsPass;
 use Symfony\Component\Validator\DependencyInjection\AddAutoMappingConfigurationPass;
 use Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass;
 use Symfony\Component\Validator\DependencyInjection\AddValidatorInitializersPass;
+use Symfony\Component\Validator\DependencyInjection\AttributeMetadataPass;
 use Symfony\Component\VarExporter\Internal\Hydrator;
 use Symfony\Component\VarExporter\Internal\Registry;
 use Symfony\Component\Workflow\DependencyInjection\WorkflowDebugPass;
@@ -155,6 +157,7 @@ class FrameworkBundle extends Bundle
         $container->addCompilerPass($registerListenersPass, PassConfig::TYPE_BEFORE_REMOVING);
         $this->addCompilerPassIfExists($container, AddConstraintValidatorsPass::class);
         $this->addCompilerPassIfExists($container, AddValidatorInitializersPass::class);
+        $this->addCompilerPassIfExists($container, AttributeMetadataPass::class);
         $this->addCompilerPassIfExists($container, AddConsoleCommandPass::class, PassConfig::TYPE_BEFORE_REMOVING);
         // must be registered before the AddConsoleCommandPass
         $container->addCompilerPass(new TranslationLintCommandPass(), PassConfig::TYPE_BEFORE_REMOVING, 10);
@@ -168,6 +171,7 @@ class FrameworkBundle extends Bundle
         $this->addCompilerPassIfExists($container, TranslationDumperPass::class);
         $container->addCompilerPass(new FragmentRendererPass());
         $this->addCompilerPassIfExists($container, SerializerPass::class);
+        $this->addCompilerPassIfExists($container, SerializerAttributeMetadataPass::class);
         $this->addCompilerPassIfExists($container, PropertyInfoPass::class);
         $this->addCompilerPassIfExists($container, PropertyInfoConstructorPass::class);
         $container->addCompilerPass(new ControllerArgumentValueResolverPass());

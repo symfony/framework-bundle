@@ -2,7 +2,7 @@
 
 $container->loadFromExtension('framework', [
     'serializer' => [
-        'enable_attributes' => false,
+        'enable_attributes' => true,
         'mapping' => [
             'paths' => [
                 '%kernel.project_dir%/Fixtures/TestBundle/Resources/config/serializer_mapping/files',

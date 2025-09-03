@@ -77,7 +77,6 @@ use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\AuthenticationEvents;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
 use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
@@ -93,6 +92,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Translation\DependencyInjection\TranslatorPass;
 use Symfony\Component\Translation\LocaleSwitcher;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Validator\Constraints\Traverse;
 use Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -1300,10 +1300,11 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $projectDir = $container->getParameter('kernel.project_dir');
 
         $ref = new \ReflectionClass(Form::class);
-        $xmlMappings = [
-            \dirname($ref->getFileName()).'/Resources/config/validation.xml',
-            strtr($projectDir.'/config/validator/foo.xml', '/', \DIRECTORY_SEPARATOR),
-        ];
+        $xmlMappings = [];
+        if (!$ref->getAttributes(Traverse::class)) {
+            $xmlMappings[] = \dirname($ref->getFileName()).'/Resources/config/validation.xml';
+        }
+        $xmlMappings[] = strtr($projectDir.'/config/validator/foo.xml', '/', \DIRECTORY_SEPARATOR);
 
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
 
@@ -1384,15 +1385,19 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertEquals([new Reference('validator.mapping.cache.adapter')], $calls[8][1]);
 
         $xmlMappings = $calls[4][1][0];
-        $this->assertCount(3, $xmlMappings);
-        try {
-            // Testing symfony/symfony
-            $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
-        } catch (\Exception $e) {
-            // Testing symfony/framework-bundle with deps=high
-            $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+
+        if (!(new \ReflectionClass(Form::class))->getAttributes(Traverse::class)) {
+            try {
+                // Testing symfony/symfony
+                $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
+            } catch (\Exception $e) {
+                // Testing symfony/framework-bundle with deps=high
+                $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+            }
+            array_shift($xmlMappings);
         }
-        $this->assertStringEndsWith('TestBundle/Resources/config/validation.xml', $xmlMappings[1]);
+        $this->assertCount(2, $xmlMappings);
+        $this->assertStringEndsWith('TestBundle/Resources/config/validation.xml', $xmlMappings[0]);
 
         $yamlMappings = $calls[5][1][0];
         $this->assertCount(1, $yamlMappings);
@@ -1410,16 +1415,19 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
         $xmlMappings = $calls[4][1][0];
-        $this->assertCount(3, $xmlMappings);
 
-        try {
-            // Testing symfony/symfony
-            $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
-        } catch (\Exception $e) {
-            // Testing symfony/framework-bundle with deps=high
-            $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+        if (!(new \ReflectionClass(Form::class))->getAttributes(Traverse::class)) {
+            try {
+                // Testing symfony/symfony
+                $this->assertStringEndsWith('Component'.\DIRECTORY_SEPARATOR.'Form/Resources/config/validation.xml', $xmlMappings[0]);
+            } catch (\Exception $e) {
+                // Testing symfony/framework-bundle with deps=high
+                $this->assertStringEndsWith('symfony'.\DIRECTORY_SEPARATOR.'form/Resources/config/validation.xml', $xmlMappings[0]);
+            }
+            array_shift($xmlMappings);
         }
-        $this->assertStringEndsWith('CustomPathBundle/Resources/config/validation.xml', $xmlMappings[1]);
+        $this->assertCount(2, $xmlMappings);
+        $this->assertStringEndsWith('CustomPathBundle/Resources/config/validation.xml', $xmlMappings[0]);
 
         $yamlMappings = $calls[5][1][0];
         $this->assertCount(1, $yamlMappings);
@@ -1466,7 +1474,6 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $calls = $container->getDefinition('validator.builder')->getMethodCalls();
 
         $this->assertSame('addXmlMappings', $calls[4][0]);
-        $this->assertCount(3, $calls[4][1][0]);
 
         $this->assertSame('addYamlMappings', $calls[5][0]);
         $this->assertCount(3, $calls[5][1][0]);
@@ -1539,7 +1546,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $argument = $container->getDefinition('serializer.mapping.chain_loader')->getArgument(0);
 
         $this->assertCount(2, $argument);
-        $this->assertEquals(AttributeLoader::class, $argument[0]->getClass());
+        $this->assertEquals(new Reference('serializer.mapping.attribute_loader'), $argument[0]);
         $this->assertEquals(new Reference('serializer.name_converter.camel_case_to_snake_case'), $container->getDefinition('serializer.name_converter.metadata_aware')->getArgument(1));
         $this->assertEquals(new Reference('property_info', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE), $container->getDefinition('serializer.normalizer.object')->getArgument(3));
     }
@@ -1729,6 +1736,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $projectDir = $container->getParameter('kernel.project_dir');
         $configDir = __DIR__.'/Fixtures/TestBundle/Resources/config';
         $expectedLoaders = [
+            new Reference('serializer.mapping.attribute_loader'),
             new Definition(XmlFileLoader::class, [$configDir.'/serialization.xml']),
             new Definition(YamlFileLoader::class, [$configDir.'/serialization.yml']),
             new Definition(YamlFileLoader::class, [$projectDir.'/config/serializer/foo.yml']),
@@ -1738,15 +1746,15 @@ abstract class FrameworkExtensionTestCase extends TestCase
             new Definition(YamlFileLoader::class, [$configDir.'/serializer_mapping/serialization.yaml']),
         ];
 
-        foreach ($expectedLoaders as $definition) {
-            if (is_file($arg = $definition->getArgument(0))) {
-                $definition->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
+        foreach ($expectedLoaders as $loader) {
+            if ($loader instanceof Definition && is_file($arg = $loader->getArgument(0))) {
+                $loader->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
             }
         }
 
         $loaders = $container->getDefinition('serializer.mapping.chain_loader')->getArgument(0);
         foreach ($loaders as $loader) {
-            if (is_file($arg = $loader->getArgument(0))) {
+            if ($loader instanceof Definition && is_file($arg = $loader->getArgument(0))) {
                 $loader->replaceArgument(0, strtr($arg, '/', \DIRECTORY_SEPARATOR));
             }
         }
