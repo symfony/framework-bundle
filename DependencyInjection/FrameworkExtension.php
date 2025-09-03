@@ -43,8 +43,6 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\ChainAdapter;
 use Symfony\Component\Cache\Adapter\TagAwareAdapter;
 use Symfony\Component\Cache\DependencyInjection\CachePoolPass;
-use Symfony\Component\Cache\Marshaller\MarshallerInterface;
-use Symfony\Component\Cache\ResettableInterface;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
@@ -55,11 +53,8 @@ use Symfony\Component\Config\ResourceCheckerInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\DataCollector\CommandDataCollector;
-use Symfony\Component\Console\Debug\CliRequest;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
-use Symfony\Component\DependencyInjection\Argument\ArgumentTrait;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -83,7 +78,6 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Glob;
-use Symfony\Component\Form\EnumFormTypeGuesser;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormTypeExtensionInterface;
 use Symfony\Component\Form\FormTypeGuesserInterface;
@@ -106,7 +100,6 @@ use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
-use Symfony\Component\HttpKernel\Profiler\ProfilerStateChecker;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
@@ -123,11 +116,9 @@ use Symfony\Component\Mercure\HubRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge as MessengerBridge;
-use Symfony\Component\Messenger\EventListener\ResetMemoryUsageListener;
 use Symfony\Component\Messenger\Handler\BatchHandlerInterface;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Middleware\DeduplicateMiddleware;
 use Symfony\Component\Messenger\Middleware\RouterContextMiddleware;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface as MessengerTransportFactoryInterface;
@@ -164,12 +155,10 @@ use Symfony\Component\RateLimiter\Storage\CacheStorage;
 use Symfony\Component\RemoteEvent\Attribute\AsRemoteEventConsumer;
 use Symfony\Component\RemoteEvent\RemoteEvent;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Loader\AttributeServicesLoader;
 use Symfony\Component\Scheduler\Attribute\AsCronTask;
 use Symfony\Component\Scheduler\Attribute\AsPeriodicTask;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\Messenger\SchedulerTransportFactory;
-use Symfony\Component\Scheduler\Messenger\Serializer\Normalizer\SchedulerTriggerNormalizer;
 use Symfony\Component\Security\Core\AuthenticationEvents;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfToken;
@@ -179,7 +168,6 @@ use Symfony\Component\Semaphore\Semaphore;
 use Symfony\Component\Semaphore\SemaphoreFactory;
 use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
 use Symfony\Component\Serializer\Attribute as SerializerMapping;
-use Symfony\Component\Serializer\DependencyInjection\AttributeMetadataPass as SerializerAttributeMetadataPass;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
@@ -205,9 +193,7 @@ use Symfony\Component\Uid\Factory\UuidFactory;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\ExpressionLanguageProvider;
-use Symfony\Component\Validator\Constraints\Traverse;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
-use Symfony\Component\Validator\DependencyInjection\AttributeMetadataPass as ValidatorAttributeMetadataPass;
 use Symfony\Component\Validator\GroupProviderInterface;
 use Symfony\Component\Validator\Mapping\Loader\PropertyInfoLoader;
 use Symfony\Component\Validator\ObjectInitializerInterface;
@@ -676,12 +662,6 @@ class FrameworkExtension extends Extension
             ->addTag('kernel.locale_aware');
         $container->registerForAutoconfiguration(ResetInterface::class)
             ->addTag('kernel.reset', ['method' => 'reset']);
-
-        if (!interface_exists(MarshallerInterface::class)) {
-            $container->registerForAutoconfiguration(ResettableInterface::class)
-                ->addTag('kernel.reset', ['method' => 'reset']);
-        }
-
         $container->registerForAutoconfiguration(PropertyListExtractorInterface::class)
             ->addTag('property_info.list_extractor');
         $container->registerForAutoconfiguration(PropertyTypeExtractorInterface::class)
@@ -843,10 +823,6 @@ class FrameworkExtension extends Extension
     {
         $loader->load('form.php');
 
-        if (!class_exists(EnumFormTypeGuesser::class)) {
-            $container->removeDefinition('form.type_guesser.enum_type');
-        }
-
         if (null === $config['form']['csrf_protection']['enabled']) {
             $this->writeConfigEnabled('form.csrf_protection', $config['csrf_protection']['enabled'], $config['form']['csrf_protection']);
         }
@@ -945,11 +921,6 @@ class FrameworkExtension extends Extension
         $loader->load('collectors.php');
         $loader->load('cache_debug.php');
 
-        if (!class_exists(ProfilerStateChecker::class)) {
-            $container->removeDefinition('profiler.state_checker');
-            $container->removeDefinition('profiler.is_disabled_state_checker');
-        }
-
         if ($this->isInitializedConfigEnabled('form')) {
             $loader->load('form_debug.php');
         }
@@ -1006,12 +977,8 @@ class FrameworkExtension extends Extension
         $container->getDefinition('profiler_listener')
             ->addArgument($config['collect_parameter']);
 
-        if (!$container->getParameter('kernel.debug') || !class_exists(CliRequest::class) || !$container->has('debug.stopwatch')) {
+        if (!$container->getParameter('kernel.debug') || !$container->has('debug.stopwatch')) {
             $container->removeDefinition('console_profiler_listener');
-        }
-
-        if (!class_exists(CommandDataCollector::class)) {
-            $container->removeDefinition('.data_collector.command');
         }
     }
 
@@ -1269,10 +1236,6 @@ class FrameworkExtension extends Extension
         }
 
         $loader->load('routing.php');
-
-        if (!class_exists(AttributeServicesLoader::class)) {
-            $container->removeDefinition('routing.loader.attribute.services');
-        }
 
         if ($config['utf8']) {
             $container->getDefinition('routing.loader')->replaceArgument(1, ['utf8' => true]);
@@ -1766,7 +1729,7 @@ class FrameworkExtension extends Extension
 
         // When attributes are disabled, it means from runtime-discovery only; autoconfiguration should still happen.
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
-        if (class_exists(ValidatorAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) && trait_exists(ArgumentTrait::class)) {
+        if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
             $container->registerAttributeForAutoconfiguration(Constraint::class, function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
                 $definition->addTag('validator.attribute_metadata');
@@ -1818,9 +1781,6 @@ class FrameworkExtension extends Extension
 
         if (!ContainerBuilder::willBeAvailable('symfony/form', Form::class, ['symfony/framework-bundle', 'symfony/validator'])) {
             $container->removeDefinition('validator.form.attribute_metadata');
-        } elseif (!($r = new \ReflectionClass(Form::class))->getAttributes(Traverse::class) || !class_exists(ValidatorAttributeMetadataPass::class)) {
-            // BC with symfony/form & symfony/validator < 7.4
-            $fileRecorder('xml', \dirname($r->getFileName()).'/Resources/config/validation.xml');
         }
 
         foreach ($container->getParameter('kernel.bundles_metadata') as $bundle) {
@@ -2016,7 +1976,7 @@ class FrameworkExtension extends Extension
 
         // When attributes are disabled, it means from runtime-discovery only; autoconfiguration should still happen.
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
-        if (class_exists(SerializerAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug'))) {
+        if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
             $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
                 $definition->addTag('serializer.attribute_metadata');
@@ -2037,15 +1997,10 @@ class FrameworkExtension extends Extension
             });
         }
 
-        if (($config['enable_attributes'] ?? false) || class_exists(SerializerAttributeMetadataPass::class)) {
-            $serializerLoaders[] = new Reference('serializer.mapping.attribute_loader');
+        $serializerLoaders[] = new Reference('serializer.mapping.attribute_loader');
 
-            $container->getDefinition('serializer.mapping.attribute_loader')
-                ->replaceArgument(0, $config['enable_attributes'] ?? false);
-        } else {
-            // BC with symfony/serializer < 7.4
-            $container->removeDefinition('serializer.mapping.attribute_services_loader');
-        }
+        $container->getDefinition('serializer.mapping.attribute_loader')
+            ->replaceArgument(0, $config['enable_attributes'] ?? false);
 
         $fileRecorder = function ($extension, $path) use (&$serializerLoaders) {
             $definition = new Definition(\in_array($extension, ['yaml', 'yml'], true) ? YamlFileLoader::class : XmlFileLoader::class, [$path]);
@@ -2289,11 +2244,6 @@ class FrameworkExtension extends Extension
         if (!$this->hasConsole()) {
             $container->removeDefinition('console.command.scheduler_debug');
         }
-
-        // BC layer Scheduler < 7.3
-        if (!ContainerBuilder::willBeAvailable('symfony/serializer', DenormalizerInterface::class, ['symfony/framework-bundle', 'symfony/scheduler']) || !class_exists(SchedulerTriggerNormalizer::class)) {
-            $container->removeDefinition('serializer.normalizer.scheduler_trigger');
-        }
     }
 
     private function registerMessengerConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader, bool $validationEnabled, bool $lockEnabled): void
@@ -2310,10 +2260,6 @@ class FrameworkExtension extends Extension
 
         if (!interface_exists(DenormalizerInterface::class)) {
             $container->removeDefinition('serializer.normalizer.flatten_exception');
-        }
-
-        if (!class_exists(ResetMemoryUsageListener::class)) {
-            $container->removeDefinition('messenger.listener.reset_memory_usage');
         }
 
         if (ContainerBuilder::willBeAvailable('symfony/amqp-messenger', MessengerBridge\Amqp\Transport\AmqpTransportFactory::class, ['symfony/framework-bundle', 'symfony/messenger'])) {
@@ -2356,7 +2302,7 @@ class FrameworkExtension extends Extension
             ],
         ];
 
-        if ($lockEnabled && class_exists(DeduplicateMiddleware::class) && class_exists(LockFactory::class)) {
+        if ($lockEnabled && class_exists(LockFactory::class)) {
             $defaultMiddleware['before'][] = ['id' => 'deduplicate_middleware'];
         } else {
             $container->removeDefinition('messenger.middleware.deduplicate_middleware');
