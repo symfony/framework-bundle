@@ -59,6 +59,7 @@ use Symfony\Component\Console\DataCollector\CommandDataCollector;
 use Symfony\Component\Console\Debug\CliRequest;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
+use Symfony\Component\DependencyInjection\Argument\ArgumentTrait;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -1765,7 +1766,7 @@ class FrameworkExtension extends Extension
 
         // When attributes are disabled, it means from runtime-discovery only; autoconfiguration should still happen.
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
-        if (class_exists(ValidatorAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug'))) {
+        if (class_exists(ValidatorAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) && trait_exists(ArgumentTrait::class)) {
             // The $reflector argument hints at where the attribute could be used
             $container->registerAttributeForAutoconfiguration(Constraint::class, function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
                 $definition->addTag('validator.attribute_metadata');
