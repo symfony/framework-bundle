@@ -429,6 +429,20 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->createContainerFromFile('workflow_without_support_and_support_strategy');
     }
 
+    public function testWorkflowWithSimplisticPlaceFollowedByComplexPlace()
+    {
+        $container = $this->createContainerFromFile('workflow_with_simplistic_place_follow_by_complex_place_config');
+
+        $this->assertTrue($container->hasDefinition('workflow.article'), 'Workflow is parsed and registered as a service');
+    }
+
+    public function testWorkflowWithComplexPlaceFollowedBySimplisticPlace()
+    {
+        $container = $this->createContainerFromFile('workflow_with_complex_place_follow_by_simplistic_place_config');
+
+        $this->assertTrue($container->hasDefinition('workflow.article'), 'Workflow is parsed and registered as a service');
+    }
+
     public function testWorkflowMultipleTransitionsWithSameName()
     {
         $container = $this->createContainerFromFile('workflow_with_multiple_transitions_with_same_name');
