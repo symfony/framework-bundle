@@ -498,27 +498,16 @@ class Configuration implements ConfigurationInterface
                                                     throw new InvalidConfigurationException('The "places" option must be an array in workflow configuration.');
                                                 }
 
-                                                // It's an indexed array of shape  ['place1', 'place2']
-                                                if (isset($places[0]) && \is_string($places[0])) {
-                                                    return array_map(static function (string $place) {
-                                                        return ['name' => $place];
-                                                    }, $places);
-                                                }
-
-                                                // It's an indexed array, we let the validation occur
-                                                if (isset($places[0]) && \is_array($places[0])) {
-                                                    return $places;
-                                                }
-
-                                                foreach ($places as $name => $place) {
-                                                    if (\is_array($place) && \array_key_exists('name', $place)) {
-                                                        continue;
+                                                $normalizedPlaces = [];
+                                                foreach ($places as $key => $value) {
+                                                    if (!\is_array($value)) {
+                                                        $value = ['name' => $value];
                                                     }
-                                                    $place['name'] = $name;
-                                                    $places[$name] = $place;
+                                                    $value['name'] ??= $key;
+                                                    $normalizedPlaces[] = $value;
                                                 }
 
-                                                return array_values($places);
+                                                return $normalizedPlaces;
                                             })
                                         ->end()
                                         ->prototype('array')
