@@ -47,6 +47,7 @@
             <xsd:element name="webhook" type="webhook" minOccurs="0" maxOccurs="1" />
             <xsd:element name="remote-event" type="remote-event" minOccurs="0" maxOccurs="1" />
             <xsd:element name="json-streamer" type="json-streamer" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="secrets" type="secrets" minOccurs="0" maxOccurs="1" />
         </xsd:choice>
 
         <xsd:attribute name="http-method-override" type="xsd:boolean" />
@@ -62,6 +63,7 @@
         <xsd:attribute name="trusted-hosts" type="xsd:string" />
         <xsd:attribute name="trusted-proxies" type="xsd:string" />
         <xsd:attribute name="trusted-headers" type="xsd:string" />
+        <xsd:attribute name="disallow-search-engine-index" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:complexType name="form">
@@ -713,6 +715,7 @@
         <xsd:choice maxOccurs="unbounded">
             <xsd:element name="resolve" type="http_resolve" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="header" type="http_header" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="var" type="http_var" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="peer-fingerprint" type="fingerprint" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="retry-failed" type="http_client_retry_failed" minOccurs="0" maxOccurs="1" />
             <xsd:element name="extra" type="xsd:anyType" minOccurs="0" maxOccurs="unbounded" />
@@ -807,6 +810,10 @@
         <xsd:attribute name="name" type="xsd:string" />
     </xsd:complexType>
 
+    <xsd:complexType name="http_var" mixed="true">
+        <xsd:attribute name="name" type="xsd:string" />
+    </xsd:complexType>
+
     <xsd:complexType name="mailer">
         <xsd:sequence>
             <xsd:element name="transport" type="mailer_transport" minOccurs="0" maxOccurs="unbounded" />
@@ -864,6 +871,7 @@
     <xsd:complexType name="http_cache">
         <xsd:sequence>
             <xsd:element name="private-header" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="skip-response-header" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
 
         <xsd:attribute name="enabled" type="xsd:boolean" />
@@ -1064,6 +1072,13 @@
 
     <xsd:complexType name="json-streamer">
         <xsd:attribute name="enabled" type="xsd:boolean" />
+    </xsd:complexType>
+
+    <xsd:complexType name="secrets">
+        <xsd:attribute name="enabled" type="xsd:boolean" />
+        <xsd:attribute name="vault-directory" type="xsd:string" />
+        <xsd:attribute name="local-dotenv-file" type="xsd:string" />
+        <xsd:attribute name="decryption-env-var" type="xsd:string" />
     </xsd:complexType>
 
 </xsd:schema>
