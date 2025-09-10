@@ -216,6 +216,7 @@ use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
 use Symfony\Component\TypeInfo\TypeResolver\TypeResolverInterface;
 use Symfony\Component\Uid\Factory\UuidFactory;
 use Symfony\Component\Uid\UuidV4;
+use Symfony\Component\Validator\Attribute\ExtendsValidationFor;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\ExpressionLanguageProvider;
 use Symfony\Component\Validator\Constraints\Traverse;
@@ -1821,9 +1822,15 @@ class FrameworkExtension extends Extension
         if (class_exists(ValidatorAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) && trait_exists(ArgumentTrait::class)) {
             // The $reflector argument hints at where the attribute could be used
             $container->registerAttributeForAutoconfiguration(Constraint::class, function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('validator.attribute_metadata');
+                $definition->addTag('validator.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
             });
         }
+
+        $container->registerAttributeForAutoconfiguration(ExtendsValidationFor::class, function (ChildDefinition $definition, ExtendsValidationFor $attribute) {
+            $definition->addTag('validator.attribute_metadata', ['for' => $attribute->class])
+                ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
+        });
 
         if ($config['enable_attributes'] ?? false) {
             $validatorBuilder->addMethodCall('enableAttributeMapping');
