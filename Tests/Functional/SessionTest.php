@@ -45,6 +45,20 @@ class SessionTest extends AbstractWebTestCase
         // prove cleared session
         $crawler = $client->request('GET', '/session');
         $this->assertStringContainsString('You are new here and gave no name.', $crawler->text());
+
+        // prepare session programatically
+        $session = $client->getSession();
+        $session->set('name', 'drak');
+        $session->save();
+
+        // ensure session can be saved multiple times without being reset
+        $session = $client->getSession();
+        $session->set('foo', 'bar');
+        $session->save();
+
+        // prove remembered name from programatically prepared session
+        $crawler = $client->request('GET', '/session');
+        $this->assertStringContainsString('Welcome back drak, nice to meet you.', $crawler->text());
     }
 
     /**
