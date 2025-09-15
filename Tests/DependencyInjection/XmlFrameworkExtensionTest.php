@@ -59,4 +59,9 @@ class XmlFrameworkExtensionTest extends FrameworkExtensionTestCase
         $definition = $container->getDefinition('asset_mapper.compiler.css_asset_url_compiler');
         $this->assertSame('strict', $definition->getArgument(0));
     }
+
+    public function testWorkflowEnumPlaces()
+    {
+        $this->markTestSkipped('XML configuration does not allow to reference enums.');
+    }
 }

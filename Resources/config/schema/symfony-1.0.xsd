@@ -462,6 +462,7 @@
         <xsd:attribute name="initial-marking" type="xsd:string" />
         <xsd:attribute name="support-strategy" type="xsd:string" />
         <xsd:attribute name="enabled" type="xsd:boolean" />
+        <xsd:attribute name="places" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="php-errors">

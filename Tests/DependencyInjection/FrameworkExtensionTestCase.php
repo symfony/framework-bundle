@@ -507,6 +507,26 @@ abstract class FrameworkExtensionTestCase extends TestCase
         ], $container->getDefinition($transitions[4])->getArguments());
     }
 
+    public function testWorkflowEnumPlaces()
+    {
+        $container = $this->createContainerFromFile('workflow_enum_places');
+
+        $workflowDefinition = $container->getDefinition('state_machine.enum.definition');
+        $this->assertSame(['a', 'b', 'c'], $workflowDefinition->getArgument(0));
+        $transitionOne = $container->getDefinition('.state_machine.enum.transition.0');
+        $this->assertSame(['one', 'a', 'b'], $transitionOne->getArguments());
+        $transitionTwo = $container->getDefinition('.state_machine.enum.transition.1');
+        $this->assertSame(['two', 'b', 'c'], $transitionTwo->getArguments());
+    }
+
+    public function testWorkflowGlobPlaces()
+    {
+        $container = $this->createContainerFromFile('workflow_glob_places');
+
+        $workflowDefinition = $container->getDefinition('state_machine.enum.definition');
+        $this->assertSame(['a', 'b', 'c'], $workflowDefinition->getArgument(0));
+    }
+
     public function testWorkflowGuardExpressions()
     {
         $container = $this->createContainerFromFile('workflow_with_guard_expression');
