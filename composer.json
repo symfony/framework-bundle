@@ -85,6 +85,7 @@
         "symfony/console": "<7.4",
         "symfony/security-csrf": "<7.4",
         "symfony/serializer": "<7.4",
+        "symfony/messenger": "<7.4",
         "symfony/translation": "<7.4",
         "symfony/webhook": "<7.4",
         "symfony/workflow": "<7.4"

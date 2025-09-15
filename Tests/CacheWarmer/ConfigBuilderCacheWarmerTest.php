@@ -407,9 +407,8 @@ class TestSecurityExtension extends Extension implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $firewallNodeBuilder = $rootNode
-            ->fixXmlConfig('firewall')
             ->children()
-                ->arrayNode('firewalls')
+                ->arrayNode('firewalls', 'firewall')
                     ->isRequired()
                     ->requiresAtLeastOneElement()
                     ->useAttributeAsKey('name')
