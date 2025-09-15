@@ -101,7 +101,6 @@ use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpClient\UriTemplateHttpClient;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\AsTargetedValueResolver;
 use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
@@ -767,8 +766,6 @@ class FrameworkExtension extends Extension
             ->addTag('mime.mime_type_guesser');
         $container->registerForAutoconfiguration(LoggerAwareInterface::class)
             ->addMethodCall('setLogger', [new Reference('logger')]);
-        $container->registerForAutoconfiguration(UriSigner::class)
-            ->addTag('kernel.uri_signer');
 
         $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition, AsEventListener $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
             $tagAttributes = get_object_vars($attribute);
