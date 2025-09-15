@@ -358,7 +358,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('workflows')
                     ->canBeEnabled()
                     ->beforeNormalization()
-                        ->always(function ($v) {
+                        ->always(static function ($v) {
                             if (\is_array($v) && true === $v['enabled']) {
                                 $workflows = $v;
                                 unset($workflows['enabled']);
@@ -367,7 +367,7 @@ class Configuration implements ConfigurationInterface
                                     $workflows = [];
                                 }
 
-                                if (1 === \count($workflows) && isset($workflows['workflows']) && !array_is_list($workflows['workflows']) && array_diff(array_keys($workflows['workflows']), ['audit_trail', 'type', 'marking_store', 'supports', 'support_strategy', 'initial_marking', 'places', 'transitions'])) {
+                                if (1 === \count($workflows) && isset($workflows['workflows']) && !array_is_list($workflows['workflows']) && array_diff_key($workflows['workflows'], ['audit_trail' => 1, 'type' => 1, 'marking_store' => 1, 'supports' => 1, 'support_strategy' => 1, 'initial_marking' => 1, 'places' => 1, 'transitions' => 1])) {
                                     $workflows = $workflows['workflows'];
                                 }
 
@@ -505,26 +505,26 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->arrayNode('transitions')
                                         ->beforeNormalization()
-                                            ->always()
-                                            ->then(function ($transitions) {
+                                            ->always(static function ($transitions) {
                                                 if (!\is_array($transitions)) {
                                                     throw new InvalidConfigurationException('The "transitions" option must be an array in workflow configuration.');
                                                 }
 
-                                                // It's an indexed array, we let the validation occur
-                                                if (isset($transitions[0]) && \is_array($transitions[0])) {
-                                                    return $transitions;
-                                                }
-
-                                                foreach ($transitions as $name => $transition) {
-                                                    if (\is_array($transition) && \array_key_exists('name', $transition)) {
-                                                        continue;
+                                                $normalizedTransitions = [];
+                                                foreach ($transitions as $key => $transition) {
+                                                    if (\is_array($transition)) {
+                                                        if (\is_string($key = $transition['key'] ?? $key)) {
+                                                            $transition['name'] ??= $key;
+                                                        }
+                                                        if (!($transition['name'] ?? false)) {
+                                                            throw new InvalidConfigurationException('The "name" option is required for each transition in workflow configuration.');
+                                                        }
+                                                        unset($transition['key']);
                                                     }
-                                                    $transition['name'] = $name;
-                                                    $transitions[$name] = $transition;
+                                                    $normalizedTransitions[$key] = $transition;
                                                 }
 
-                                                return $transitions;
+                                                return $normalizedTransitions;
                                             })
                                         ->end()
                                         ->isRequired()
@@ -541,6 +541,7 @@ class Configuration implements ConfigurationInterface
                                                     ->example('is_fully_authenticated() and is_granted(\'ROLE_JOURNALIST\') and subject.getTitle() == \'My first article\'')
                                                 ->end()
                                                 ->arrayNode('from')
+                                                    ->performNoDeepMerging()
                                                     ->beforeNormalization()
                                                         ->ifString()
                                                         ->then(fn ($v) => [$v])
@@ -551,6 +552,7 @@ class Configuration implements ConfigurationInterface
                                                     ->end()
                                                 ->end()
                                                 ->arrayNode('to')
+                                                    ->performNoDeepMerging()
                                                     ->beforeNormalization()
                                                         ->ifString()
                                                         ->then(fn ($v) => [$v])
