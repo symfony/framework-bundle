@@ -152,7 +152,6 @@ return static function (ContainerConfigurator $container) {
         ->set('controller.is_signature_valid_attribute_listener', IsSignatureValidAttributeListener::class)
             ->args([
                 service('uri_signer'),
-                tagged_locator('kernel.uri_signer'),
             ])
             ->tag('kernel.event_subscriber')
 
