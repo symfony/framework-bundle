@@ -9,15 +9,15 @@ $container->loadFromExtension('framework', [
             'supports' => [
                 FrameworkExtensionTestCase::class,
             ],
-            'places' => Places::cases(),
+            'places' => Places::class.'::*',
             'transitions' => [
                 'one' => [
-                    'from' => Places::A->value,
-                    'to' => Places::B->value,
+                    'from' => Places::A,
+                    'to' => Places::B,
                 ],
                 'two' => [
-                    'from' => Places::B->value,
-                    'to' => Places::C->value,
+                    'from' => Places::B,
+                    'to' => Places::C,
                 ],
             ],
         ]
