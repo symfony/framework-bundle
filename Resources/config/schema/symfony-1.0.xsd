@@ -510,7 +510,8 @@
             <xsd:element name="metadata" type="metadata" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="guard" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="name" type="xsd:string" />
+        <xsd:attribute name="key" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="place" mixed="true">
