@@ -576,6 +576,27 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame([WorkflowEvents::LEAVE, WorkflowEvents::COMPLETED], $eventsToDispatch);
     }
 
+    public function testWorkflowTransitionsPerformNoDeepMerging()
+    {
+        $container = $this->createContainer(['kernel.charset' => 'UTF-8', 'kernel.secret' => 'secret', 'kernel.runtime_environment' => 'test']);
+        $container->registerExtension(new FrameworkExtension());
+
+        $this->loadFromFile($container, 'workflow_base_config');
+
+        $this->loadFromFile($container, 'workflow_override_config');
+
+        $container->compile();
+
+        $transitions = [];
+
+        foreach ($container->getDefinition('test_workflow')->getArgument(0)->getArgument(1) as $transitionDefinition) {
+            $transitions[] = $transitionDefinition->getArguments();
+        }
+
+        $this->assertCount(1, $transitions);
+        $this->assertSame(['base_transition', ['middle'], ['alternative']], $transitions[0]);
+    }
+
     public function testEnabledPhpErrorsConfig()
     {
         $container = $this->createContainerFromFile('php_errors_enabled');
