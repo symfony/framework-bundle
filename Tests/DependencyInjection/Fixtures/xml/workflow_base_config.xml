@@ -8,9 +8,7 @@
     <services>
         <service id="test_workflow" alias="workflow.test_workflow" public="true" />
     </services>
-    <framework:config http-method-override="false" handle-all-throwables="true">
-        <framework:annotations enabled="false" />
-        <framework:php-errors log="true" />
+    <framework:config>
         <framework:workflow name="test_workflow" type="workflow">
             <framework:initial-marking>start</framework:initial-marking>
             <framework:support>Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\FrameworkExtensionTestCase</framework:support>
