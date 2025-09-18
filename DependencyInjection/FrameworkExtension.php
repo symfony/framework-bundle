@@ -108,6 +108,7 @@ use Symfony\Component\JsonStreamer\ValueTransformer\ValueTransformerInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 use Symfony\Component\Lock\PersistingStoreInterface;
+use Symfony\Component\Lock\Serializer\LockKeyNormalizer;
 use Symfony\Component\Lock\Store\StoreFactory;
 use Symfony\Component\Mailer\Bridge as MailerBridge;
 use Symfony\Component\Mailer\Command\MailerTestCommand;
@@ -2159,6 +2160,11 @@ class FrameworkExtension extends Extension
     private function registerLockConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
     {
         $loader->load('lock.php');
+
+        // BC layer Lock < 7.4
+        if (!interface_exists(DenormalizerInterface::class) || !class_exists(LockKeyNormalizer::class)) {
+            $container->removeDefinition('serializer.normalizer.lock_key');
+        }
 
         foreach ($config['resources'] as $resourceName => $resourceStores) {
             if (0 === \count($resourceStores)) {
