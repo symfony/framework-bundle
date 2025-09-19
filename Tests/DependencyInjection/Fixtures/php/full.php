@@ -10,9 +10,6 @@ $container->loadFromExtension('framework', [
             'field_name' => '_csrf',
         ],
     ],
-    'http_method_override' => false,
-    'handle_all_throwables' => true,
-    'php_errors' => ['log' => true],
     'trust_x_sendfile_type_header' => true,
     'esi' => [
         'enabled' => true,
