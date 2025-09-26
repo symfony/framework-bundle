@@ -145,7 +145,7 @@ class Configuration implements ConfigurationInterface
             return ContainerBuilder::willBeAvailable($package, $class, $parentPackages);
         };
 
-        $enableIfStandalone = fn (string $package, string $class) => !class_exists(FullStack::class) && $willBeAvailable($package, $class) ? 'canBeDisabled' : 'canBeEnabled';
+        $enableIfStandalone = static fn (string $package, string $class) => !class_exists(FullStack::class) && $willBeAvailable($package, $class) ? 'canBeDisabled' : 'canBeEnabled';
 
         $this->addCsrfSection($rootNode);
         $this->addFormSection($rootNode, $enableIfStandalone);
@@ -1035,6 +1035,7 @@ class Configuration implements ConfigurationInterface
                             ->normalizeKeys(false)
                             ->useAttributeAsKey('name')
                             ->arrayPrototype()
+                                ->acceptAndWrap(['string'], 'value')
                                 ->children()
                                     ->variableNode('value')->end()
                                     ->stringNode('message')->end()
@@ -1045,7 +1046,6 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->stringNode('domain')->end()
                                 ->end()
-                                ->acceptAndWrap(['string'], 'value')
                                 ->validate()
                                     ->ifTrue(static fn ($v) => !(isset($v['value']) xor isset($v['message'])))
                                     ->thenInvalid('The "globals" parameter should be either a string or an array with a "value" or a "message" key')
@@ -1154,7 +1154,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('annotations')
                     ->canBeEnabled()
                     ->validate()
-                        ->ifTrue(static fn (array $v) => $v['enabled'])
+                        ->ifTrue(static fn ($v) => $v['enabled'])
                         ->thenInvalid('Enabling the doctrine/annotations integration is not supported anymore.')
                 ->end()
             ->end()
@@ -1482,16 +1482,17 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('lock')
                     ->info('Lock configuration')
-                    ->{$enableIfStandalone('symfony/lock', Lock::class)}()
                     ->acceptAndWrap(['string'], 'resources')
+                    ->{$enableIfStandalone('symfony/lock', Lock::class)}()
                     ->beforeNormalization()
                         ->ifArray()
                         ->then(static function ($v) {
-                            $v += ['enabled' => true];
-
                             if (!isset($v['resources']) && !isset($v['resource'])) {
-                                $v = ['enabled' => $v['enabled'], 'resources' => $v];
-                                unset($v['resources']['enabled']);
+                                $v = ['resources' => $v];
+                                if (\array_key_exists('enabled', $v['resources'])) {
+                                    $v['enabled'] = $v['resources']['enabled'];
+                                    unset($v['resources']['enabled']);
+                                }
                             }
 
                             return $v;
@@ -1499,7 +1500,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                     ->addDefaultsIfNotSet()
                     ->validate()
-                        ->ifTrue(fn ($config) => $config['enabled'] && !$config['resources'])
+                        ->ifTrue(static fn ($v) => $v['enabled'] && !$v['resources'])
                         ->thenInvalid('At least one resource must be defined.')
                     ->end()
                     ->children()
@@ -1547,16 +1548,17 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('semaphore')
                     ->info('Semaphore configuration')
-                    ->{$enableIfStandalone('symfony/semaphore', Semaphore::class)}()
                     ->acceptAndWrap(['string'], 'resources')
+                    ->{$enableIfStandalone('symfony/semaphore', Semaphore::class)}()
                     ->beforeNormalization()
                         ->ifArray()
                         ->then(static function ($v) {
-                            $v += ['enabled' => true];
-
                             if (!isset($v['resources']) && !isset($v['resource'])) {
-                                $v = ['enabled' => $v['enabled'], 'resources' => $v];
-                                unset($v['resources']['enabled']);
+                                $v = ['resources' => $v];
+                                if (\array_key_exists('enabled', $v['resources'])) {
+                                    $v['enabled'] = $v['resources']['enabled'];
+                                    unset($v['resources']['enabled']);
+                                }
                             }
 
                             return $v;
@@ -2245,7 +2247,7 @@ class Configuration implements ConfigurationInterface
                                     ->acceptAndWrap(['string'])
                                     ->beforeNormalization()
                                         ->ifArray()
-                                        ->then(static fn ($v) => array_filter(array_values($v)))
+                                        ->then(static fn ($v) => array_values(array_filter($v)))
                                     ->end()
                                     ->prototype('scalar')->end()
                                 ->end()
@@ -2256,7 +2258,7 @@ class Configuration implements ConfigurationInterface
                                     ->acceptAndWrap(['string'])
                                     ->beforeNormalization()
                                         ->ifArray()
-                                        ->then(static fn ($v) => array_filter(array_values($v)))
+                                        ->then(static fn ($v) => array_values(array_filter($v)))
                                     ->end()
                                     ->prototype('scalar')->end()
                                 ->end()
@@ -2453,8 +2455,11 @@ class Configuration implements ConfigurationInterface
                         ->ifArray()
                         ->then(static function ($v) {
                             if (!isset($v['limiters']) && !isset($v['limiter'])) {
-                                $v = ['enabled' => $v['enabled'] ?? true, 'limiters' => $v];
-                                unset($v['limiters']['enabled']);
+                                $v = ['limiters' => $v];
+                                if (\array_key_exists('enabled', $v['limiters'])) {
+                                    $v['enabled'] = $v['limiters']['enabled'];
+                                    unset($v['limiters']['enabled']);
+                                }
                             }
 
                             return $v;
