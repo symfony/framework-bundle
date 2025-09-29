@@ -1995,6 +1995,7 @@ class Configuration implements ConfigurationInterface
                                     ->defaultNull()
                                     ->info('Rate limiter name to use for throttling requests.')
                                 ->end()
+                                ->append($this->createHttpClientCachingSection())
                                 ->append($this->createHttpClientRetrySection())
                             ->end()
                         ->end()
@@ -2140,6 +2141,7 @@ class Configuration implements ConfigurationInterface
                                         ->defaultNull()
                                         ->info('Rate limiter name to use for throttling requests.')
                                     ->end()
+                                    ->append($this->createHttpClientCachingSection())
                                     ->append($this->createHttpClientRetrySection())
                                 ->end()
                             ->end()
@@ -2148,6 +2150,33 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ;
+    }
+
+    private function createHttpClientCachingSection(): ArrayNodeDefinition
+    {
+        $root = new NodeBuilder();
+
+        return $root
+            ->arrayNode('caching')
+                ->info('Caching configuration.')
+                ->canBeEnabled()
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->stringNode('cache_pool')
+                        ->info('The taggable cache pool to use for storing the responses.')
+                        ->defaultValue('cache.http_client')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->booleanNode('shared')
+                        ->info('Indicates whether the cache is shared (public) or private.')
+                        ->defaultTrue()
+                    ->end()
+                    ->integerNode('max_ttl')
+                        ->info('The maximum TTL (in seconds) allowed for cached responses. Null means no cap.')
+                        ->defaultNull()
+                        ->min(0)
+                    ->end()
+                ->end();
     }
 
     private function createHttpClientRetrySection(): ArrayNodeDefinition
