@@ -13,6 +13,7 @@ CHANGELOG
  * Add `KernelBrowser::getSession()`
  * Add support for configuring workflow places with glob patterns matching consts/backed enums
  * Add support for configuring the `CachingHttpClient`
+ * Add support for weighted transitions in workflows
 
 7.3
 ---

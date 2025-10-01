@@ -236,6 +236,7 @@ use Symfony\Component\Webhook\Controller\WebhookController;
 use Symfony\Component\WebLink\HttpHeaderParser;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
 use Symfony\Component\Workflow;
+use Symfony\Component\Workflow\Arc;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\Yaml\Command\LintCommand as BaseYamlLintCommand;
 use Symfony\Component\Yaml\Yaml;
@@ -1114,6 +1115,11 @@ class FrameworkExtension extends Extension
             // Global transition counter per workflow
             $transitionCounter = 0;
             foreach ($workflow['transitions'] as $transition) {
+                foreach (['from', 'to'] as $direction) {
+                    foreach ($transition[$direction] as $k => $arc) {
+                        $transition[$direction][$k] = new Definition(Arc::class, [$arc['place'], $arc['weight'] ?? 1]);
+                    }
+                }
                 if ('workflow' === $type) {
                     $transitionId = \sprintf('.%s.transition.%s', $workflowId, $transitionCounter++);
                     $container->register($transitionId, Workflow\Transition::class)
@@ -1137,7 +1143,7 @@ class FrameworkExtension extends Extension
                         foreach ($transition['to'] as $to) {
                             $transitionId = \sprintf('.%s.transition.%s', $workflowId, $transitionCounter++);
                             $container->register($transitionId, Workflow\Transition::class)
-                                ->setArguments([$transition['name'], $from, $to]);
+                                ->setArguments([$transition['name'], [$from], [$to]]);
                             $transitions[] = new Reference($transitionId);
                             if (isset($transition['guard'])) {
                                 $eventName = \sprintf('workflow.%s.guard.%s', $name, $transition['name']);

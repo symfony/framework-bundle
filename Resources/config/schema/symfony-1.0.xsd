@@ -518,13 +518,21 @@
 
     <xsd:complexType name="transition">
         <xsd:sequence>
-            <xsd:element name="from" type="xsd:string" minOccurs="1" maxOccurs="unbounded" />
-            <xsd:element name="to" type="xsd:string" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="from" type="arc" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="to" type="arc" minOccurs="1" maxOccurs="unbounded" />
             <xsd:element name="metadata" type="metadata" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="guard" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" />
         <xsd:attribute name="key" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="arc">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="weight" type="xsd:integer" />
+            </xsd:extension>
+        </xsd:simpleContent>
     </xsd:complexType>
 
     <xsd:complexType name="place" mixed="true">

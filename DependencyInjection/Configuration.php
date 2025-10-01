@@ -562,11 +562,11 @@ class Configuration implements ConfigurationInterface
                                         ->requiresAtLeastOneElement()
                                         ->prototype('array')
                                             ->children()
-                                                ->scalarNode('name')
+                                                ->stringNode('name')
                                                     ->isRequired()
                                                     ->cannotBeEmpty()
                                                 ->end()
-                                                ->scalarNode('guard')
+                                                ->stringNode('guard')
                                                     ->cannotBeEmpty()
                                                     ->info('An expression to block the transition.')
                                                     ->example('is_fully_authenticated() and is_granted(\'ROLE_JOURNALIST\') and subject.getTitle() == \'My first article\'')
@@ -576,11 +576,52 @@ class Configuration implements ConfigurationInterface
                                                     ->acceptAndWrap(['backed-enum', 'string'])
                                                     ->beforeNormalization()
                                                         ->ifArray()
-                                                        ->then(static fn ($from) => array_map(static fn ($v) => $v instanceof \BackedEnum ? $v->value : $v, $from))
+                                                        ->then($workflowNormalizeArcs = static function ($arcs) {
+                                                            // Fix XML parsing, when only one arc is defined
+                                                            if (\array_key_exists('value', $arcs) && \array_key_exists('weight', $arcs)) {
+                                                                return [[
+                                                                    'place' => $arcs['value'],
+                                                                    'weight' => $arcs['weight'],
+                                                                ]];
+                                                            }
+
+                                                            $normalizedArcs = [];
+                                                            foreach ($arcs as $arc) {
+                                                                if ($arc instanceof \BackedEnum) {
+                                                                    $arc = $arc->value;
+                                                                }
+                                                                if (\is_string($arc)) {
+                                                                    $arc = [
+                                                                        'place' => $arc,
+                                                                        'weight' => 1,
+                                                                    ];
+                                                                } elseif (!\is_array($arc)) {
+                                                                    throw new InvalidConfigurationException('The "from" arcs must be a list of strings or arrays in workflow configuration.');
+                                                                } elseif (\array_key_exists('value', $arc) && \array_key_exists('weight', $arc)) {
+                                                                    // Fix XML parsing
+                                                                    $arc = [
+                                                                        'place' => $arc['value'],
+                                                                        'weight' => $arc['weight'],
+                                                                    ];
+                                                                }
+
+                                                                $normalizedArcs[] = $arc;
+                                                            }
+
+                                                            return $normalizedArcs;
+                                                        })
                                                     ->end()
                                                     ->requiresAtLeastOneElement()
-                                                    ->prototype('scalar')
-                                                        ->cannotBeEmpty()
+                                                    ->prototype('array')
+                                                        ->children()
+                                                            ->stringNode('place')
+                                                                ->isRequired()
+                                                                ->cannotBeEmpty()
+                                                            ->end()
+                                                            ->integerNode('weight')
+                                                                ->isRequired()
+                                                            ->end()
+                                                        ->end()
                                                     ->end()
                                                 ->end()
                                                 ->arrayNode('to')
@@ -588,11 +629,26 @@ class Configuration implements ConfigurationInterface
                                                     ->acceptAndWrap(['backed-enum', 'string'])
                                                     ->beforeNormalization()
                                                         ->ifArray()
-                                                        ->then(static fn ($to) => array_map(static fn ($v) => $v instanceof \BackedEnum ? $v->value : $v, $to))
+                                                        ->then($workflowNormalizeArcs)
                                                     ->end()
                                                     ->requiresAtLeastOneElement()
-                                                    ->prototype('scalar')
-                                                        ->cannotBeEmpty()
+                                                    ->prototype('array')
+                                                        ->children()
+                                                            ->stringNode('place')
+                                                                ->isRequired()
+                                                                ->cannotBeEmpty()
+                                                            ->end()
+                                                            ->integerNode('weight')
+                                                                ->isRequired()
+                                                            ->end()
+                                                        ->end()
+                                                    ->end()
+                                                ->end()
+                                                ->integerNode('weight')
+                                                    ->defaultValue(1)
+                                                    ->validate()
+                                                        ->ifTrue(static fn ($v) => $v < 1)
+                                                        ->thenInvalid('The weight must be greater than 0.')
                                                     ->end()
                                                 ->end()
                                                 ->arrayNode('metadata')
