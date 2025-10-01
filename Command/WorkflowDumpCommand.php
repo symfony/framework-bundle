@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\Workflow\Debug\TraceableWorkflow;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Dumper\MermaidDumper;
 use Symfony\Component\Workflow\Dumper\PlantUmlDumper;
@@ -78,6 +79,9 @@ EOF
             throw new InvalidArgumentException(\sprintf('The workflow named "%s" cannot be found.', $workflowName));
         }
         $workflow = $this->workflows->get($workflowName);
+        if ($workflow instanceof TraceableWorkflow) {
+            $workflow = $workflow->getInner();
+        }
         $type = $workflow instanceof StateMachine ? 'state_machine' : 'workflow';
         $definition = $workflow->getDefinition();
 
