@@ -30,6 +30,7 @@ CHANGELOG
  * Add `framework.type_info.aliases` option
  * Add `KernelBrowser::getSession()`
  * Add support for configuring workflow places with glob patterns matching consts/backed enums
+ * Add support for configuring the `CachingHttpClient`
 
 7.3
 ---

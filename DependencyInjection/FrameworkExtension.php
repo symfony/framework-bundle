@@ -85,6 +85,8 @@ use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
+use Symfony\Component\HttpClient\CachingHttpClient;
+use Symfony\Component\HttpClient\Exception\ChunkCacheItemNotFoundException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
 use Symfony\Component\HttpClient\RetryableHttpClient;
@@ -2638,6 +2640,8 @@ class FrameworkExtension extends Extension
         $loader->load('http_client.php');
 
         $options = $config['default_options'] ?? [];
+        $cachingOptions = $options['caching'] ?? ['enabled' => false];
+        unset($options['caching']);
         $rateLimiter = $options['rate_limiter'] ?? null;
         unset($options['rate_limiter']);
         $retryOptions = $options['retry_failed'] ?? ['enabled' => false];
@@ -2655,6 +2659,10 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('httplug.http_client');
             $container->removeAlias(HttpAsyncClient::class);
             $container->removeAlias(HttpClient::class);
+        }
+
+        if ($this->readConfigEnabled('http_client.caching', $container, $cachingOptions)) {
+            $this->registerCachingHttpClient($cachingOptions, $options, 'http_client', $container);
         }
 
         if (null !== $rateLimiter) {
@@ -2682,6 +2690,8 @@ class FrameworkExtension extends Extension
 
             $scope = $scopeConfig['scope'] ?? null;
             unset($scopeConfig['scope']);
+            $cachingOptions = $scopeConfig['caching'] ?? ['enabled' => false];
+            unset($scopeConfig['caching']);
             $rateLimiter = $scopeConfig['rate_limiter'] ?? null;
             unset($scopeConfig['rate_limiter']);
             $retryOptions = $scopeConfig['retry_failed'] ?? ['enabled' => false];
@@ -2703,6 +2713,10 @@ class FrameworkExtension extends Extension
                     ->addTag('http_client.client')
                     ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore'])
                 ;
+            }
+
+            if ($this->readConfigEnabled('http_client.scoped_clients.'.$name.'.caching', $container, $cachingOptions)) {
+                $this->registerCachingHttpClient($cachingOptions, $scopeConfig, $name, $container);
             }
 
             if (null !== $rateLimiter) {
@@ -2744,6 +2758,24 @@ class FrameworkExtension extends Extension
                 ->setDecoratedService('http_client.transport', null, -10)  // lower priority than TraceableHttpClient (5)
                 ->setArguments([new Reference($responseFactoryId)]);
         }
+    }
+
+    private function registerCachingHttpClient(array $options, array $defaultOptions, string $name, ContainerBuilder $container): void
+    {
+        if (!class_exists(ChunkCacheItemNotFoundException::class)) {
+            throw new LogicException('Caching cannot be enabled as version 7.3+ of the HttpClient component is required.');
+        }
+
+        $container
+            ->register($name.'.caching', CachingHttpClient::class)
+            ->setDecoratedService($name, null, 13) // between RetryableHttpClient (10) and ThrottlingHttpClient (15)
+            ->setArguments([
+                new Reference($name.'.caching.inner'),
+                new Reference($options['cache_pool']),
+                $defaultOptions,
+                $options['shared'],
+                $options['max_ttl'],
+            ]);
     }
 
     private function registerThrottlingHttpClient(string $rateLimiter, string $name, ContainerBuilder $container): void

@@ -11,10 +11,14 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
+#[IgnoreDeprecations]
+#[Group('legacy')]
 class XmlFrameworkExtensionTest extends FrameworkExtensionTestCase
 {
     protected function loadFromFile(ContainerBuilder $container, $file)
