@@ -100,6 +100,7 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Webhook\Client\RequestParser;
 use Symfony\Component\Webhook\Controller\WebhookController;
+use Symfony\Component\Workflow\Arc;
 use Symfony\Component\Workflow\DependencyInjection\WorkflowValidatorPass;
 use Symfony\Component\Workflow\Exception\InvalidDefinitionException;
 use Symfony\Component\Workflow\Metadata\InMemoryMetadataStore;
@@ -452,61 +453,104 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertCount(5, $transitions);
 
-        $this->assertSame('.workflow.article.transition.0', (string) $transitions[0]);
-        $this->assertSame([
+        $this->assertTransitionReference(
+            $container,
+            '.workflow.article.transition.0',
             'request_review',
             [
-                'draft',
+                ['place' => 'draft', 'weight' => 1],
             ],
             [
-                'wait_for_journalist', 'wait_for_spellchecker',
+                ['place' => 'wait_for_journalist', 'weight' => 1],
+                ['place' => 'wait_for_spellchecker', 'weight' => 1],
             ],
-        ], $container->getDefinition($transitions[0])->getArguments());
+            $transitions[0]
+        );
 
-        $this->assertSame('.workflow.article.transition.1', (string) $transitions[1]);
-        $this->assertSame([
+        $this->assertTransitionReference(
+            $container,
+            '.workflow.article.transition.1',
             'journalist_approval',
             [
-                'wait_for_journalist',
+                ['place' => 'wait_for_journalist', 'weight' => 1],
             ],
             [
-                'approved_by_journalist',
+                ['place' => 'approved_by_journalist', 'weight' => 1],
             ],
-        ], $container->getDefinition($transitions[1])->getArguments());
+            $transitions[1]
+        );
 
-        $this->assertSame('.workflow.article.transition.2', (string) $transitions[2]);
-        $this->assertSame([
+        $this->assertTransitionReference(
+            $container,
+            '.workflow.article.transition.2',
             'spellchecker_approval',
             [
-                'wait_for_spellchecker',
+                ['place' => 'wait_for_spellchecker', 'weight' => 1],
             ],
             [
-                'approved_by_spellchecker',
+                ['place' => 'approved_by_spellchecker', 'weight' => 1],
             ],
-        ], $container->getDefinition($transitions[2])->getArguments());
+            $transitions[2]
+        );
 
-        $this->assertSame('.workflow.article.transition.3', (string) $transitions[3]);
-        $this->assertSame([
+        $this->assertTransitionReference(
+            $container,
+            '.workflow.article.transition.3',
             'publish',
             [
-                'approved_by_journalist',
-                'approved_by_spellchecker',
+                ['place' => 'approved_by_journalist', 'weight' => 1],
+                ['place' => 'approved_by_spellchecker', 'weight' => 1],
             ],
             [
-                'published',
+                ['place' => 'published', 'weight' => 1],
             ],
-        ], $container->getDefinition($transitions[3])->getArguments());
+            $transitions[3]
+        );
 
-        $this->assertSame('.workflow.article.transition.4', (string) $transitions[4]);
-        $this->assertSame([
+        $this->assertTransitionReference(
+            $container,
+            '.workflow.article.transition.4',
             'publish',
             [
-                'draft',
+                ['place' => 'draft', 'weight' => 1],
             ],
             [
-                'published',
+                ['place' => 'published', 'weight' => 2],
             ],
-        ], $container->getDefinition($transitions[4])->getArguments());
+            $transitions[4]
+        );
+    }
+
+    private function assertTransitionReference(ContainerBuilder $container, string $expectedServiceId, string $expectedName, array $expectedFroms, array $expectedTos, Reference $transition): void
+    {
+        $this->assertSame($expectedServiceId, (string) $transition);
+
+        $args = $container->getDefinition($transition)->getArguments();
+        $this->assertTransition($expectedName, $expectedFroms, $expectedTos, $args);
+    }
+
+    private function assertTransition(string $expectedName, array $expectedFroms, array $expectedTos, array $args): void
+    {
+        $this->assertCount(3, $args);
+        $this->assertSame($expectedName, $args[0]);
+
+        $this->assertCount(\count($expectedFroms), $args[1]);
+        foreach ($expectedFroms as $i => ['place' => $place, 'weight' => $weight]) {
+            $this->assertInstanceOf(Definition::class, $args[1][$i]);
+            $this->assertSame(Arc::class, $args[1][$i]->getClass());
+            $arcArgs = array_values($args[1][$i]->getArguments());
+            $this->assertSame($place, $arcArgs[0]);
+            $this->assertSame($weight, $arcArgs[1]);
+        }
+
+        $this->assertCount(\count($expectedTos), $args[2]);
+        foreach ($expectedTos as $i => ['place' => $place, 'weight' => $weight]) {
+            $this->assertInstanceOf(Definition::class, $args[2][$i]);
+            $this->assertSame(Arc::class, $args[2][$i]->getClass());
+            $arcArgs = array_values($args[2][$i]->getArguments());
+            $this->assertSame($place, $arcArgs[0]);
+            $this->assertSame($weight, $arcArgs[1]);
+        }
     }
 
     public function testWorkflowEnumPlaces()
@@ -515,10 +559,23 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $workflowDefinition = $container->getDefinition('state_machine.enum.definition');
         $this->assertSame(['a', 'b', 'c'], $workflowDefinition->getArgument(0));
-        $transitionOne = $container->getDefinition('.state_machine.enum.transition.0');
-        $this->assertSame(['one', 'a', 'b'], $transitionOne->getArguments());
-        $transitionTwo = $container->getDefinition('.state_machine.enum.transition.1');
-        $this->assertSame(['two', 'b', 'c'], $transitionTwo->getArguments());
+        $this->assertTransitionReference(
+            $container,
+            '.state_machine.enum.transition.0',
+            'one',
+            [['place' => 'a', 'weight' => 1]],
+            [['place' => 'b', 'weight' => 1]],
+            $workflowDefinition->getArgument(1)[0],
+        );
+
+        $this->assertTransitionReference(
+            $container,
+            '.state_machine.enum.transition.1',
+            'two',
+            [['place' => 'b', 'weight' => 1]],
+            [['place' => 'c', 'weight' => 1]],
+            $workflowDefinition->getArgument(1)[1],
+        );
     }
 
     public function testWorkflowGlobPlaces()
@@ -610,7 +667,12 @@ abstract class FrameworkExtensionTestCase extends TestCase
         }
 
         $this->assertCount(1, $transitions);
-        $this->assertSame(['base_transition', ['middle'], ['alternative']], $transitions[0]);
+        $this->assertTransition(
+            'base_transition',
+            [['place' => 'middle', 'weight' => 1]],
+            [['place' => 'alternative', 'weight' => 1]],
+            $transitions[0],
+        );
     }
 
     public function testEnabledPhpErrorsConfig()
