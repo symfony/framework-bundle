@@ -180,6 +180,7 @@ use Symfony\Component\RemoteEvent\Attribute\AsRemoteEventConsumer;
 use Symfony\Component\RemoteEvent\RemoteEvent;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Loader\AttributeServicesLoader;
+use Symfony\Component\Routing\Loader\XmlFileLoader as RoutingXmlFileLoader;
 use Symfony\Component\Scheduler\Attribute\AsCronTask;
 use Symfony\Component\Scheduler\Attribute\AsPeriodicTask;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
@@ -1332,6 +1333,10 @@ class FrameworkExtension extends Extension
         }
 
         $loader->load('routing.php');
+
+        if (!class_exists(RoutingXmlFileLoader::class)) {
+            $container->removeDefinition('routing.loader.xml');
+        }
 
         if (!class_exists(AttributeServicesLoader::class)) {
             $container->removeDefinition('routing.loader.attribute.services');
