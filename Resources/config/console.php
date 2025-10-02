@@ -332,6 +332,7 @@ return static function (ContainerConfigurator $container) {
         ->set('console.command.workflow_dump', WorkflowDumpCommand::class)
             ->args([
                 tagged_locator('workflow', 'name'),
+                service('event_dispatcher')->nullOnInvalid(),
             ])
             ->tag('console.command')
 
