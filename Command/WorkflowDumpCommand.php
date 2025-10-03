@@ -17,7 +17,7 @@ use Symfony\Component\Workflow\Command\WorkflowDumpCommand as BaseWorkflowDumpCo
 trigger_deprecation('symfony/framework-bundle', '7.4', 'The "%s" class is deprecated, use "%s" instead.', WorkflowDumpCommand::class, BaseWorkflowDumpCommand::class);
 
 /**
- * @deprecated since Symfony 7.4, use {@see \Symfony\Component\Workflow\Command\WorkflowDumpCommand} instead.
+ * @deprecated since Symfony 7.4, use {@see BaseWorkflowDumpCommand} instead.
  */
 #[AsCommand(name: 'workflow:dump', description: 'Dump a workflow')]
 class WorkflowDumpCommand extends BaseWorkflowDumpCommand
