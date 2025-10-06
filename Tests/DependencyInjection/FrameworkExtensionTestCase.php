@@ -2629,6 +2629,21 @@ abstract class FrameworkExtensionTestCase extends TestCase
         self::assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
     }
 
+    public function testLockWithServiceAndEnv()
+    {
+        $container = $this->createContainerFromFile('lock_service_and_env', [], true, false);
+        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
+        $container->compile();
+
+        self::assertTrue($container->hasDefinition('lock.foo.factory'));
+        self::assertTrue($container->hasDefinition('lock.bar.factory'));
+        $storeDef = $container->getDefinition($container->getDefinition('lock.bar.factory')->getArgument(0));
+
+        $connection = $storeDef->getArgument(0);
+        self::assertInstanceOf(Reference::class, $connection);
+        self::assertEquals('my_service', $connection->__toString());
+    }
+
     public function testDefaultSemaphore()
     {
         $container = $this->createContainerFromFile('semaphore');
