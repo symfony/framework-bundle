@@ -128,22 +128,6 @@ class AppKernel extends Kernel implements ExtensionInterface, ConfigurationInter
     {
     }
 
-    /**
-     * @deprecated since Symfony 7.4, to be removed in Symfony 8.0 together with XML support.
-     */
-    public function getNamespace(): string
-    {
-        return '';
-    }
-
-    /**
-     * @deprecated since Symfony 7.4, to be removed in Symfony 8.0 together with XML support.
-     */
-    public function getXsdValidationBasePath(): string|false
-    {
-        return false;
-    }
-
     public function getAlias(): string
     {
         return 'foo';
