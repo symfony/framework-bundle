@@ -128,6 +128,22 @@ class AppKernel extends Kernel implements ExtensionInterface, ConfigurationInter
     {
     }
 
+    /**
+     * To be removed when symfony/dependency-injection is bumped to 8.0+.
+     */
+    public function getNamespace(): string
+    {
+        return '';
+    }
+
+    /**
+     * To be removed when symfony/dependency-injection is bumped to 8.0+.
+     */
+    public function getXsdValidationBasePath(): string|false
+    {
+        return false;
+    }
+
     public function getAlias(): string
     {
         return 'foo';
