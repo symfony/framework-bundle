@@ -705,13 +705,32 @@ class FrameworkExtension extends Extension
 
         $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition, AsEventListener $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
             $tagAttributes = get_object_vars($attribute);
-            if ($reflector instanceof \ReflectionMethod) {
-                if (isset($tagAttributes['method'])) {
-                    throw new LogicException(\sprintf('AsEventListener attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
-                }
-                $tagAttributes['method'] = $reflector->getName();
+
+            if (!$reflector instanceof \ReflectionMethod) {
+                $definition->addTag('kernel.event_listener', $tagAttributes);
+
+                return;
             }
-            $definition->addTag('kernel.event_listener', $tagAttributes);
+
+            if (isset($tagAttributes['method'])) {
+                throw new LogicException(\sprintf('AsEventListener attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
+            }
+
+            $tagAttributes['method'] = $reflector->getName();
+
+            if (!$eventArg = $reflector->getParameters()[0] ?? null) {
+                throw new LogicException(\sprintf('AsEventListener attribute requires the first argument of "%s::%s()" to be an event object.', $reflector->class, $reflector->name));
+            }
+
+            $types = ($type = $eventArg->getType() instanceof \ReflectionUnionType ? $eventArg->getType()->getTypes() : [$eventArg->getType()]) ?: [];
+
+            foreach ($types as $type) {
+                if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                    $tagAttributes['event'] = $type->getName();
+
+                    $definition->addTag('kernel.event_listener', $tagAttributes);
+                }
+            }
         });
         $container->registerAttributeForAutoconfiguration(AsController::class, static function (ChildDefinition $definition, AsController $attribute): void {
             $definition->addTag('controller.service_arguments');

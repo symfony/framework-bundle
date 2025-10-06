@@ -37,7 +37,6 @@ use Symfony\Bundle\FrameworkBundle\Command\SecretsRevealCommand;
 use Symfony\Bundle\FrameworkBundle\Command\SecretsSetCommand;
 use Symfony\Bundle\FrameworkBundle\Command\TranslationDebugCommand;
 use Symfony\Bundle\FrameworkBundle\Command\TranslationExtractCommand;
-use Symfony\Bundle\FrameworkBundle\Command\WorkflowDumpCommand;
 use Symfony\Bundle\FrameworkBundle\Command\YamlLintCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\EventListener\SuggestMissingPackageSubscriber;
@@ -61,6 +60,7 @@ use Symfony\Component\Translation\Command\TranslationPullCommand;
 use Symfony\Component\Translation\Command\TranslationPushCommand;
 use Symfony\Component\Translation\Command\XliffLintCommand;
 use Symfony\Component\Validator\Command\DebugCommand as ValidatorDebugCommand;
+use Symfony\Component\Workflow\Command\WorkflowDumpCommand;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 
 return static function (ContainerConfigurator $container) {
