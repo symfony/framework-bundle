@@ -15,6 +15,7 @@ CHANGELOG
  * Add support for configuring the `CachingHttpClient`
  * Add support for weighted transitions in workflows
  * Add support for union types with `Symfony\Component\EventDispatcher\Attribute\AsEventListener`
+ * Add `framework.allowed_http_method_override` option
 
 7.3
 ---
