@@ -4,7 +4,7 @@ CHANGELOG
 8.0
 ---
 
- * Remove the `WorkflowDumpCommand`, use the command from the Workflow component instead
+ * Remove the `WorkflowDumpCommand` class; the `workflow:dump` command works the same as before but its class is now defined in the Workflow component
  * Remove `errors.xml` and `webhook.xml` routing configuration files (use their PHP equivalent instead)
  * Enable the property info constructor extractor by default
  * Remove deprecated `Symfony\Bundle\FrameworkBundle\Console\Application::add()` method in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
