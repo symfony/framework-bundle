@@ -231,6 +231,22 @@ class ConfigBuilderCacheWarmerTest extends TestCase
             {
             }
 
+            /**
+             * To be removed when symfony/dependency-injection is bumped to 8.0+.
+             */
+            public function getXsdValidationBasePath(): string|false
+            {
+                return false;
+            }
+
+            /**
+             * To be removed when symfony/dependency-injection is bumped to 8.0+.
+             */
+            public function getNamespace(): string
+            {
+                return 'http://www.example.com/schema/acme';
+            }
+
             public function getAlias(): string
             {
                 return 'kernel';
