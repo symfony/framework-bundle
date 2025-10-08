@@ -171,10 +171,10 @@ return static function (ContainerConfigurator $container) {
                 param('request_listener.http_port'),
                 param('request_listener.https_port'),
             ])
-            ->call('setParameter', [
-                '_functions',
-                service('router.expression_language_provider')->ignoreOnInvalid(),
-            ])
+            ->call('setParameters', [[
+                '_functions' => service('router.expression_language_provider')->ignoreOnInvalid(),
+                '_locale' => '%kernel.default_locale%',
+            ]])
         ->alias(RequestContext::class, 'router.request_context')
 
         ->set('router.expression_language_provider', ExpressionLanguageProvider::class)

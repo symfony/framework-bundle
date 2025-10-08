@@ -16,6 +16,7 @@ CHANGELOG
  * Add support for weighted transitions in workflows
  * Add support for union types with `Symfony\Component\EventDispatcher\Attribute\AsEventListener`
  * Add `framework.allowed_http_method_override` option
+ * Initialize `router.request_context`'s `_locale` parameter to `%kernel.default_locale%`
 
 7.3
 ---
