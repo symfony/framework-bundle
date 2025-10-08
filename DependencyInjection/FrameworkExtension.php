@@ -2323,6 +2323,7 @@ class FrameworkExtension extends Extension
             // Generate stores
             $storeDefinitions = [];
             foreach ($resourceStores as $resourceStore) {
+                $usedEnvs = [];
                 $storeDsn = $container->resolveEnvPlaceholders($resourceStore, null, $usedEnvs);
                 if (!$usedEnvs && !str_contains($resourceStore, ':') && !\in_array($resourceStore, ['flock', 'semaphore', 'in-memory', 'null'], true)) {
                     $resourceStore = new Reference($resourceStore);
