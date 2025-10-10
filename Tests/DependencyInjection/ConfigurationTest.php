@@ -636,6 +636,7 @@ class ConfigurationTest extends TestCase
     {
         return [
             'http_method_override' => false,
+            'allowed_http_method_override' => null,
             'handle_all_throwables' => true,
             'trust_x_sendfile_type_header' => '%env(bool:default::SYMFONY_TRUST_X_SENDFILE_TYPE_HEADER)%',
             'ide' => '%env(default::SYMFONY_IDE)%',

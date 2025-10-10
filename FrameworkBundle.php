@@ -119,6 +119,10 @@ class FrameworkBundle extends Bundle
             Request::enableHttpMethodParameterOverride();
         }
 
+        if ($this->container->hasParameter('kernel.allowed_http_method_override')) {
+            Request::setAllowedHttpMethodOverride($this->container->getParameter('kernel.allowed_http_method_override'));
+        }
+
         if ($this->container->hasParameter('kernel.trust_x_sendfile_type_header') && $this->container->getParameter('kernel.trust_x_sendfile_type_header')) {
             BinaryFileResponse::trustXSendfileTypeHeader();
         }
