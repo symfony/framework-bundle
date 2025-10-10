@@ -383,6 +383,7 @@ class FrameworkExtension extends Extension
         $container->parameterCannotBeEmpty('kernel.secret', 'A non-empty value for the parameter "kernel.secret" is required. Did you forget to configure the '.$emptySecretHint.'?');
 
         $container->setParameter('kernel.http_method_override', $config['http_method_override']);
+        $container->setParameter('kernel.allowed_http_method_override', $config['allowed_http_method_override']);
         $container->setParameter('kernel.trust_x_sendfile_type_header', $config['trust_x_sendfile_type_header']);
         $container->setParameter('kernel.trusted_hosts', [0] === array_keys($config['trusted_hosts']) ? $config['trusted_hosts'][0] : $config['trusted_hosts']);
         $container->setParameter('kernel.default_locale', $config['default_locale']);
@@ -442,7 +443,7 @@ class FrameworkExtension extends Extension
         }
 
         $propertyInfoEnabled = $this->readConfigEnabled('property_info', $container, $config['property_info']);
-        $this->registerHttpCacheConfiguration($config['http_cache'], $container, $config['http_method_override']);
+        $this->registerHttpCacheConfiguration($config['http_cache'], $container, $config['http_method_override'], $config['allowed_http_method_override']);
         $this->registerEsiConfiguration($config['esi'], $container, $loader);
         $this->registerSsiConfiguration($config['ssi'], $container, $loader);
         $this->registerFragmentsConfiguration($config['fragments'], $container, $loader);
@@ -945,7 +946,7 @@ class FrameworkExtension extends Extension
         }
     }
 
-    private function registerHttpCacheConfiguration(array $config, ContainerBuilder $container, bool $httpMethodOverride): void
+    private function registerHttpCacheConfiguration(array $config, ContainerBuilder $container, bool $httpMethodOverride, ?array $allowedHttpMethodOverride): void
     {
         $options = $config;
         unset($options['enabled']);
@@ -967,6 +968,14 @@ class FrameworkExtension extends Extension
                   ->addArgument((new Definition('void'))
                       ->setFactory([Request::class, 'enableHttpMethodParameterOverride'])
                   );
+        }
+
+        if (null !== $allowedHttpMethodOverride) {
+            $container->getDefinition('http_cache')
+                    ->addArgument((new Definition('void'))
+                        ->setFactory([Request::class, 'setAllowedHttpMethodOverride'])
+                        ->addArgument($allowedHttpMethodOverride)
+                    );
         }
     }
 

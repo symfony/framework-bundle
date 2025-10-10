@@ -214,6 +214,30 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertFalse($container->getParameter('kernel.http_method_override'));
     }
 
+    public function testAllowedHttpMethodOverride()
+    {
+        $container = $this->createContainerFromFile('full');
+
+        $this->assertNull($container->getParameter('kernel.allowed_http_method_override'));
+    }
+
+    public function testAllowedHttpMethodOverrideWithSpecificMethods()
+    {
+        $container = $this->createContainerFromClosure(function ($container) {
+            $container->loadFromExtension('framework', [
+                'annotations' => false,
+                'http_method_override' => true,
+                'allowed_http_method_override' => ['PUT', 'DELETE'],
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'secret' => 's3cr3t',
+            ]);
+        });
+
+        $this->assertTrue($container->getParameter('kernel.http_method_override'));
+        $this->assertEquals(['PUT', 'DELETE'], $container->getParameter('kernel.allowed_http_method_override'));
+    }
+
     public function testTrustXSendfileTypeHeader()
     {
         $container = $this->createContainerFromFile('full');
