@@ -213,6 +213,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromClosure(function ($container) {
             $container->loadFromExtension('framework', [
+                'http_method_override' => true,
                 'allowed_http_method_override' => ['PUT', 'DELETE'],
                 'secret' => 's3cr3t',
             ]);
