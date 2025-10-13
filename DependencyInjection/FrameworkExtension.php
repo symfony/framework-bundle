@@ -51,7 +51,9 @@ use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\ResourceCheckerInterface;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as ConsoleValueResolverInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\AsTargetedValueResolver as AsTargetedConsoleValueResolver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
@@ -285,6 +287,18 @@ class FrameworkExtension extends Extension
             if (!class_exists(RunCommandMessageHandler::class)) {
                 $container->removeDefinition('console.messenger.application');
                 $container->removeDefinition('console.messenger.execute_command_handler');
+            }
+
+            if (!interface_exists(ConsoleValueResolverInterface::class)) {
+                $container->removeDefinition('console.argument_resolver');
+                $container->removeDefinition('console.argument_resolver.backed_enum');
+                $container->removeDefinition('console.argument_resolver.uid');
+                $container->removeDefinition('console.argument_resolver.builtin_type');
+                $container->removeDefinition('console.argument_resolver.datetime');
+                $container->removeDefinition('console.argument_resolver.map_input');
+                $container->removeDefinition('console.argument_resolver.service');
+                $container->removeDefinition('console.argument_resolver.default');
+                $container->removeDefinition('console.argument_resolver.variadic');
             }
         }
 
@@ -636,9 +650,13 @@ class FrameworkExtension extends Extension
             }
 
             $definition->addTag('console.command', $tagAttributes);
+            $definition->addTag('console.command.service_arguments');
         });
         $container->registerForAutoconfiguration(Command::class)
-            ->addTag('console.command');
+            ->addTag('console.command')
+            ->addTag('console.command.service_arguments');
+        $container->registerForAutoconfiguration(ConsoleValueResolverInterface::class)
+            ->addTag('console.argument_value_resolver');
         $container->registerForAutoconfiguration(ResourceCheckerInterface::class)
             ->addTag('config_cache.resource_checker');
         $container->registerForAutoconfiguration(EnvVarLoaderInterface::class)
@@ -743,6 +761,9 @@ class FrameworkExtension extends Extension
         });
         $container->registerAttributeForAutoconfiguration(AsTargetedValueResolver::class, static function (ChildDefinition $definition, AsTargetedValueResolver $attribute): void {
             $definition->addTag('controller.targeted_value_resolver', $attribute->name ? ['name' => $attribute->name] : []);
+        });
+        $container->registerAttributeForAutoconfiguration(AsTargetedConsoleValueResolver::class, static function (ChildDefinition $definition, AsTargetedConsoleValueResolver $attribute): void {
+            $definition->addTag('console.targeted_value_resolver', $attribute->name ? ['name' => $attribute->name] : []);
         });
         $container->registerAttributeForAutoconfiguration(AsSchedule::class, static function (ChildDefinition $definition, AsSchedule $attribute): void {
             $definition->addTag('scheduler.schedule_provider', ['name' => $attribute->name]);
