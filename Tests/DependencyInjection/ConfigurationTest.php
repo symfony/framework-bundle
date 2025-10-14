@@ -13,6 +13,7 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Configuration;
 use Symfony\Bundle\FullStack;
@@ -709,6 +710,25 @@ class ConfigurationTest extends TestCase
         ]);
 
         $this->assertSame(['data-example-attr' => 'value'], $config['form']['csrf_protection']['field_attr'] ?? []);
+    }
+
+    #[TestWith(['CONNECT'])]
+    #[TestWith(['GET'])]
+    #[TestWith(['HEAD'])]
+    #[TestWith(['TRACE'])]
+    public function testInvalidHttpMethodOverride(string $method)
+    {
+        $processor = new Processor();
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The HTTP methods "GET", "HEAD", "CONNECT", and "TRACE" cannot be overridden.');
+
+        $processor->processConfiguration(
+            new Configuration(true),
+            [[
+                'allowed_http_method_override' => [$method],
+            ]]
+        );
     }
 
     protected static function getBundleDefaultConfig()
