@@ -588,22 +588,18 @@ class Configuration implements ConfigurationInterface
                                                         ->then($workflowNormalizeArcs = static function ($arcs) {
                                                             // Fix XML parsing, when only one arc is defined
                                                             if (\array_key_exists('value', $arcs) && \array_key_exists('weight', $arcs)) {
-                                                                return [[
+                                                                $arcs = [[
                                                                     'place' => $arcs['value'],
                                                                     'weight' => $arcs['weight'],
                                                                 ]];
+                                                            } elseif (\array_key_exists('place', $arcs)) {
+                                                                $arcs = [$arcs];
                                                             }
 
                                                             $normalizedArcs = [];
                                                             foreach ($arcs as $arc) {
-                                                                if ($arc instanceof \BackedEnum) {
-                                                                    $arc = $arc->value;
-                                                                }
-                                                                if (\is_string($arc)) {
-                                                                    $arc = [
-                                                                        'place' => $arc,
-                                                                        'weight' => 1,
-                                                                    ];
+                                                                if (\is_string($arc) || $arc instanceof \BackedEnum) {
+                                                                    $arc = ['place' => $arc];
                                                                 } elseif (!\is_array($arc)) {
                                                                     throw new InvalidConfigurationException('The "from" arcs must be a list of strings or arrays in workflow configuration.');
                                                                 } elseif (\array_key_exists('value', $arc) && \array_key_exists('weight', $arc)) {
@@ -612,6 +608,10 @@ class Configuration implements ConfigurationInterface
                                                                         'place' => $arc['value'],
                                                                         'weight' => $arc['weight'],
                                                                     ];
+                                                                }
+
+                                                                if (($arc['place'] ?? null) instanceof \BackedEnum) {
+                                                                    $arc['place'] = $arc['place']->value;
                                                                 }
 
                                                                 $normalizedArcs[] = $arc;
@@ -628,7 +628,8 @@ class Configuration implements ConfigurationInterface
                                                                 ->cannotBeEmpty()
                                                             ->end()
                                                             ->integerNode('weight')
-                                                                ->isRequired()
+                                                                ->defaultValue(1)
+                                                                ->min(1)
                                                             ->end()
                                                         ->end()
                                                     ->end()
@@ -648,7 +649,8 @@ class Configuration implements ConfigurationInterface
                                                                 ->cannotBeEmpty()
                                                             ->end()
                                                             ->integerNode('weight')
-                                                                ->isRequired()
+                                                                ->defaultValue(1)
+                                                                ->min(1)
                                                             ->end()
                                                         ->end()
                                                     ->end()
