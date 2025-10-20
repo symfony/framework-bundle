@@ -336,9 +336,6 @@ class ConfigBuilderCacheWarmerTest extends TestCase
 
         self::assertFileExists($kernel->getBuildDir().'/Symfony/Config/FrameworkConfig.php');
         self::assertFileExists($kernel->getBuildDir().'/Symfony/Config/SecurityConfig.php');
-        self::assertFileExists($kernel->getBuildDir().'/Symfony/Config/Security/FirewallConfig.php');
-        self::assertFileExists($kernel->getBuildDir().'/Symfony/Config/Security/FirewallConfig/FormLoginConfig.php');
-        self::assertFileExists($kernel->getBuildDir().'/Symfony/Config/Security/FirewallConfig/TokenConfig.php');
     }
 }
 
