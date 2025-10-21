@@ -30,7 +30,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
  *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  *
- * @final since Symfony 7.1
+ * @deprecated since Symfony 7.4
  */
 class ConfigBuilderCacheWarmer implements CacheWarmerInterface
 {

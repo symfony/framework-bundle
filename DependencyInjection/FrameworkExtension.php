@@ -47,6 +47,7 @@ use Symfony\Component\Cache\DependencyInjection\CachePoolPass;
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\ResettableInterface;
 use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -296,6 +297,9 @@ class FrameworkExtension extends Extension
         }
         if (!class_exists(IsSignatureValidAttributeListener::class)) {
             $container->removeDefinition('controller.is_signature_valid_attribute_listener');
+        }
+        if (!class_exists(ConfigBuilderGenerator::class)) {
+            $container->removeDefinition('config_builder.warmer');
         }
 
         if ($this->hasConsole()) {
