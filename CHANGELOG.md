@@ -4,6 +4,7 @@ CHANGELOG
 7.4
 ---
 
+ * Auto-generate `config/reference.php` to assist in writing and discovering app's configuration
  * Auto-register routes from attributes found on controller services
  * Add `ControllerHelper`; the helpers from AbstractController as a standalone service
  * Allow using their name without added suffix when using `#[Target]` for custom services

@@ -230,4 +230,27 @@ trait MicroKernelTrait
 
         return $collection;
     }
+
+    /**
+     * Returns the kernel parameters.
+     *
+     * @return array<string, array|bool|string|int|float|\UnitEnum|null>
+     */
+    protected function getKernelParameters(): array
+    {
+        $parameters = parent::getKernelParameters();
+        $bundlesPath = $this->getBundlesPath();
+        $bundlesDefinition = !is_file($bundlesPath) ? [FrameworkBundle::class => ['all' => true]] : require $bundlesPath;
+        $knownEnvs = [$this->environment => true];
+
+        foreach ($bundlesDefinition as $envs) {
+            $knownEnvs += $envs;
+        }
+        unset($knownEnvs['all']);
+        $parameters['.container.known_envs'] = array_keys($knownEnvs);
+        $parameters['.kernel.config_dir'] = $this->getConfigDir();
+        $parameters['.kernel.bundles_definition'] = $bundlesDefinition;
+
+        return $parameters;
+    }
 }
