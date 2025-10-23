@@ -24,7 +24,9 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class ConcreteMicroKernel extends Kernel implements EventSubscriberInterface
 {
-    use MicroKernelTrait;
+    use MicroKernelTrait {
+        getKernelParameters as public;
+    }
 
     private string $cacheDir;
 
@@ -53,6 +55,11 @@ class ConcreteMicroKernel extends Kernel implements EventSubscriberInterface
     public function getLogDir(): string
     {
         return $this->cacheDir;
+    }
+
+    public function getConfigDir(): string
+    {
+        return $this->getCacheDir().'/config';
     }
 
     public function __serialize(): array

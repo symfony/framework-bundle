@@ -42,6 +42,7 @@ class MicroKernelTraitTest extends TestCase
             $this->kernel = null;
             $fs = new Filesystem();
             $fs->remove($kernel->getCacheDir());
+            $fs->remove($kernel->getProjectDir().'/config/reference.php');
         }
     }
 
@@ -85,7 +86,7 @@ class MicroKernelTraitTest extends TestCase
 
     public function testFlexStyle()
     {
-        $kernel = new FlexStyleMicroKernel('test', false);
+        $kernel = $this->kernel = new FlexStyleMicroKernel('test', false);
         $kernel->boot();
 
         $request = Request::create('/');
@@ -177,5 +178,35 @@ class MicroKernelTraitTest extends TestCase
         $response = $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, false);
 
         $this->assertSame('OK', $response->getContent());
+    }
+
+    public function testGetKernelParameters()
+    {
+        $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
+
+        $parameters = $kernel->getKernelParameters();
+
+        $this->assertSame($kernel->getConfigDir(), $parameters['.kernel.config_dir']);
+        $this->assertSame(['test'], $parameters['.container.known_envs']);
+        $this->assertSame(['Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true]], $parameters['.kernel.bundles_definition']);
+    }
+
+    public function testGetKernelParametersWithBundlesFile()
+    {
+        $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
+
+        $configDir = $kernel->getConfigDir();
+        mkdir($configDir, 0o777, true);
+
+        $bundlesContent = "<?php\nreturn [\n    'Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true],\n    'TestBundle' => ['test' => true, 'dev' => true],\n];";
+        file_put_contents($configDir.'/bundles.php', $bundlesContent);
+
+        $parameters = $kernel->getKernelParameters();
+
+        $this->assertSame(['test', 'dev'], $parameters['.container.known_envs']);
+        $this->assertSame([
+            'Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true],
+            'TestBundle' => ['test' => true, 'dev' => true],
+        ], $parameters['.kernel.bundles_definition']);
     }
 }
