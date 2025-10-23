@@ -29,6 +29,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
  * Generate all config builders.
  *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
+ *
+ * @deprecated since Symfony 7.4
  */
 final class ConfigBuilderCacheWarmer implements CacheWarmerInterface
 {
