@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PhpConfigReferen
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -58,6 +59,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         $this->assertStringContainsString('namespace Symfony\Component\DependencyInjection\Loader\Configurator;', $content);
         $this->assertStringContainsString('final class App extends AppReference', $content);
         $this->assertStringContainsString('public static function config(array $config): array', $content);
+        $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
     }
 
     public function testProcessIgnoresFileWriteErrors()
@@ -79,6 +81,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
         $pass->process($container);
         $this->assertFileDoesNotExist($readOnlyDir.'/reference.php');
+        $this->assertEmpty($container->getResources());
     }
 
     public function testProcessGeneratesExpectedReferenceFile()
@@ -100,6 +103,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         }
 
         $this->assertFileEquals(__DIR__.'/../../Fixtures/reference.php', $this->tempDir.'/reference.php');
+        $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
     }
 
     #[TestWith([self::class])]
