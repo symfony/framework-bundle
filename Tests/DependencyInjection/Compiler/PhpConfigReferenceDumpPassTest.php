@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PhpConfigReferenceDumpPass;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -99,6 +100,22 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         }
 
         $this->assertFileEquals(__DIR__.'/../../Fixtures/reference.php', $this->tempDir.'/reference.php');
+    }
+
+    #[TestWith([self::class])]
+    #[TestWith(['Symfony\\NotARealClass'])]
+    public function testProcessWithInvalidBundleClass(string $invalidClass)
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('.container.known_envs', ['test', 'dev']);
+
+        $pass = new PhpConfigReferenceDumpPass($this->tempDir.'/reference.php', [
+            $invalidClass => ['dev' => true],
+        ]);
+        $pass->process($container);
+
+        $referenceFile = $this->tempDir.'/reference.php';
+        $this->assertFileExists($referenceFile);
     }
 }
 

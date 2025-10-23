@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\AppReference;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutesReference;
 
 /**
@@ -94,6 +95,9 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
         $anyEnvExtensions = [];
         foreach ($this->bundlesDefinition as $bundle => $envs) {
+            if (!is_subclass_of($bundle, BundleInterface::class)) {
+                continue;
+            }
             if (!$extension = (new $bundle())->getContainerExtension()) {
                 continue;
             }
