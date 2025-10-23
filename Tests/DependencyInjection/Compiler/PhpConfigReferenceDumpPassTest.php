@@ -61,6 +61,10 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
     public function testProcessIgnoresFileWriteErrors()
     {
+        if ('\\' === \DIRECTORY_SEPARATOR) {
+            self::markTestSkipped('Cannot reliably make directory read-only on Windows.');
+        }
+
         // Create a read-only directory to simulate write errors
         $readOnlyDir = $this->tempDir.'/readonly';
         mkdir($readOnlyDir, 0o444, true);
