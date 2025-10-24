@@ -25,6 +25,7 @@ use Symfony\Component\Form\Extension\Core\Type\TransformationFailureExtension;
 use Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension;
 use Symfony\Component\Form\Extension\HtmlSanitizer\Type\TextTypeHtmlSanitizerExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationRequestHandler;
+use Symfony\Component\Form\Extension\HttpFoundation\Type\FormFlowTypeSessionDataStorageExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\Type\FormTypeHttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\Type\FormTypeValidatorExtension;
 use Symfony\Component\Form\Extension\Validator\Type\RepeatedTypeValidatorExtension;
@@ -125,6 +126,10 @@ return static function (ContainerConfigurator $container) {
 
         ->set('form.type_extension.form.http_foundation', FormTypeHttpFoundationExtension::class)
             ->args([service('form.type_extension.form.request_handler')])
+            ->tag('form.type_extension')
+
+        ->set('form.type_extension.form.flow.session_data_storage', FormFlowTypeSessionDataStorageExtension::class)
+            ->args([service('request_stack')->ignoreOnInvalid()])
             ->tag('form.type_extension')
 
         ->set('form.type_extension.form.request_handler', HttpFoundationRequestHandler::class)

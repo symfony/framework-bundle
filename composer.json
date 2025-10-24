@@ -83,6 +83,7 @@
         "phpdocumentor/reflection-docblock": "<3.2.2",
         "phpdocumentor/type-resolver": "<1.4.0",
         "symfony/console": "<7.4",
+        "symfony/form": "<7.4",
         "symfony/security-csrf": "<7.4",
         "symfony/serializer": "<7.4",
         "symfony/messenger": "<7.4",
