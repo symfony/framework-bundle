@@ -39,6 +39,7 @@ CHANGELOG
  * Add `framework.allowed_http_method_override` option
  * Initialize `router.request_context`'s `_locale` parameter to `%kernel.default_locale%`
  * Deprecate `ConfigBuilderCacheWarmer`, return PHP arrays from your config instead
+ * Add support for selecting the appropriate error renderer based on the `APP_RUNTIME_MODE` env var
 
 7.3
 ---
