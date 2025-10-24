@@ -221,7 +221,7 @@ return static function (ContainerConfigurator $container) {
                     ->args([service('request_stack')]),
                 inline_service(ErrorRendererInterface::class)
                     ->factory([\Closure::class, 'fromCallable'])
-                    ->args([service('error_renderer.default'), 'render'])
+                    ->args([[service('error_renderer.default'), 'render']])
                     ->lazy(),
                 inline_service()
                     ->factory([HtmlErrorRenderer::class, 'isDebug'])
