@@ -11,11 +11,13 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PhpConfigReferenceDumpPass;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -57,6 +59,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         $this->assertStringContainsString('namespace Symfony\Component\DependencyInjection\Loader\Configurator;', $content);
         $this->assertStringContainsString('final class App extends AppReference', $content);
         $this->assertStringContainsString('public static function config(array $config): array', $content);
+        $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
     }
 
     public function testProcessIgnoresFileWriteErrors()
@@ -78,6 +81,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
         $pass->process($container);
         $this->assertFileDoesNotExist($readOnlyDir.'/reference.php');
+        $this->assertEmpty($container->getResources());
     }
 
     public function testProcessGeneratesExpectedReferenceFile()
@@ -99,6 +103,23 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         }
 
         $this->assertFileEquals(__DIR__.'/../../Fixtures/reference.php', $this->tempDir.'/reference.php');
+        $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
+    }
+
+    #[TestWith([self::class])]
+    #[TestWith(['Symfony\\NotARealClass'])]
+    public function testProcessWithInvalidBundleClass(string $invalidClass)
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('.container.known_envs', ['test', 'dev']);
+
+        $pass = new PhpConfigReferenceDumpPass($this->tempDir.'/reference.php', [
+            $invalidClass => ['dev' => true],
+        ]);
+        $pass->process($container);
+
+        $referenceFile = $this->tempDir.'/reference.php';
+        $this->assertFileExists($referenceFile);
     }
 }
 

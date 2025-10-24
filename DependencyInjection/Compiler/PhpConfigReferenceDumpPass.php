@@ -13,11 +13,13 @@ namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\Config\Definition\ArrayShapeGenerator;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\AppReference;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutesReference;
 
 /**
@@ -94,6 +96,9 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
         $anyEnvExtensions = [];
         foreach ($this->bundlesDefinition as $bundle => $envs) {
+            if (!is_subclass_of($bundle, BundleInterface::class)) {
+                continue;
+            }
             if (!$extension = (new $bundle())->getContainerExtension()) {
                 continue;
             }
@@ -156,8 +161,11 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         ]);
 
         $dir = \dirname($this->referenceFile);
-        if (is_dir($dir) && is_writable($dir) && (!is_file($this->referenceFile) || file_get_contents($this->referenceFile) !== $configReference)) {
-            file_put_contents($this->referenceFile, $configReference);
+        if (is_dir($dir) && is_writable($dir)) {
+            if (!is_file($this->referenceFile) || file_get_contents($this->referenceFile) !== $configReference) {
+                file_put_contents($this->referenceFile, $configReference);
+            }
+            $container->addResource(new FileResource($this->referenceFile));
         }
     }
 
