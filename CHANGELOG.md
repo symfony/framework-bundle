@@ -11,7 +11,6 @@ CHANGELOG
  * Make `Router` class `final`
  * Make `SerializerCacheWarmer` class `final`
  * Make `Translator` class `final`
- * Make `ConfigBuilderCacheWarmer` class `final`
  * Make `TranslationsCacheWarmer` class `final`
  * Make `ValidatorCacheWarmer` class `final`
  * Remove autowiring aliases for `RateLimiterFactory`; use `RateLimiterFactoryInterface` instead
@@ -19,7 +18,7 @@ CHANGELOG
  * Remove the `router.cache_dir` config option
  * Remove the `validation.cache` option
  * Remove `TranslationUpdateCommand` in favor of `TranslationExtractCommand`
- * Deprecate `ConfigBuilderCacheWarmer`, return PHP arrays from your config instead
+ * Remove `ConfigBuilderCacheWarmer`, return PHP arrays from your config instead
 
 7.4
 ---
