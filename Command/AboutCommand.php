@@ -58,6 +58,12 @@ class AboutCommand extends Command
             $buildDir = $kernel->getCacheDir();
         }
 
+        if (method_exists($kernel, 'getShareDir')) {
+            $shareDir = $kernel->getShareDir();
+        } else {
+            $shareDir = $kernel->getCacheDir();
+        }
+
         $xdebugMode = getenv('XDEBUG_MODE') ?: \ini_get('xdebug.mode');
 
         $rows = [
@@ -76,6 +82,7 @@ class AboutCommand extends Command
             ['Charset', $kernel->getCharset()],
             ['Cache directory', self::formatPath($kernel->getCacheDir(), $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($kernel->getCacheDir()).'</>)'],
             ['Build directory', self::formatPath($buildDir, $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($buildDir).'</>)'],
+            ['Share directory', self::formatPath($shareDir, $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($shareDir).'</>)'],
             ['Log directory', self::formatPath($kernel->getLogDir(), $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($kernel->getLogDir()).'</>)'],
             new TableSeparator(),
             ['<info>PHP</>'],
