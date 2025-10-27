@@ -39,6 +39,7 @@ CHANGELOG
  * Initialize `router.request_context`'s `_locale` parameter to `%kernel.default_locale%`
  * Deprecate `ConfigBuilderCacheWarmer`, return PHP arrays from your config instead
  * Add support for selecting the appropriate error renderer based on the `APP_RUNTIME_MODE` env var
+ * Add `KernelInterface::getShareDir()`, `APP_SHARE_DIR` and `%kernel.share_dir%` to store application data that are shared between all front-end servers
 
 7.3
 ---
