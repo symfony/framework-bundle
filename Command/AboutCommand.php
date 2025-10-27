@@ -53,6 +53,7 @@ class AboutCommand extends Command
         $kernel = $this->getApplication()->getKernel();
 
         $buildDir = $kernel->getBuildDir();
+        $shareDir = $kernel->getShareDir();
 
         $xdebugMode = getenv('XDEBUG_MODE') ?: \ini_get('xdebug.mode');
 
@@ -72,6 +73,7 @@ class AboutCommand extends Command
             ['Charset', $kernel->getCharset()],
             ['Cache directory', self::formatPath($kernel->getCacheDir(), $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($kernel->getCacheDir()).'</>)'],
             ['Build directory', self::formatPath($buildDir, $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($buildDir).'</>)'],
+            ['Share directory', self::formatPath($shareDir, $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($shareDir).'</>)'],
             ['Log directory', self::formatPath($kernel->getLogDir(), $kernel->getProjectDir()).' (<comment>'.self::formatFileSize($kernel->getLogDir()).'</>)'],
             new TableSeparator(),
             ['<info>PHP</>'],
