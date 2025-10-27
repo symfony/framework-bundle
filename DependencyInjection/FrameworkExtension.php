@@ -2877,39 +2877,45 @@ class FrameworkExtension extends Extension
             $retryOptions = $scopeConfig['retry_failed'] ?? ['enabled' => false];
             unset($scopeConfig['retry_failed']);
 
+            $transport = $name.'.transport';
+            $container->register($transport, HttpClientInterface::class)
+                ->setFactory('current')
+                ->setArguments([[new Reference('http_client.transport')]])
+            ;
+
             if (null === $scope) {
                 $baseUri = $scopeConfig['base_uri'];
                 unset($scopeConfig['base_uri']);
 
                 $container->register($name, ScopingHttpClient::class)
                     ->setFactory([ScopingHttpClient::class, 'forBaseUri'])
-                    ->setArguments([new Reference('http_client.transport'), $baseUri, $scopeConfig])
+                    ->setArguments([new Reference($transport), $baseUri, $scopeConfig])
                     ->addTag('http_client.client')
                     ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore'])
                 ;
             } else {
                 $container->register($name, ScopingHttpClient::class)
-                    ->setArguments([new Reference('http_client.transport'), [$scope => $scopeConfig], $scope])
+                    ->setArguments([new Reference($transport), [$scope => $scopeConfig], $scope])
                     ->addTag('http_client.client')
                     ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore'])
                 ;
             }
 
             if ($this->readConfigEnabled('http_client.scoped_clients.'.$name.'.caching', $container, $cachingOptions)) {
-                $this->registerCachingHttpClient($cachingOptions, $scopeConfig, $name, $container);
+                $this->registerCachingHttpClient($cachingOptions, $scopeConfig, $transport, $container);
             }
 
             if (null !== $rateLimiter) {
-                $this->registerThrottlingHttpClient($rateLimiter, $name, $container);
+                $this->registerThrottlingHttpClient($rateLimiter, $transport, $container);
             }
 
             if ($this->readConfigEnabled('http_client.scoped_clients.'.$name.'.retry_failed', $container, $retryOptions)) {
-                $this->registerRetryableHttpClient($retryOptions, $name, $container);
+                $this->registerRetryableHttpClient($retryOptions, $transport, $container);
             }
 
             $container
                 ->register($name.'.uri_template', UriTemplateHttpClient::class)
-                ->setDecoratedService($name, null, 7) // Between TraceableHttpClient (5) and RetryableHttpClient (10)
+                ->setDecoratedService($name, null, 7) // After TraceableHttpClient (5) and on top of ScopingHttpClient
                 ->setArguments([
                     new Reference($name.'.uri_template.inner'),
                     new Reference('http_client.uri_template_expander', ContainerInterface::NULL_ON_INVALID_REFERENCE),
@@ -2943,7 +2949,7 @@ class FrameworkExtension extends Extension
     private function registerCachingHttpClient(array $options, array $defaultOptions, string $name, ContainerBuilder $container): void
     {
         if (!class_exists(ChunkCacheItemNotFoundException::class)) {
-            throw new LogicException('Caching cannot be enabled as version 7.3+ of the HttpClient component is required.');
+            throw new LogicException('Caching cannot be enabled as version 7.4+ of the HttpClient component is required.');
         }
 
         $container

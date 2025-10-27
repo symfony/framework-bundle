@@ -2076,7 +2076,7 @@ class Configuration implements ConfigurationInterface
                                 ->acceptAndWrap(['string'], 'base_uri')
                                 ->validate()
                                     ->ifTrue(static fn () => !class_exists(HttpClient::class))
-                                    ->then(static fn () => 'HttpClient support cannot be enabled as the component is not installed. Try running "composer require symfony/http-client".')
+                                    ->then(static fn () => throw new LogicException('HttpClient support cannot be enabled as the component is not installed. Try running "composer require symfony/http-client".'))
                                 ->end()
                                 ->validate()
                                     ->ifTrue(static fn ($v) => !isset($v['scope']) && !isset($v['base_uri']))
