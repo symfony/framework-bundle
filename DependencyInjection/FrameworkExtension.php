@@ -1770,13 +1770,13 @@ class FrameworkExtension extends Extension
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
         if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
-            $container->registerAttributeForAutoconfiguration(Constraint::class, function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
+            $container->registerAttributeForAutoconfiguration(Constraint::class, static function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
                 $definition->addTag('validator.attribute_metadata')
                     ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
             });
         }
 
-        $container->registerAttributeForAutoconfiguration(ExtendsValidationFor::class, function (ChildDefinition $definition, ExtendsValidationFor $attribute) {
+        $container->registerAttributeForAutoconfiguration(ExtendsValidationFor::class, static function (ChildDefinition $definition, ExtendsValidationFor $attribute) {
             $definition->addTag('validator.attribute_metadata', ['for' => $attribute->class])
                 ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
         });
@@ -2023,22 +2023,25 @@ class FrameworkExtension extends Extension
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
         if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
-            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata');
+            $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Context::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Groups::class, $configurator);
 
-            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata');
+            $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Ignore::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\MaxDepth::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedName::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedPath::class, $configurator);
 
-            $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, function (ChildDefinition $definition) {
-                $definition->addTag('serializer.attribute_metadata');
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, static function (ChildDefinition $definition) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             });
         }
 
@@ -2104,7 +2107,7 @@ class FrameworkExtension extends Extension
 
         $container->setParameter('.serializer.named_serializers', $config['named_serializers'] ?? []);
 
-        $container->registerAttributeForAutoconfiguration(ExtendsSerializationFor::class, function (ChildDefinition $definition, ExtendsSerializationFor $attribute) {
+        $container->registerAttributeForAutoconfiguration(ExtendsSerializationFor::class, static function (ChildDefinition $definition, ExtendsSerializationFor $attribute) {
             $definition->addTag('serializer.attribute_metadata', ['for' => $attribute->class])
                 ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
         });
@@ -2732,39 +2735,45 @@ class FrameworkExtension extends Extension
             $retryOptions = $scopeConfig['retry_failed'] ?? ['enabled' => false];
             unset($scopeConfig['retry_failed']);
 
+            $transport = $name.'.transport';
+            $container->register($transport, HttpClientInterface::class)
+                ->setFactory('current')
+                ->setArguments([[new Reference('http_client.transport')]])
+            ;
+
             if (null === $scope) {
                 $baseUri = $scopeConfig['base_uri'];
                 unset($scopeConfig['base_uri']);
 
                 $container->register($name, ScopingHttpClient::class)
                     ->setFactory([ScopingHttpClient::class, 'forBaseUri'])
-                    ->setArguments([new Reference('http_client.transport'), $baseUri, $scopeConfig])
+                    ->setArguments([new Reference($transport), $baseUri, $scopeConfig])
                     ->addTag('http_client.client')
                     ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore'])
                 ;
             } else {
                 $container->register($name, ScopingHttpClient::class)
-                    ->setArguments([new Reference('http_client.transport'), [$scope => $scopeConfig], $scope])
+                    ->setArguments([new Reference($transport), [$scope => $scopeConfig], $scope])
                     ->addTag('http_client.client')
                     ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore'])
                 ;
             }
 
             if ($this->readConfigEnabled('http_client.scoped_clients.'.$name.'.caching', $container, $cachingOptions)) {
-                $this->registerCachingHttpClient($cachingOptions, $scopeConfig, $name, $container);
+                $this->registerCachingHttpClient($cachingOptions, $scopeConfig, $transport, $container);
             }
 
             if (null !== $rateLimiter) {
-                $this->registerThrottlingHttpClient($rateLimiter, $name, $container);
+                $this->registerThrottlingHttpClient($rateLimiter, $transport, $container);
             }
 
             if ($this->readConfigEnabled('http_client.scoped_clients.'.$name.'.retry_failed', $container, $retryOptions)) {
-                $this->registerRetryableHttpClient($retryOptions, $name, $container);
+                $this->registerRetryableHttpClient($retryOptions, $transport, $container);
             }
 
             $container
                 ->register($name.'.uri_template', UriTemplateHttpClient::class)
-                ->setDecoratedService($name, null, 7) // Between TraceableHttpClient (5) and RetryableHttpClient (10)
+                ->setDecoratedService($name, null, 7) // After TraceableHttpClient (5) and on top of ScopingHttpClient
                 ->setArguments([
                     new Reference($name.'.uri_template.inner'),
                     new Reference('http_client.uri_template_expander', ContainerInterface::NULL_ON_INVALID_REFERENCE),
@@ -2798,7 +2807,7 @@ class FrameworkExtension extends Extension
     private function registerCachingHttpClient(array $options, array $defaultOptions, string $name, ContainerBuilder $container): void
     {
         if (!class_exists(ChunkCacheItemNotFoundException::class)) {
-            throw new LogicException('Caching cannot be enabled as version 7.3+ of the HttpClient component is required.');
+            throw new LogicException('Caching cannot be enabled as version 7.4+ of the HttpClient component is required.');
         }
 
         $container

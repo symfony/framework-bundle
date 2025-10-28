@@ -2266,15 +2266,18 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertFalse($arguments[3]);
         $this->assertSame(2, $arguments[4]);
 
-        $this->assertTrue($container->hasDefinition('bar.caching'));
-        $definition = $container->getDefinition('bar.caching');
+        $this->assertTrue($container->hasDefinition('bar.transport.caching'));
+        $definition = $container->getDefinition('bar.transport.caching');
         $this->assertSame(CachingHttpClient::class, $definition->getClass());
-        $this->assertSame('bar', $definition->getDecoratedService()[0]);
         $arguments = $definition->getArguments();
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('bar.caching.inner', (string) $arguments[0]);
+        $this->assertSame('bar.transport.caching.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('baz', (string) $arguments[1]);
+        $scopedClient = $container->getDefinition('bar');
+
+        $this->assertSame('bar.transport', (string) $scopedClient->getArgument(0));
+        $this->assertNull($scopedClient->getDecoratedService());
     }
 
     public function testHttpClientRetry()
@@ -2288,8 +2291,8 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(0.3, $container->getDefinition('http_client.retry_strategy')->getArgument(4));
         $this->assertSame(2, $container->getDefinition('http_client.retryable')->getArgument(2));
 
-        $this->assertSame(RetryableHttpClient::class, $container->getDefinition('foo.retryable')->getClass());
-        $this->assertSame(4, $container->getDefinition('foo.retry_strategy')->getArgument(2));
+        $this->assertSame(RetryableHttpClient::class, $container->getDefinition('foo.transport.retryable')->getClass());
+        $this->assertSame(4, $container->getDefinition('foo.transport.retry_strategy')->getArgument(2));
     }
 
     public function testHttpClientWithQueryParameterKey()
@@ -2354,15 +2357,15 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('http_client.throttling.limiter', (string) $arguments[1]);
 
-        $this->assertTrue($container->hasDefinition('foo.throttling'));
-        $definition = $container->getDefinition('foo.throttling');
+        $this->assertTrue($container->hasDefinition('foo.transport.throttling'));
+        $definition = $container->getDefinition('foo.transport.throttling');
         $this->assertSame(ThrottlingHttpClient::class, $definition->getClass());
-        $this->assertSame('foo', $definition->getDecoratedService()[0]);
+        $this->assertSame('foo.transport', $definition->getDecoratedService()[0]);
         $this->assertCount(2, $arguments = $definition->getArguments());
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('foo.throttling.inner', (string) $arguments[0]);
+        $this->assertSame('foo.transport.throttling.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
-        $this->assertSame('foo.throttling.limiter', (string) $arguments[1]);
+        $this->assertSame('foo.transport.throttling.limiter', (string) $arguments[1]);
     }
 
     public static function provideMailer(): iterable
