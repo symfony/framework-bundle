@@ -58,7 +58,6 @@ use Symfony\Component\HttpClient\CachingHttpClient;
 use Symfony\Component\HttpClient\Exception\ChunkCacheItemNotFoundException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\RetryableHttpClient;
-use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpKernel\DependencyInjection\LoggerPass;
@@ -107,6 +106,7 @@ use Symfony\Component\Workflow\Metadata\InMemoryMetadataStore;
 use Symfony\Component\Workflow\WorkflowEvents;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class FrameworkExtensionTestCase extends TestCase
 {
@@ -2239,8 +2239,8 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertTrue($container->hasDefinition('foo'), 'should have the "foo" service.');
         $definition = $container->getDefinition('foo');
-        $this->assertSame(ScopingHttpClient::class, $definition->getClass());
-        $this->assertTrue($definition->hasTag('kernel.reset'));
+        $this->assertSame(HttpClientInterface::class, $definition->getClass());
+        $this->assertTrue($definition->hasTag('http_client.client'));
     }
 
     public function testScopedHttpClientWithoutQueryOption()
@@ -2248,7 +2248,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container = $this->createContainerFromFile('http_client_scoped_without_query_option');
 
         $this->assertTrue($container->hasDefinition('foo'), 'should have the "foo" service.');
-        $this->assertSame(ScopingHttpClient::class, $container->getDefinition('foo')->getClass());
+        $this->assertSame(HttpClientInterface::class, $container->getDefinition('foo')->getClass());
     }
 
     public function testHttpClientOverrideDefaultOptions()
@@ -2258,7 +2258,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(['foo' => 'bar'], $container->getDefinition('http_client.transport')->getArgument(0)['headers']);
         $this->assertSame(['foo' => 'bar'], $container->getDefinition('http_client.transport')->getArgument(0)['extra']);
         $this->assertSame(4, $container->getDefinition('http_client.transport')->getArgument(1));
-        $this->assertSame('http://example.com', $container->getDefinition('foo')->getArgument(1));
+        $this->assertSame('http://example.com', $container->getDefinition('foo.scoping')->getArgument(1));
 
         $expected = [
             'headers' => [
@@ -2270,7 +2270,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'query' => [],
             'resolve' => [],
         ];
-        $this->assertEquals($expected, $container->getDefinition('foo')->getArgument(2));
+        $this->assertEquals($expected, $container->getDefinition('foo.scoping')->getArgument(2));
     }
 
     public function testCachingHttpClient()
@@ -2287,7 +2287,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('http_client', $definition->getDecoratedService()[0]);
         $this->assertCount(5, $arguments = $definition->getArguments());
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('http_client.caching.inner', (string) $arguments[0]);
+        $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('foo', (string) $arguments[1]);
         $this->assertArrayHasKey('headers', $arguments[2]);
@@ -2295,18 +2295,18 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertFalse($arguments[3]);
         $this->assertSame(2, $arguments[4]);
 
-        $this->assertTrue($container->hasDefinition('bar.transport.caching'));
-        $definition = $container->getDefinition('bar.transport.caching');
+        $this->assertTrue($container->hasDefinition('bar.caching'));
+        $definition = $container->getDefinition('bar.caching');
         $this->assertSame(CachingHttpClient::class, $definition->getClass());
         $arguments = $definition->getArguments();
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('bar.transport.caching.inner', (string) $arguments[0]);
+        $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('baz', (string) $arguments[1]);
-        $scopedClient = $container->getDefinition('bar');
+        $scopedClient = $container->getDefinition('bar.scoping');
 
-        $this->assertSame('bar.transport', (string) $scopedClient->getArgument(0));
-        $this->assertNull($scopedClient->getDecoratedService());
+        $this->assertSame('.inner', (string) $scopedClient->getArgument(0));
+        $this->assertSame('bar', $scopedClient->getDecoratedService()[0]);
     }
 
     public function testHttpClientRetry()
@@ -2320,8 +2320,8 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(0.3, $container->getDefinition('http_client.retry_strategy')->getArgument(4));
         $this->assertSame(2, $container->getDefinition('http_client.retryable')->getArgument(2));
 
-        $this->assertSame(RetryableHttpClient::class, $container->getDefinition('foo.transport.retryable')->getClass());
-        $this->assertSame(4, $container->getDefinition('foo.transport.retry_strategy')->getArgument(2));
+        $this->assertSame(RetryableHttpClient::class, $container->getDefinition('foo.retryable')->getClass());
+        $this->assertSame(4, $container->getDefinition('foo.retry_strategy')->getArgument(2));
     }
 
     public function testHttpClientWithQueryParameterKey()
@@ -2331,12 +2331,12 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $expected = [
             'key' => 'foo',
         ];
-        $this->assertSame($expected, $container->getDefinition('foo')->getArgument(2)['query']);
+        $this->assertSame($expected, $container->getDefinition('foo.scoping')->getArgument(2)['query']);
 
         $expected = [
             'host' => '127.0.0.1',
         ];
-        $this->assertSame($expected, $container->getDefinition('foo')->getArgument(2)['resolve']);
+        $this->assertSame($expected, $container->getDefinition('foo.scoping')->getArgument(2)['resolve']);
     }
 
     public function testHttpClientFullDefaultOptions()
@@ -2382,19 +2382,19 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('http_client', $definition->getDecoratedService()[0]);
         $this->assertCount(2, $arguments = $definition->getArguments());
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('http_client.throttling.inner', (string) $arguments[0]);
+        $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('http_client.throttling.limiter', (string) $arguments[1]);
 
-        $this->assertTrue($container->hasDefinition('foo.transport.throttling'));
-        $definition = $container->getDefinition('foo.transport.throttling');
+        $this->assertTrue($container->hasDefinition('foo.throttling'));
+        $definition = $container->getDefinition('foo.throttling');
         $this->assertSame(ThrottlingHttpClient::class, $definition->getClass());
-        $this->assertSame('foo.transport', $definition->getDecoratedService()[0]);
+        $this->assertSame('foo', $definition->getDecoratedService()[0]);
         $this->assertCount(2, $arguments = $definition->getArguments());
         $this->assertInstanceOf(Reference::class, $arguments[0]);
-        $this->assertSame('foo.transport.throttling.inner', (string) $arguments[0]);
+        $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
-        $this->assertSame('foo.transport.throttling.limiter', (string) $arguments[1]);
+        $this->assertSame('foo.throttling.limiter', (string) $arguments[1]);
     }
 
     public static function provideMailer(): iterable
