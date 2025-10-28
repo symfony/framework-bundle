@@ -1873,13 +1873,13 @@ class FrameworkExtension extends Extension
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
         if (class_exists(ValidatorAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) && trait_exists(ArgumentTrait::class)) {
             // The $reflector argument hints at where the attribute could be used
-            $container->registerAttributeForAutoconfiguration(Constraint::class, function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
+            $container->registerAttributeForAutoconfiguration(Constraint::class, static function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
                 $definition->addTag('validator.attribute_metadata')
                     ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
             });
         }
 
-        $container->registerAttributeForAutoconfiguration(ExtendsValidationFor::class, function (ChildDefinition $definition, ExtendsValidationFor $attribute) {
+        $container->registerAttributeForAutoconfiguration(ExtendsValidationFor::class, static function (ChildDefinition $definition, ExtendsValidationFor $attribute) {
             $definition->addTag('validator.attribute_metadata', ['for' => $attribute->class])
                 ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
         });
@@ -2139,22 +2139,25 @@ class FrameworkExtension extends Extension
         // And when runtime-discovery of attributes is enabled, we can skip compile-time autoconfiguration in debug mode.
         if (class_exists(SerializerAttributeMetadataPass::class) && (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug'))) {
             // The $reflector argument hints at where the attribute could be used
-            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata');
+            $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Context::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Groups::class, $configurator);
 
-            $configurator = function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata');
+            $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Ignore::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\MaxDepth::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedName::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedPath::class, $configurator);
 
-            $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, function (ChildDefinition $definition) {
-                $definition->addTag('serializer.attribute_metadata');
+            $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, static function (ChildDefinition $definition) {
+                $definition->addTag('serializer.attribute_metadata')
+                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
             });
         }
 
@@ -2225,7 +2228,7 @@ class FrameworkExtension extends Extension
 
         $container->setParameter('.serializer.named_serializers', $config['named_serializers'] ?? []);
 
-        $container->registerAttributeForAutoconfiguration(ExtendsSerializationFor::class, function (ChildDefinition $definition, ExtendsSerializationFor $attribute) {
+        $container->registerAttributeForAutoconfiguration(ExtendsSerializationFor::class, static function (ChildDefinition $definition, ExtendsSerializationFor $attribute) {
             $definition->addTag('serializer.attribute_metadata', ['for' => $attribute->class])
                 ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
         });
