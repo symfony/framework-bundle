@@ -115,7 +115,7 @@ return static function (ContainerConfigurator $container) {
 
         ->set('http_cache.store', Store::class)
             ->args([
-                param('kernel.cache_dir').'/http_cache',
+                param('kernel.share_dir').'/http_cache',
             ])
         ->alias(StoreInterface::class, 'http_cache.store')
 
