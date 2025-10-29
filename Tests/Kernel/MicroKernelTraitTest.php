@@ -46,6 +46,49 @@ class MicroKernelTraitTest extends TestCase
         }
     }
 
+    public function testGetShareDirDisabledByEnv()
+    {
+        $previous = $_SERVER['APP_SHARE_DIR'] ?? null;
+        $_SERVER['APP_SHARE_DIR'] = 'false';
+
+        try {
+            $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
+
+            $this->assertNull($kernel->getShareDir());
+
+            $parameters = $kernel->getKernelParameters();
+            $this->assertArrayNotHasKey('kernel.share_dir', $parameters);
+        } finally {
+            if (null === $previous) {
+                unset($_SERVER['APP_SHARE_DIR']);
+            } else {
+                $_SERVER['APP_SHARE_DIR'] = $previous;
+            }
+        }
+    }
+
+    public function testGetShareDirCustomPathFromEnv()
+    {
+        $previous = $_SERVER['APP_SHARE_DIR'] ?? null;
+        $_SERVER['APP_SHARE_DIR'] = sys_get_temp_dir();
+
+        try {
+            $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
+
+            $expected = rtrim(sys_get_temp_dir(), '/').'/test';
+            $this->assertSame($expected, $kernel->getShareDir());
+
+            $parameters = $kernel->getKernelParameters();
+            $this->assertSame($expected, $parameters['kernel.share_dir'] ?? null);
+        } finally {
+            if (null === $previous) {
+                unset($_SERVER['APP_SHARE_DIR']);
+            } else {
+                $_SERVER['APP_SHARE_DIR'] = $previous;
+            }
+        }
+    }
+
     public function test()
     {
         $kernel = $this->kernel = new ConcreteMicroKernel('test', false);

@@ -124,10 +124,15 @@ trait MicroKernelTrait
         return parent::getBuildDir();
     }
 
-    public function getShareDir(): string
+    public function getShareDir(): ?string
     {
         if (isset($_SERVER['APP_SHARE_DIR'])) {
-            return $_SERVER['APP_SHARE_DIR'].'/'.$this->environment;
+            if (false === $dir = filter_var($_SERVER['APP_SHARE_DIR'], \FILTER_VALIDATE_BOOL, \FILTER_NULL_ON_FAILURE) ?? $_SERVER['APP_SHARE_DIR']) {
+                return null;
+            }
+            if (\is_string($dir)) {
+                return $dir.'/'.$this->environment;
+            }
         }
 
         return parent::getShareDir();
