@@ -706,32 +706,13 @@ class FrameworkExtension extends Extension
 
         $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition, AsEventListener $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
             $tagAttributes = get_object_vars($attribute);
-
-            if (!$reflector instanceof \ReflectionMethod) {
-                $definition->addTag('kernel.event_listener', $tagAttributes);
-
-                return;
-            }
-
-            if (isset($tagAttributes['method'])) {
-                throw new LogicException(\sprintf('AsEventListener attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
-            }
-
-            $tagAttributes['method'] = $reflector->getName();
-
-            if (!$eventArg = $reflector->getParameters()[0] ?? null) {
-                throw new LogicException(\sprintf('AsEventListener attribute requires the first argument of "%s::%s()" to be an event object.', $reflector->class, $reflector->name));
-            }
-
-            $types = ($type = $eventArg->getType() instanceof \ReflectionUnionType ? $eventArg->getType()->getTypes() : [$eventArg->getType()]) ?: [];
-
-            foreach ($types as $type) {
-                if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
-                    $tagAttributes['event'] = $type->getName();
-
-                    $definition->addTag('kernel.event_listener', $tagAttributes);
+            if ($reflector instanceof \ReflectionMethod) {
+                if (isset($tagAttributes['method'])) {
+                    throw new LogicException(\sprintf('AsEventListener attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
                 }
+                $tagAttributes['method'] = $reflector->getName();
             }
+            $definition->addTag('kernel.event_listener', $tagAttributes);
         });
         $container->registerAttributeForAutoconfiguration(AsController::class, static function (ChildDefinition $definition, AsController $attribute): void {
             $definition->addTag('controller.service_arguments');
@@ -2152,7 +2133,7 @@ class FrameworkExtension extends Extension
             $definition->addTag('property_info.constructor_extractor', ['priority' => -1000]);
         }
 
-        if (ContainerBuilder::willBeAvailable('phpdocumentor/reflection-docblock', DocBlockFactoryInterface::class, ['symfony/framework-bundle', 'symfony/property-info'], true)) {
+        if (ContainerBuilder::willBeAvailable('phpdocumentor/reflection-docblock', DocBlockFactoryInterface::class, ['symfony/framework-bundle', 'symfony/property-info'])) {
             $definition = $container->register('property_info.php_doc_extractor', PhpDocExtractor::class);
             $definition->addTag('property_info.description_extractor', ['priority' => -1000]);
             $definition->addTag('property_info.type_extractor', ['priority' => -1001]);
