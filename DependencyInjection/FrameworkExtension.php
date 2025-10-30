@@ -2150,7 +2150,7 @@ class FrameworkExtension extends Extension
             $definition->addTag('property_info.constructor_extractor', ['priority' => -1000]);
         }
 
-        if (ContainerBuilder::willBeAvailable('phpdocumentor/reflection-docblock', DocBlockFactoryInterface::class, ['symfony/framework-bundle', 'symfony/property-info'], true)) {
+        if (ContainerBuilder::willBeAvailable('phpdocumentor/reflection-docblock', DocBlockFactoryInterface::class, ['symfony/framework-bundle', 'symfony/property-info'])) {
             $definition = $container->register('property_info.php_doc_extractor', PhpDocExtractor::class);
             $definition->addTag('property_info.description_extractor', ['priority' => -1000]);
             $definition->addTag('property_info.type_extractor', ['priority' => -1001]);
