@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\OutOfBoundsException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\Messenger\Tests\Fixtures\DummyMessage;
 use Symfony\Component\RateLimiter\CompoundRateLimiterFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Validator\Constraints\Email;
@@ -424,6 +425,40 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
             yield [$mode];
         }
         yield ['loose'];
+    }
+
+    public function testMessengerSigningSerializerWiring()
+    {
+        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+            $container->register('signed_handler', 'stdClass')
+                ->addTag('messenger.message_handler', ['handles' => DummyMessage::class, 'sign' => true]);
+
+            $container->loadFromExtension('framework', [
+                'annotations' => false,
+                'http_method_override' => false,
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'messenger' => [
+                    'transports' => [
+                        'async' => ['dsn' => 'in-memory://'],
+                    ],
+                    'routing' => [
+                        DummyMessage::class => ['senders' => ['async']],
+                    ],
+                    'buses' => [
+                        'message_bus' => ['default_middleware' => ['enabled' => true]],
+                    ],
+                ],
+            ]);
+        });
+
+        $this->assertTrue($container->hasDefinition('messenger.signing_serializer'));
+        $mapping = $container->getDefinition('messenger.signing_serializer')->getArgument(2);
+        $this->assertArrayHasKey(DummyMessage::class, $mapping);
+        $this->assertNotEmpty($mapping[DummyMessage::class]);
+
+        $this->assertTrue($container->hasDefinition('message_bus'));
+        $this->assertSame('message_bus', (string) $container->getAlias('messenger.default_bus'));
     }
 }
 
