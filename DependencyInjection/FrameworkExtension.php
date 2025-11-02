@@ -2418,6 +2418,7 @@ class FrameworkExtension extends Extension
         $senderAliases = [];
         $transportRetryReferences = [];
         $transportRateLimiterReferences = [];
+        $serializerIds = [];
         foreach ($config['transports'] as $name => $transport) {
             $serializerId = $transport['serializer'] ?? 'messenger.default_serializer';
             $tags = [
@@ -2434,6 +2435,7 @@ class FrameworkExtension extends Extension
             ;
             $container->setDefinition($transportId = 'messenger.transport.'.$name, $transportDefinition);
             $senderAliases[$name] = $transportId;
+            $serializerIds[$transportId] = $serializerId;
 
             if (null !== $transport['retry_strategy']['service']) {
                 $transportRetryReferences[$name] = new Reference($transport['retry_strategy']['service']);
@@ -2461,13 +2463,11 @@ class FrameworkExtension extends Extension
         }
 
         $senderReferences = [];
-        // alias => service_id
-        foreach ($senderAliases as $alias => $serviceId) {
-            $senderReferences[$alias] = new Reference($serviceId);
+        foreach ($senderAliases as $alias => $transportId) {
+            $senderReferences[$alias] = new Reference($transportId);
         }
-        // service_id => service_id
-        foreach ($senderAliases as $serviceId) {
-            $senderReferences[$serviceId] = new Reference($serviceId);
+        foreach ($senderAliases as $transportId) {
+            $senderReferences[$transportId] = new Reference($transportId);
         }
 
         foreach ($config['transports'] as $name => $transport) {
@@ -2478,7 +2478,7 @@ class FrameworkExtension extends Extension
             }
         }
 
-        $failureTransportReferencesByTransportName = array_map(fn ($failureTransportName) => $senderReferences[$failureTransportName], $failureTransportsByName);
+        $failureTransportReferencesByTransportName = array_map(static fn ($failureTransportName) => $senderReferences[$failureTransportName], $failureTransportsByName);
 
         $messageToSendersMapping = [];
         foreach ($config['routing'] as $message => $messageConfiguration) {
@@ -2506,6 +2506,18 @@ class FrameworkExtension extends Extension
             ->replaceArgument(0, $messageToSendersMapping)
             ->replaceArgument(1, $sendersServiceLocator)
         ;
+
+        $messageToSerializersMapping = [];
+        foreach ($messageToSendersMapping as $message => $senders) {
+            foreach ($senders as $sender) {
+                $serializerId = $serializerIds[$senderAliases[$sender] ?? $sender];
+                $messageToSerializersMapping[$message][$serializerId] = $serializerId;
+            }
+            $messageToSerializersMapping[$message] = array_keys($messageToSerializersMapping[$message]);
+        }
+
+        $container->getDefinition('messenger.signing_serializer')
+            ->replaceArgument(2, $messageToSerializersMapping);
 
         $container->getDefinition('messenger.retry.send_failed_message_for_retry_listener')
             ->replaceArgument(0, $sendersServiceLocator)
@@ -2798,7 +2810,7 @@ class FrameworkExtension extends Extension
 
         $container
             ->register($name.'.caching', CachingHttpClient::class)
-            ->setDecoratedService($name, null,  15)
+            ->setDecoratedService($name, null, 15)
             ->setArguments([
                 new Reference('.inner'),
                 new Reference($options['cache_pool']),

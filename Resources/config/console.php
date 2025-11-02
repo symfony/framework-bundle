@@ -407,6 +407,6 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service('console.messenger.application'),
             ])
-            ->tag('messenger.message_handler')
+            ->tag('messenger.message_handler', ['sign' => true])
     ;
 };
