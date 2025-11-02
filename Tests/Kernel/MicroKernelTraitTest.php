@@ -71,7 +71,9 @@ class MicroKernelTraitTest extends TestCase
         $this->assertSame($expected, $kernel->getShareDir());
 
         $parameters = $kernel->getKernelParameters();
-        $this->assertSame($expected, $parameters['kernel.share_dir'] ?? null);
+        $this->assertArrayHasKey('kernel.share_dir', $parameters);
+        $this->assertNotNull($parameters['kernel.share_dir']);
+        $this->assertSame(realpath($expected), realpath($parameters['kernel.share_dir']));
     }
 
     public function test()
