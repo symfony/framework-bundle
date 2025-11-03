@@ -377,10 +377,6 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
                 ->addTag('messenger.message_handler', ['handles' => DummyMessage::class, 'sign' => true]);
 
             $container->loadFromExtension('framework', [
-                'annotations' => false,
-                'http_method_override' => false,
-                'handle_all_throwables' => true,
-                'php_errors' => ['log' => true],
                 'messenger' => [
                     'transports' => [
                         'async' => ['dsn' => 'in-memory://'],
