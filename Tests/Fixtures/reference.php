@@ -130,40 +130,43 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         count?: int,
  *     },
  * }
+ * @psalm-type ConfigType = array{
+ *     imports?: ImportsConfig,
+ *     parameters?: ParametersConfig,
+ *     services?: ServicesConfig,
+ *     test?: TestConfig,
+ *     "when@dev"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     "when@prod"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     "when@test"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         ...<string, ExtensionType>,
+ *     }>
+ * }
  */
 final class App extends AppReference
 {
     /**
-     * @param array{
-     *     imports?: ImportsConfig,
-     *     parameters?: ParametersConfig,
-     *     services?: ServicesConfig,
-     *     test?: TestConfig,
-     *     "when@dev"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     "when@prod"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     "when@test"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         ...<string, ExtensionType>,
-     *     }>
-     * } $config
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
      */
     public static function config(array $config): array
     {

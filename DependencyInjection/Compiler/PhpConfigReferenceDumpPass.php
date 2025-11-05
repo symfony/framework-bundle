@@ -60,11 +60,11 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
     private const WHEN_ENV_APP_TEMPLATE = <<<'PHPDOC'
 
-             *     "when@{ENV}"?: array{
-             *         imports?: ImportsConfig,
-             *         parameters?: ParametersConfig,
-             *         services?: ServicesConfig,{SHAPE}
-             *     },
+         *     "when@{ENV}"?: array{
+         *         imports?: ImportsConfig,
+         *         parameters?: ParametersConfig,
+         *         services?: ServicesConfig,{SHAPE}
+         *     },
         PHPDOC;
 
     private const ROUTES_TYPES_TEMPLATE = <<<'PHPDOC'
@@ -121,23 +121,24 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
         $r = new \ReflectionClass(AppReference::class);
 
-        if (false === $i = strpos($phpdoc = $r->getDocComment(), "\n */")) {
+        if (false === $i = strpos($phpdoc = $r->getDocComment(), "\n * @psalm-type ConfigType = ")) {
             throw new \LogicException(\sprintf('Cannot insert config shape in "%s".', AppReference::class));
         }
         $appTypes = substr_replace($phpdoc, $appTypes, $i, 0);
 
-        if (false === $i = strpos($phpdoc = $r->getMethod('config')->getDocComment(), "\n     *     ...<string, ExtensionType|array{")) {
+        if (false === $i = strrpos($phpdoc = $appTypes, "\n *     ...<string, ExtensionType|array{")) {
             throw new \LogicException(\sprintf('Cannot insert config shape in "%s".', AppReference::class));
         }
-        $appParam = substr_replace($phpdoc, $this->getShapeForExtensions($anyEnvExtensions, $container), $i, 0);
-        $i += \strlen($appParam) - \strlen($phpdoc);
+        $appTypes = substr_replace($phpdoc, $this->getShapeForExtensions($anyEnvExtensions, $container), $i, 0);
+        $i += \strlen($appTypes) - \strlen($phpdoc);
 
         foreach ($extensionsPerEnv as $env => $extensions) {
-            $appParam = substr_replace($appParam, strtr(self::WHEN_ENV_APP_TEMPLATE, [
+            $appTypes = substr_replace($appTypes, strtr(self::WHEN_ENV_APP_TEMPLATE, [
                 '{ENV}' => $env,
                 '{SHAPE}' => $this->getShapeForExtensions($extensions, $container, '    '),
             ]), $i, 0);
         }
+        $appParam = $r->getMethod('config')->getDocComment();
 
         $r = new \ReflectionClass(RoutesReference::class);
 
@@ -191,7 +192,7 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         foreach ($extensions as $extension) {
             if ($this->getConfiguration($extension, $container)) {
                 $type = $this->camelCase($extension->getAlias()).'Config';
-                $shape .= \sprintf("\n     *     %s%s?: %s,", $indent, $extension->getAlias(), $type);
+                $shape .= \sprintf("\n *     %s%s?: %s,", $indent, $extension->getAlias(), $type);
             }
         }
 
