@@ -31,7 +31,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     type?: string|null,
  *     ignore_errors?: bool,
  * }>
- * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array|null>|null>
+ * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array<mixed>|null>|null>
  * @psalm-type ArgumentsType = list<mixed>|array<string, mixed>
  * @psalm-type CallType = array<string, ArgumentsType>|array{0:string, 1?:ArgumentsType, 2?:bool}|array{method:string, arguments?:ArgumentsType, returns_clone?:bool}
  * @psalm-type TagsType = list<string|array<string, array<string, mixed>>> // arrays inside the list must have only one element, with the tag name as the key
@@ -83,7 +83,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,
  *     constructor?: string,
- *     from_callable?: mixed,
+ *     from_callable?: CallbackType,
  * }
  * @psalm-type AliasType = string|array{
  *     alias: string,
@@ -130,40 +130,43 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         count?: int,
  *     },
  * }
+ * @psalm-type ConfigType = array{
+ *     imports?: ImportsConfig,
+ *     parameters?: ParametersConfig,
+ *     services?: ServicesConfig,
+ *     test?: TestConfig,
+ *     "when@dev"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     "when@prod"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     "when@test"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         test?: TestConfig,
+ *     },
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         ...<string, ExtensionType>,
+ *     }>
+ * }
  */
 final class App extends AppReference
 {
     /**
-     * @param array{
-     *     imports?: ImportsConfig,
-     *     parameters?: ParametersConfig,
-     *     services?: ServicesConfig,
-     *     test?: TestConfig,
-     *     "when@dev"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     "when@prod"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     "when@test"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         test?: TestConfig,
-     *     },
-     *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         ...<string, ExtensionType>,
-     *     }>
-     * } $config
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
      */
     public static function config(array $config): array
     {
@@ -184,8 +187,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  *
  *     return Routes::config([
  *         'controllers' => [
- *             'resource' => 'attributes',
- *             'type' => 'tagged_services',
+ *             'resource' => 'routing.controllers',
  *         ],
  *     ]);
  *     ```
