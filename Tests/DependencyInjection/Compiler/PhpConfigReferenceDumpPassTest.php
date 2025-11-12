@@ -26,17 +26,31 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class PhpConfigReferenceDumpPassTest extends TestCase
 {
+    private string $readOnlyDir;
     private string $tempDir;
 
     protected function setUp(): void
     {
         $this->tempDir = sys_get_temp_dir().'/sf_test_config_reference';
         mkdir($this->tempDir, 0o777, true);
+
+        // Create a read-only directory to simulate write errors
+        $this->readOnlyDir = $this->tempDir.'/readonly';
+        mkdir($this->readOnlyDir, 0o444, true);
+
+        // Make the directory read-only on Windows
+        if ('\\' === \DIRECTORY_SEPARATOR) {
+            exec('attrib +r '.escapeshellarg($this->readOnlyDir));
+        }
     }
 
     protected function tearDown(): void
     {
         if (is_dir($this->tempDir)) {
+            if ('\\' === \DIRECTORY_SEPARATOR) {
+                exec('attrib -r '.escapeshellarg($this->readOnlyDir));
+            }
+
             $fs = new Filesystem();
             $fs->remove($this->tempDir);
         }
@@ -64,23 +78,15 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
     public function testProcessIgnoresFileWriteErrors()
     {
-        if ('\\' === \DIRECTORY_SEPARATOR) {
-            self::markTestSkipped('Cannot reliably make directory read-only on Windows.');
-        }
-
-        // Create a read-only directory to simulate write errors
-        $readOnlyDir = $this->tempDir.'/readonly';
-        mkdir($readOnlyDir, 0o444, true);
-
         $container = new ContainerBuilder();
         $container->setParameter('.container.known_envs', ['dev', 'prod', 'test']);
 
-        $pass = new PhpConfigReferenceDumpPass($readOnlyDir.'/reference.php', [
+        $pass = new PhpConfigReferenceDumpPass($this->readOnlyDir.'/reference.php', [
             TestBundle::class => ['all' => true],
         ]);
 
         $pass->process($container);
-        $this->assertFileDoesNotExist($readOnlyDir.'/reference.php');
+        $this->assertFileDoesNotExist($this->readOnlyDir.'/reference.php');
         $this->assertEmpty($container->getResources());
     }
 
