@@ -1053,7 +1053,7 @@ class FrameworkExtension extends Extension
         }
 
         if (false === $config['collect_serializer_data']) {
-            trigger_deprecation('symfony/framework-bundle', '7.3', 'Setting the "framework.profiler.collect_serializer_data" config option to "false" is deprecated.');
+            trigger_deprecation('symfony/framework-bundle', '7.3', 'Not setting the "framework.profiler.collect_serializer_data" config option to "true" is deprecated.');
         }
 
         if ($this->isInitializedConfigEnabled('serializer') && $config['collect_serializer_data']) {
