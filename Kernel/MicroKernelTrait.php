@@ -79,12 +79,14 @@ trait MicroKernelTrait
         $routes->import($configDir.'/{routes}/'.$this->environment.'/*.{php,yaml}');
         $routes->import($configDir.'/{routes}/*.{php,yaml}');
 
-        $routes->import('routing.controllers');
-
         if (is_file($this->getConfigDir().'/routes.yaml')) {
             $routes->import($configDir.'/routes.yaml');
         } else {
             $routes->import($configDir.'/{routes}.php');
+        }
+
+        if ($fileName = (new \ReflectionObject($this))->getFileName()) {
+            $routes->import($fileName, 'attribute');
         }
     }
 
