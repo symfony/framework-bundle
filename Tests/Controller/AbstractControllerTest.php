@@ -227,6 +227,37 @@ class AbstractControllerTest extends TestCase
         $this->assertEquals('{}', $response->getContent());
     }
 
+    public function testJsonNull()
+    {
+        $controller = $this->createController();
+        $controller->setContainer(new Container());
+
+        $response = $controller->json(null);
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('null', $response->getContent());
+    }
+
+    public function testJsonNullWithSerializer()
+    {
+        $container = new Container();
+
+        $serializer = $this->createMock(SerializerInterface::class);
+        $serializer
+            ->expects($this->once())
+            ->method('serialize')
+            ->with(null, 'json', ['json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS])
+            ->willReturn('null');
+
+        $container->set('serializer', $serializer);
+
+        $controller = $this->createController();
+        $controller->setContainer($container);
+
+        $response = $controller->json(null);
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('null', $response->getContent());
+    }
+
     public function testFile()
     {
         $container = new Container();
