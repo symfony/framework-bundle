@@ -148,6 +148,10 @@ class ControllerHelper implements ServiceSubscriberInterface
             return new JsonResponse($json, $status, $headers, true);
         }
 
+        if (null === $data) {
+            return new JsonResponse('null', $status, $headers, true);
+        }
+
         return new JsonResponse($data, $status, $headers);
     }
 
