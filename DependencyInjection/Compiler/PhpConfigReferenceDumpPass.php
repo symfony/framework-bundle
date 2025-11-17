@@ -35,24 +35,24 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
         {APP_TYPES}
-        final class App extends AppReference
+        final class App
         {
             {APP_PARAM}
             public static function config(array $config): array
             {
-                return parent::config($config);
+                return AppReference::config($config);
             }
         }
 
         namespace Symfony\Component\Routing\Loader\Configurator;
 
         {ROUTES_TYPES}
-        final class Routes extends RoutesReference
+        final class Routes
         {
             {ROUTES_PARAM}
             public static function config(array $config): array
             {
-                return parent::config($config);
+                return $config;
             }
         }
 

@@ -71,7 +71,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
         $content = file_get_contents($referenceFile);
         $this->assertStringContainsString('namespace Symfony\Component\DependencyInjection\Loader\Configurator;', $content);
-        $this->assertStringContainsString('final class App extends AppReference', $content);
+        $this->assertStringContainsString('final class App', $content);
         $this->assertStringContainsString('public static function config(array $config): array', $content);
         $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
     }
