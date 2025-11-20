@@ -35,24 +35,24 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
         {APP_TYPES}
-        final class App extends AppReference
+        final class App
         {
             {APP_PARAM}
             public static function config(array $config): array
             {
-                return parent::config($config);
+                return AppReference::config($config);
             }
         }
 
         namespace Symfony\Component\Routing\Loader\Configurator;
 
         {ROUTES_TYPES}
-        final class Routes extends RoutesReference
+        final class Routes
         {
             {ROUTES_PARAM}
             public static function config(array $config): array
             {
-                return parent::config($config);
+                return $config;
             }
         }
 
@@ -95,6 +95,15 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         $appTypes = '';
 
         $anyEnvExtensions = [];
+        foreach ($container->getExtensions() as $alias => $extension) {
+            if (!$configuration = $this->getConfiguration($extension, $container)) {
+                continue;
+            }
+
+            $anyEnvExtensions[$alias] = $extension;
+            $type = $this->camelCase($alias).'Config';
+            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($configuration->getConfigTreeBuilder()->buildTree()));
+        }
         foreach ($this->bundlesDefinition as $bundle => $envs) {
             if (!is_subclass_of($bundle, BundleInterface::class)) {
                 continue;
@@ -105,15 +114,21 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
             if (!$configuration = $this->getConfiguration($extension, $container)) {
                 continue;
             }
-            $anyEnvExtensions[$bundle] = $extension;
-            $type = $this->camelCase($extension->getAlias()).'Config';
-            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($configuration->getConfigTreeBuilder()->buildTree()));
+
+            $extensionAlias = $extension->getAlias();
+            if (isset($anyEnvExtensions[$extensionAlias])) {
+                $extension = $anyEnvExtensions[$extensionAlias];
+            } else {
+                $anyEnvExtensions[$extensionAlias] = $extension;
+                $type = $this->camelCase($extensionAlias).'Config';
+                $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($configuration->getConfigTreeBuilder()->buildTree()));
+            }
 
             foreach ($knownEnvs as $env) {
                 if ($envs[$env] ?? $envs['all'] ?? false) {
                     $extensionsPerEnv[$env][] = $extension;
                 } else {
-                    unset($anyEnvExtensions[$bundle]);
+                    unset($anyEnvExtensions[$extensionAlias]);
                 }
             }
         }

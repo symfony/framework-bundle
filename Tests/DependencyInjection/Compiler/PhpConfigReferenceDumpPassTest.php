@@ -71,7 +71,7 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
         $content = file_get_contents($referenceFile);
         $this->assertStringContainsString('namespace Symfony\Component\DependencyInjection\Loader\Configurator;', $content);
-        $this->assertStringContainsString('final class App extends AppReference', $content);
+        $this->assertStringContainsString('final class App', $content);
         $this->assertStringContainsString('public static function config(array $config): array', $content);
         $this->assertEquals([new FileResource(realpath($this->tempDir).'/reference.php')], $container->getResources());
     }
@@ -95,8 +95,8 @@ class PhpConfigReferenceDumpPassTest extends TestCase
         $container = new ContainerBuilder();
         $container->setParameter('.container.known_envs', ['dev', 'prod', 'test']);
 
-        $extension = new TestExtension();
-        $container->registerExtension($extension);
+        $container->registerExtension(new TestExtension(false));
+        $container->registerExtension(new AppExtension());
 
         $pass = new PhpConfigReferenceDumpPass($this->tempDir.'/reference.php', [
             TestBundle::class => ['all' => true],
@@ -133,12 +133,16 @@ class TestBundle extends Bundle
 {
     public function getContainerExtension(): ?ExtensionInterface
     {
-        return new TestExtension();
+        return new TestExtension(true);
     }
 }
 
 class TestExtension extends Extension
 {
+    public function __construct(private bool $fromBundle)
+    {
+    }
+
     public function load(array $configs, ContainerBuilder $container): void
     {
     }
@@ -160,12 +164,16 @@ class TestExtension extends Extension
 
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
-        return new TestConfiguration();
+        return new TestConfiguration($this->fromBundle);
     }
 }
 
 class TestConfiguration implements ConfigurationInterface
 {
+    public function __construct(private bool $fromBundle)
+    {
+    }
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('test');
@@ -181,9 +189,30 @@ class TestConfiguration implements ConfigurationInterface
                             ->integerNode('count')->end()
                         ->end()
                     ->end()
+                    ->booleanNode('fromBundle')->defaultValue($this->fromBundle)->end()
                 ->end();
         }
 
         return $treeBuilder;
+    }
+}
+
+class AppExtension extends Extension
+{
+    public function load(array $configs, ContainerBuilder $container): void
+    {
+    }
+
+    public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
+    {
+        return new AppConfiguration();
+    }
+}
+
+class AppConfiguration implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder(): TreeBuilder
+    {
+        return new TreeBuilder('app', 'boolean');
     }
 }
