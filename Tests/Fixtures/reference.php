@@ -129,12 +129,15 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         name?: scalar|null,
  *         count?: int,
  *     },
+ *     fromBundle?: bool, // Default: false
  * }
+ * @psalm-type AppConfig = bool
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
  *     services?: ServicesConfig,
  *     test?: TestConfig,
+ *     app?: AppConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
