@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\BackupGlobals;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -238,5 +239,34 @@ class MicroKernelTraitTest extends TestCase
             'Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true],
             'TestBundle' => ['test' => true, 'dev' => true],
         ], $parameters['.kernel.bundles_definition']);
+    }
+
+    public function testRelativeEnvDirsAreResolvedFromProjectDir()
+    {
+        $_SERVER['APP_CACHE_DIR'] = 'var/custom-cache';
+        $_SERVER['APP_BUILD_DIR'] = 'var/custom-build';
+        $_SERVER['APP_SHARE_DIR'] = 'var/custom-share';
+
+        $projectDir = sys_get_temp_dir().'/sf_env_dir_kernel';
+        $kernel = new EnvDirKernel($projectDir);
+
+        $this->assertSame($projectDir.'/var/custom-cache/test', $kernel->getCacheDir());
+        $this->assertSame($projectDir.'/var/custom-build/test', $kernel->getBuildDir());
+        $this->assertSame($projectDir.'/var/custom-share/test', $kernel->getShareDir());
+    }
+}
+
+class EnvDirKernel extends Kernel
+{
+    use MicroKernelTrait;
+
+    public function __construct(private readonly string $projectDir)
+    {
+        parent::__construct('test', false);
+    }
+
+    public function getProjectDir(): string
+    {
+        return $this->projectDir;
     }
 }
