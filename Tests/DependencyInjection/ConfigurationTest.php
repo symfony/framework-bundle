@@ -711,6 +711,7 @@ class ConfigurationTest extends TestCase
                     'enum' => [
                         'supports' => [self::class],
                         'places' => Places::cases(),
+                        'initial_marking' => Places::A,
                         'transitions' => [
                             [
                                 'name' => 'one',
@@ -727,6 +728,8 @@ class ConfigurationTest extends TestCase
                 ],
             ],
         ]]);
+
+        $this->assertSame(['a'], $config['workflows']['workflows']['enum']['initial_marking']);
 
         $transitions = $config['workflows']['workflows']['enum']['transitions'];
 
