@@ -137,6 +137,7 @@ use Symfony\Component\Notifier\Notifier;
 use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport\TransportFactoryInterface as NotifierTransportFactoryInterface;
+use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\ObjectMapper\ConditionCallableInterface;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\ObjectMapper\TransformCallableInterface;
@@ -618,6 +619,12 @@ class FrameworkExtension extends Extension
                 ->addTag('object_mapper.transform_callable');
             $container->registerForAutoconfiguration(ConditionCallableInterface::class)
                 ->addTag('object_mapper.condition_callable');
+            $container->registerAttributeForAutoconfiguration(Map::class, static function (ChildDefinition $definition, Map $attribute, \ReflectionClass $reflector): void {
+                $definition->addResourceTag('object_mapper.map', [
+                    'source' => $attribute->source ?? $reflector->name,
+                    'target' => $attribute->target ?? $reflector->name,
+                ]);
+            });
         }
 
         $container->registerForAutoconfiguration(PackageInterface::class)
