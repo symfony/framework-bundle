@@ -163,6 +163,7 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
+use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
@@ -1954,7 +1955,7 @@ class FrameworkExtension extends Extension
         if (isset($config['enable_attributes']) && $config['enable_attributes']) {
             $annotationLoader = new Definition(
                 AttributeLoader::class,
-                [new Reference('annotation_reader', ContainerInterface::NULL_ON_INVALID_REFERENCE)]
+                interface_exists(CacheableSupportsMethodInterface::class) ? [new Reference('annotation_reader', ContainerInterface::NULL_ON_INVALID_REFERENCE)] : [],
             );
 
             $serializerLoaders[] = $annotationLoader;
