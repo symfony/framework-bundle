@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Add `createFormFlowBuilder` method to `AbstractController` and `ControllerHelper`
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
  * Add support for `framework.secrets.decryption_env_var` to contain dots
 

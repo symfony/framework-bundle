@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
+use Symfony\Component\Form\Flow\FormFlowBuilderInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormConfigInterface;
@@ -659,6 +660,22 @@ class AbstractControllerTest extends TestCase
         $controller->setContainer($container);
 
         $this->assertEquals($formBuilder, $controller->createFormBuilder('foo'));
+    }
+
+    public function testCreateFormFlowBuilder()
+    {
+        $formFlowBuilder = $this->createStub(FormFlowBuilderInterface::class);
+
+        $formFactory = $this->createMock(FormFactoryInterface::class);
+        $formFactory->expects($this->once())->method('createBuilder')->willReturn($formFlowBuilder);
+
+        $container = new Container();
+        $container->set('form.factory', $formFactory);
+
+        $controller = $this->createController();
+        $controller->setContainer($container);
+
+        $this->assertEquals($formFlowBuilder, $controller->createFormFlowBuilder('foo'));
     }
 
     public function testAddLink()
