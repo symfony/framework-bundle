@@ -67,6 +67,7 @@ use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\AuthenticationEvents;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
@@ -1709,6 +1710,23 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromFile('serializer_mapping', ['kernel.debug' => true, 'kernel.container_class' => __CLASS__]);
         $this->assertFalse($container->hasDefinition('serializer.mapping.cache_class_metadata_factory'));
+    }
+
+    /**
+     * @group legacy
+     */
+    public function testSerializerAttributesEnabledAnnotationsEnabledGlobally()
+    {
+        $container = $this->createContainerFromFile('serializer_attributes_enabled_annotations_enabled_globally');
+        $cacheWarmer = $container->getDefinition('serializer.mapping.cache_warmer');
+        $loaders = $cacheWarmer->getArgument(0);
+        $attributeLoader = $loaders[0];
+
+        if (class_exists(AnnotationLoader::class)) {
+            $this->assertEquals([new Reference('annotation_reader', ContainerInterface::NULL_ON_INVALID_REFERENCE)], $attributeLoader->getArguments());
+        } else {
+            $this->assertSame([], $attributeLoader->getArguments());
+        }
     }
 
     public function testSerializerMapping()
