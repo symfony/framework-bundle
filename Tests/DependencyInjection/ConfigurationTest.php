@@ -988,6 +988,9 @@ class ConfigurationTest extends TestCase
             ],
             'json_streamer' => [
                 'enabled' => !class_exists(FullStack::class) && class_exists(JsonStreamWriter::class),
+                'default_options' => [
+                    'include_null_properties' => false,
+                ],
             ],
         ];
     }
