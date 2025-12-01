@@ -462,8 +462,19 @@ class Configuration implements ConfigurationInterface
                                         ->cannotBeEmpty()
                                     ->end()
                                     ->arrayNode('initial_marking')
-                                        ->acceptAndWrap(['string'])
+                                        ->acceptAndWrap(['backed-enum', 'string'])
                                         ->defaultValue([])
+                                        ->beforeNormalization()
+                                            ->ifArray()
+                                            ->then(static function ($markings) {
+                                                $normalizedMarkings = [];
+                                                foreach ($markings as $marking) {
+                                                    $normalizedMarkings[] = $marking instanceof \BackedEnum ? $marking->value : $marking;
+                                                }
+
+                                                return $normalizedMarkings;
+                                            })
+                                        ->end()
                                         ->prototype('scalar')->end()
                                     ->end()
                                     ->arrayNode('events_to_dispatch', 'event_to_dispatch')
@@ -1936,6 +1947,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->arrayNode('vars', 'var')
                                     ->info('Associative array: the default vars used to expand the templated URI.')
+                                    ->useAttributeAsKey('name')
                                     ->normalizeKeys(false)
                                     ->variablePrototype()->end()
                                 ->end()
@@ -2014,6 +2026,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->arrayNode('extra')
                                     ->info('Extra options for specific HTTP client.')
+                                    ->useAttributeAsKey('name')
                                     ->normalizeKeys(false)
                                     ->variablePrototype()->end()
                                 ->end()
@@ -2160,6 +2173,7 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->arrayNode('extra')
                                         ->info('Extra options for specific HTTP client.')
+                                        ->useAttributeAsKey('name')
                                         ->normalizeKeys(false)
                                         ->variablePrototype()->end()
                                     ->end()

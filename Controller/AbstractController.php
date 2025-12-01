@@ -17,6 +17,8 @@ use Psr\Link\LinkInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Flow\FormFlowInterface;
+use Symfony\Component\Form\Flow\FormFlowTypeInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -344,6 +346,8 @@ abstract class AbstractController implements ServiceSubscriberInterface
 
     /**
      * Creates and returns a Form instance from the type of the form.
+     *
+     * @return ($type is class-string<FormFlowTypeInterface> ? FormFlowInterface : FormInterface)
      */
     protected function createForm(string $type, mixed $data = null, array $options = []): FormInterface
     {
