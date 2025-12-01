@@ -1409,6 +1409,13 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('Fixtures/translations', $options['cache_vary']['scanned_directories'][3]);
     }
 
+    public function testTranslatorProvidersMergedEnabledLocales()
+    {
+        $container = $this->createContainerFromFile('translator_providers');
+        self::assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_pull')->getArgument(5));
+        self::assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_push')->getArgument(3));
+    }
+
     public function testTranslatorMultipleFallbacks()
     {
         $container = $this->createContainerFromFile('translator_fallbacks');
