@@ -361,7 +361,11 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('only_exceptions')->defaultFalse()->end()
                         ->booleanNode('only_main_requests')->defaultFalse()->end()
                         ->scalarNode('dsn')->defaultValue('file:%kernel.cache_dir%/profiler')->end()
-                        ->enumNode('collect_serializer_data')->values([true])->defaultTrue()->end() // to be @deprecated in Symfony 8.1
+                        ->enumNode('collect_serializer_data')
+                            ->values([true])
+                            ->defaultTrue()
+                            ->setDeprecated('symfony/framework-bundle', '8.1', 'Setting the "%path%.%node%" configuration option is deprecated. It will be removed in version 9.0.')
+                        ->end()
                     ->end()
                 ->end()
             ->end()
