@@ -60,7 +60,10 @@ trait BuildDebugContainerTrait
             $dumpedContainer = unserialize(file_get_contents(substr_replace($file, '.ser', -4)));
             $container->setDefinitions($dumpedContainer->getDefinitions());
             $container->setAliases($dumpedContainer->getAliases());
-            $container->__construct($dumpedContainer->getParameterBag());
+
+            $parameterBag = $container->getParameterBag();
+            $parameterBag->clear();
+            $parameterBag->add($dumpedContainer->getParameterBag()->all());
         }
 
         return $this->container = $container;
