@@ -1752,8 +1752,7 @@ class FrameworkExtension extends Extension
         if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
             $container->registerAttributeForAutoconfiguration(Constraint::class, static function (ChildDefinition $definition, Constraint $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('validator.attribute_metadata')
-                    ->addTag('container.excluded', ['source' => 'because it\'s a validator constraint extension']);
+                $definition->addTag('validator.attribute_metadata');
             });
         }
 
@@ -2005,15 +2004,13 @@ class FrameworkExtension extends Extension
         if (!($config['enable_attributes'] ?? false) || !$container->getParameter('kernel.debug')) {
             // The $reflector argument hints at where the attribute could be used
             $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionClass|\ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata')
-                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
+                $definition->addTag('serializer.attribute_metadata');
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Context::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Groups::class, $configurator);
 
             $configurator = static function (ChildDefinition $definition, object $attribute, \ReflectionMethod|\ReflectionProperty $reflector) {
-                $definition->addTag('serializer.attribute_metadata')
-                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
+                $definition->addTag('serializer.attribute_metadata');
             };
             $container->registerAttributeForAutoconfiguration(SerializerMapping\Ignore::class, $configurator);
             $container->registerAttributeForAutoconfiguration(SerializerMapping\MaxDepth::class, $configurator);
@@ -2021,8 +2018,7 @@ class FrameworkExtension extends Extension
             $container->registerAttributeForAutoconfiguration(SerializerMapping\SerializedPath::class, $configurator);
 
             $container->registerAttributeForAutoconfiguration(SerializerMapping\DiscriminatorMap::class, static function (ChildDefinition $definition) {
-                $definition->addTag('serializer.attribute_metadata')
-                    ->addTag('container.excluded', ['source' => 'because it\'s a serializer metadata extension']);
+                $definition->addTag('serializer.attribute_metadata');
             });
         }
 
