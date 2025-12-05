@@ -149,9 +149,6 @@ class FrameworkBundle extends Bundle
             ]);
         }
 
-        if ($container->hasParameter('.kernel.config_dir') && $container->hasParameter('.kernel.bundles_definition')) {
-            $container->addCompilerPass(new PhpConfigReferenceDumpPass($container->getParameter('.kernel.config_dir').'/reference.php', $container->getParameter('.kernel.bundles_definition')));
-        }
         $container->addCompilerPass(new AssetsContextPass());
         $container->addCompilerPass(new LoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -32);
         $container->addCompilerPass(new RegisterControllerArgumentLocatorsPass());
@@ -208,6 +205,9 @@ class FrameworkBundle extends Bundle
         $this->addCompilerPassIfExists($container, StreamablePass::class);
 
         if ($container->getParameter('kernel.debug')) {
+            if ($container->hasParameter('.kernel.config_dir') && $container->hasParameter('.kernel.bundles_definition')) {
+                $container->addCompilerPass(new PhpConfigReferenceDumpPass($container->getParameter('.kernel.config_dir').'/reference.php', $container->getParameter('.kernel.bundles_definition')));
+            }
             $container->addCompilerPass(new AddDebugLogProcessorPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 2);
             $container->addCompilerPass(new UnusedTagsPass(), PassConfig::TYPE_AFTER_REMOVING);
             $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_BEFORE_REMOVING, -255);

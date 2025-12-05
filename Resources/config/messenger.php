@@ -78,7 +78,10 @@ return static function (ContainerConfigurator $container) {
         ->set('serializer.normalizer.flatten_exception', FlattenExceptionNormalizer::class)
             ->tag('serializer.normalizer', ['built_in' => true, 'priority' => -880])
 
+        ->set('.messenger.transport.native_php_serializer', PhpSerializer::class)
         ->set('messenger.transport.native_php_serializer', PhpSerializer::class)
+            ->factory('current')
+            ->args([[service('.messenger.transport.native_php_serializer')]])
         ->alias('messenger.default_serializer', 'messenger.transport.native_php_serializer')
         ->alias(SerializerInterface::class, 'messenger.default_serializer')
 
