@@ -2725,12 +2725,12 @@ class FrameworkExtension extends Extension
             unset($scopeConfig['retry_failed']);
 
             // This "transport" service is decorated in the following order:
-            // 1. ThrottlingHttpClient (30) -> throttles requests
-            // 2. UriTemplateHttpClient (25) -> expands URI templates
-            // 3. ScopingHttpClient (20) -> resolves relative URLs and applies scope configuration
-            // 4. CachingHttpClient (15) -> caches responses
-            // 5. RetryableHttpClient (10) -> retries requests
-            // 6. TraceableHttpClient (5) -> traces requests
+            // 1. ThrottlingHttpClient (5) -> throttles requests
+            // 2. UriTemplateHttpClient (10) -> expands URI templates
+            // 3. ScopingHttpClient (15) -> resolves relative URLs and applies scope configuration
+            // 4. CachingHttpClient (20) -> caches responses
+            // 5. RetryableHttpClient (25) -> retries requests
+            // 6. TraceableHttpClient (100) -> traces requests
             $container->register($name, HttpClientInterface::class)
                 ->setFactory('current')
                 ->setArguments([[new Reference('http_client.transport')]])
@@ -2738,7 +2738,7 @@ class FrameworkExtension extends Extension
             ;
 
             $scopingDefinition = $container->register($name.'.scoping', ScopingHttpClient::class)
-                ->setDecoratedService($name, null, 20)
+                ->setDecoratedService($name, null, 15)
                 ->addTag('kernel.reset', ['method' => 'reset', 'on_invalid' => 'ignore']);
 
             if (null === $scope) {
@@ -2767,7 +2767,7 @@ class FrameworkExtension extends Extension
 
             $container
                 ->register($name.'.uri_template', UriTemplateHttpClient::class)
-                ->setDecoratedService($name, null, 25)
+                ->setDecoratedService($name, null, 10)
                 ->setArguments([
                     new Reference('.inner'),
                     new Reference('http_client.uri_template_expander', ContainerInterface::NULL_ON_INVALID_REFERENCE),
@@ -2806,7 +2806,7 @@ class FrameworkExtension extends Extension
 
         $container
             ->register($name.'.caching', CachingHttpClient::class)
-            ->setDecoratedService($name, null, 15)
+            ->setDecoratedService($name, null, 20)
             ->setArguments([
                 new Reference('.inner'),
                 new Reference($options['cache_pool']),
@@ -2827,7 +2827,7 @@ class FrameworkExtension extends Extension
 
         $container
             ->register($name.'.throttling', ThrottlingHttpClient::class)
-            ->setDecoratedService($name, null, 30)
+            ->setDecoratedService($name, null, 5)
             ->setArguments([new Reference('.inner'), new Reference($name.'.throttling.limiter')]);
     }
 
@@ -2859,7 +2859,7 @@ class FrameworkExtension extends Extension
 
         $container
             ->register($name.'.retryable', RetryableHttpClient::class)
-            ->setDecoratedService($name, null, 10)
+            ->setDecoratedService($name, null, 25)
             ->setArguments([new Reference('.inner'), $retryStrategy, $options['max_retries'], new Reference('logger')])
             ->addTag('monolog.logger', ['channel' => 'http_client']);
     }
