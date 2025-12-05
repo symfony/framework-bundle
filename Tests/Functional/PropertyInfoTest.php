@@ -28,7 +28,7 @@ class PropertyInfoTest extends AbstractWebTestCase
             $this->markTestSkipped();
         }
 
-        $this->assertEquals(Type::list(Type::int()), $propertyInfo->getType(Dummy::class, 'codes'));
+        $this->assertEquals(Type::array(Type::int()), $propertyInfo->getType(Dummy::class, 'codes'));
     }
 
     #[IgnoreDeprecations]
