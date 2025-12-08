@@ -646,7 +646,7 @@ class FrameworkExtension extends Extension
             $this->registerNotifierConfiguration($config['notifier'], $container, $loader, $this->readConfigEnabled('webhook', $container, $config['webhook']));
         }
 
-        // profiler depends on form, validation, translation, messenger, mailer, http-client, notifier, serializer being registered
+        // profiler depends on form, validation, translation, messenger, mailer, http-client, notifier, serializer being registered. console is optional
         $this->registerProfilerConfiguration($config['profiler'], $container, $loader);
 
         if ($this->readConfigEnabled('webhook', $container, $config['webhook'])) {
@@ -1078,7 +1078,7 @@ class FrameworkExtension extends Extension
         $container->getDefinition('profiler_listener')
             ->addArgument($config['collect_parameter']);
 
-        if (!$container->getParameter('kernel.debug') || !class_exists(CliRequest::class) || !$container->has('debug.stopwatch')) {
+        if (!$container->getParameter('kernel.debug') || !$this->hasConsole() || !class_exists(CliRequest::class) || !$container->has('debug.stopwatch')) {
             $container->removeDefinition('console_profiler_listener');
         }
 
