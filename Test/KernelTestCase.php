@@ -25,6 +25,7 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 abstract class KernelTestCase extends TestCase
 {
+    use ConsoleCommandAssertionsTrait;
     use MailerAssertionsTrait;
     use NotificationAssertionsTrait;
 
