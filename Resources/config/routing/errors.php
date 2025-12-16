@@ -11,7 +11,7 @@
 
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-return function (RoutingConfigurator $routes): void {
+return static function (RoutingConfigurator $routes): void {
     $routes->add('_preview_error', '/{code}.{_format}')
         ->controller('error_controller::preview')
         ->defaults(['_format' => 'html'])

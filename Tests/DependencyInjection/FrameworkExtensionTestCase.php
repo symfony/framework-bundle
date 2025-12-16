@@ -211,7 +211,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testAllowedHttpMethodOverrideWithSpecificMethods()
     {
-        $container = $this->createContainerFromClosure(function ($container) {
+        $container = $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'http_method_override' => true,
                 'allowed_http_method_override' => ['PUT', 'DELETE'],
@@ -933,7 +933,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container = $this->createContainerFromFile('messenger_disabled');
         $messengerDefinitions = array_filter(
             $container->getDefinitions(),
-            fn ($name) => str_starts_with($name, 'messenger.'),
+            static fn ($name) => str_starts_with($name, 'messenger.'),
             \ARRAY_FILTER_USE_KEY
         );
 
@@ -1035,7 +1035,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'transport_3' => new Reference('messenger.transport.failure_transport_3'),
         ];
 
-        $failureTransportsReferences = array_map(function (ServiceClosureArgument $serviceClosureArgument) {
+        $failureTransportsReferences = array_map(static function (ServiceClosureArgument $serviceClosureArgument) {
             $values = $serviceClosureArgument->getValues();
 
             return array_shift($values);
@@ -1076,7 +1076,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'transport_3' => new Reference('messenger.transport.failure_transport_3'),
         ];
 
-        $failureTransportsReferences = array_map(function (ServiceClosureArgument $serviceClosureArgument) {
+        $failureTransportsReferences = array_map(static function (ServiceClosureArgument $serviceClosureArgument) {
             $values = $serviceClosureArgument->getValues();
 
             return array_shift($values);
@@ -1150,7 +1150,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'schedule' => new Reference('messenger.transport.failed'),
         ];
 
-        $failureTransportsReferences = array_map(function (ServiceClosureArgument $serviceClosureArgument) {
+        $failureTransportsReferences = array_map(static function (ServiceClosureArgument $serviceClosureArgument) {
             $values = $serviceClosureArgument->getValues();
 
             return array_shift($values);
@@ -1386,7 +1386,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $nonExistingDirectories = array_filter(
             $options['scanned_directories'],
-            fn ($directory) => !file_exists($directory)
+            static fn ($directory) => !file_exists($directory)
         );
 
         $this->assertNotEmpty($nonExistingDirectories, 'FrameworkBundle should pass non existing directories to Translator');
@@ -2534,7 +2534,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('kernel.locale_aware', $switcherDef->getArgument(1)->getTag());
         $this->assertEquals(new Reference('router.request_context', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE), $switcherDef->getArgument(2));
 
-        $localeAwareServices = array_map(fn (Reference $r) => (string) $r, $switcherDef->getArgument(1)->getValues());
+        $localeAwareServices = array_map(static fn (Reference $r) => (string) $r, $switcherDef->getArgument(1)->getValues());
 
         $this->assertNotContains('translation.locale_switcher', $localeAwareServices);
     }
@@ -2820,7 +2820,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testObjectMapperEnabled()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', []);
         });
         $this->assertTrue($container->has('object_mapper'));

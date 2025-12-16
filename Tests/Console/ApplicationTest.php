@@ -135,7 +135,7 @@ class ApplicationTest extends TestCase
         $kernel
             ->method('getBundles')
             ->willReturn([$this->createBundleMock(
-                [(new Command('fine'))->setCode(function (InputInterface $input, OutputInterface $output): int {
+                [(new Command('fine'))->setCode(static function (InputInterface $input, OutputInterface $output): int {
                     $output->write('fine');
 
                     return 0;
@@ -167,7 +167,7 @@ class ApplicationTest extends TestCase
         $kernel
             ->method('getBundles')
             ->willReturn([$this->createBundleMock(
-                [(new Command(null))->setCode(function (InputInterface $input, OutputInterface $output): int {
+                [(new Command(null))->setCode(static function (InputInterface $input, OutputInterface $output): int {
                     $output->write('fine');
 
                     return 0;
@@ -201,7 +201,7 @@ class ApplicationTest extends TestCase
         $kernel
             ->method('getBundles')
             ->willReturn([$this->createBundleMock(
-                [(new Command('fine'))->setCode(function (InputInterface $input, OutputInterface $output): int {
+                [(new Command('fine'))->setCode(static function (InputInterface $input, OutputInterface $output): int {
                     $output->write('fine');
 
                     return 0;
@@ -290,7 +290,7 @@ class ApplicationTest extends TestCase
         $bundle
             ->expects($this->once())
             ->method('registerCommands')
-            ->willReturnCallback(function (Application $application) use ($commands) {
+            ->willReturnCallback(static function (Application $application) use ($commands) {
                 $application->addCommands($commands);
             })
         ;

@@ -218,7 +218,7 @@ class ConfigurationTest extends TestCase
     public static function provideInvalidAssetConfigurationTests(): iterable
     {
         // helper to turn config into embedded package config
-        $createPackageConfig = fn (array $packageConfig) => [
+        $createPackageConfig = static fn (array $packageConfig) => [
             'base_urls' => '//example.com',
             'version' => 1,
             'packages' => [

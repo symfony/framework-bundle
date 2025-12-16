@@ -242,7 +242,7 @@ class TranslationExtractCommandTest extends TestCase
             ->expects($this->any())
             ->method('extract')
             ->willReturnCallback(
-                function ($path, $catalogue) use ($extractedMessages) {
+                static function ($path, $catalogue) use ($extractedMessages) {
                     foreach ($extractedMessages as $domain => $messages) {
                         $catalogue->add($messages, $domain);
                     }
@@ -254,7 +254,7 @@ class TranslationExtractCommandTest extends TestCase
             ->expects($this->any())
             ->method('read')
             ->willReturnCallback(
-                function ($path, $catalogue) use ($loadedMessages) {
+                static function ($path, $catalogue) use ($loadedMessages) {
                     $catalogue->add($loadedMessages);
                 }
             );
