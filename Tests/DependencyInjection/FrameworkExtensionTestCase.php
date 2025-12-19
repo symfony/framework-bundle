@@ -14,12 +14,14 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RequiresMethod;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LogLevel;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Fixtures\Workflow\Validator\DefinitionValidator;
+use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\JsonPath\UppercaseFunction;
 use Symfony\Bundle\FrameworkBundle\Tests\Fixtures\Messenger\DummyMessage;
 use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 use Symfony\Bundle\FullStack;
@@ -68,6 +70,8 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Fragment\FragmentUriGeneratorInterface;
+use Symfony\Component\JsonPath\FunctionReturnType;
+use Symfony\Component\JsonPath\JsonPathCrawlerInterface;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransportFactory;
@@ -2972,6 +2976,40 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromFile('json_streamer');
         $this->assertTrue($container->has('json_streamer.stream_writer'));
+    }
+
+    #[RequiresMethod(JsonPathCrawlerInterface::class, 'crawl')]
+    public function testJsonPathEnabled()
+    {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', []);
+        });
+
+        $this->assertTrue($container->hasDefinition('json_path.crawler'));
+        $this->assertSame('json_path.crawler', (string) $container->getAlias(JsonPathCrawlerInterface::class));
+
+        $locatorArgument = $container->getDefinition('json_path.crawler')->getArgument(0);
+        $this->assertInstanceOf(ServiceLocatorArgument::class, $locatorArgument);
+        $this->assertInstanceOf(TaggedIteratorArgument::class, $locatorArgument->getTaggedIteratorArgument());
+        $this->assertSame('json_path.function', $locatorArgument->getTaggedIteratorArgument()->getTag());
+    }
+
+    #[RequiresMethod(JsonPathCrawlerInterface::class, 'crawl')]
+    public function testJsonPathFunctionAttributeAutoconfiguration()
+    {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', []);
+            $container->register('json_path.function.upper', UppercaseFunction::class)
+                ->setAutoconfigured(true);
+        });
+
+        $this->assertEquals([['name' => 'upper', 'return_type' => FunctionReturnType::Value, 'arity' => 1]], $container->getDefinition('json_path.function.upper')->getTag('json_path.function'));
+
+        $locatorArgument = $container->getDefinition('json_path.crawler')->getArgument(0);
+        $this->assertInstanceOf(ServiceLocatorArgument::class, $locatorArgument);
+        $this->assertInstanceOf(TaggedIteratorArgument::class, $locatorArgument->getTaggedIteratorArgument());
+        $this->assertSame('json_path.function', $locatorArgument->getTaggedIteratorArgument()->getTag());
+        $this->assertSame('name', $locatorArgument->getTaggedIteratorArgument()->getIndexAttribute());
     }
 
     public function testObjectMapperEnabled()

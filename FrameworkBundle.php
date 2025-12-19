@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ConsoleArgumentV
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\DeprecateJsonStreamerValueTransformerTagPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ErrorLoggerCompilerPass;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\JsonPathPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PhpConfigReferenceDumpPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ProfilerPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\RemoveUnusedSessionMarshallingHandlerPass;
@@ -217,6 +218,7 @@ class FrameworkBundle extends Bundle
         $this->addCompilerPassIfExists($container, StreamablePass::class);
         $this->addCompilerPassIfExists($container, TransformerPass::class);
         $this->addCompilerPassIfExists($container, ReverseMappingPass::class);
+        $this->addCompilerPassIfExists($container, JsonPathPass::class);
 
         if ($container->getParameter('kernel.debug')) {
             if ($container->hasParameter('.kernel.config_dir') && $container->hasParameter('.kernel.bundles_definition')) {
