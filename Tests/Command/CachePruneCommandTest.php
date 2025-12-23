@@ -75,7 +75,7 @@ class CachePruneCommandTest extends TestCase
 
     private function getRewindableGenerator(): RewindableGenerator
     {
-        return new RewindableGenerator(static function () {
+        return new RewindableGenerator(function () {
             yield 'foo_pool' => $this->getPruneableInterfaceMock();
             yield 'bar_pool' => $this->getPruneableInterfaceMock();
         }, 2);
