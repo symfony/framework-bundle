@@ -34,6 +34,8 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
         namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+        use Symfony\Component\Config\Loader\ParamConfigurator as Param;
+
         {APP_TYPES}
         final class App
         {
