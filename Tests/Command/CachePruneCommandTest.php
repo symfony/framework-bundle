@@ -40,7 +40,7 @@ class CachePruneCommandTest extends TestCase
         $failedPool = $this->createMock(PruneableInterface::class);
         $failedPool->expects($this->once())->method('prune')->willReturn(false);
 
-        $generator = new RewindableGenerator(function () use ($failedPool) {
+        $generator = new RewindableGenerator(static function () use ($failedPool) {
             yield 'failed_pool' => $failedPool;
         }, 1);
 
@@ -59,7 +59,7 @@ class CachePruneCommandTest extends TestCase
         $successPool = $this->createMock(PruneableInterface::class);
         $successPool->expects($this->once())->method('prune')->willReturn(true);
 
-        $generator = new RewindableGenerator(function () use ($failedPool, $successPool) {
+        $generator = new RewindableGenerator(static function () use ($failedPool, $successPool) {
             yield 'failed_pool' => $failedPool;
             yield 'success_pool' => $successPool;
         }, 2);
@@ -75,7 +75,7 @@ class CachePruneCommandTest extends TestCase
 
     private function getRewindableGenerator(): RewindableGenerator
     {
-        return new RewindableGenerator(function () {
+        return new RewindableGenerator(static function () {
             yield 'foo_pool' => $this->getPruneableInterfaceMock();
             yield 'bar_pool' => $this->getPruneableInterfaceMock();
         }, 2);
@@ -83,7 +83,7 @@ class CachePruneCommandTest extends TestCase
 
     private function getEmptyRewindableGenerator(): RewindableGenerator
     {
-        return new RewindableGenerator(fn () => new \ArrayIterator([]), 0);
+        return new RewindableGenerator(static fn () => new \ArrayIterator([]), 0);
     }
 
     private function getKernel(): MockObject&KernelInterface
