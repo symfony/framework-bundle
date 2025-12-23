@@ -4,6 +4,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Symfony\Component\Config\Loader\ParamConfigurator as Param;
+
 /**
  * This class provides array-shapes for configuring the services and bundles of an application.
  *
@@ -124,14 +126,14 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  * }
  * @psalm-type ExtensionType = array<string, mixed>
  * @psalm-type TestConfig = array{
- *     enabled?: scalar|null, // Default: false
+ *     enabled?: scalar|null|Param, // Default: false
  *     options?: array{
- *         name?: scalar|null,
- *         count?: int,
+ *         name?: scalar|null|Param,
+ *         count?: int|Param,
  *     },
- *     fromBundle?: bool, // Default: false
+ *     fromBundle?: bool|Param, // Default: false
  * }
- * @psalm-type AppConfig = bool
+ * @psalm-type AppConfig = bool|Param
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
