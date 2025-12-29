@@ -72,6 +72,7 @@ use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransportFac
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransportFactory;
 use Symfony\Component\Messenger\Bridge\Beanstalkd\Transport\BeanstalkdTransportFactory;
 use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransportFactory;
+use Symfony\Component\Messenger\Middleware\DecodeFailedMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\DeduplicateMiddleware;
 use Symfony\Component\Messenger\Transport\TransportFactory;
 use Symfony\Component\Notifier\ChatterInterface;
@@ -1252,6 +1253,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.commands']],
             ['id' => 'reject_redelivered_message_middleware'],
             ['id' => 'dispatch_after_current_bus'],
+            ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
             ['id' => 'handle_message', 'arguments' => [false]],
@@ -1263,6 +1265,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.events']],
             ['id' => 'reject_redelivered_message_middleware'],
             ['id' => 'dispatch_after_current_bus'],
+            ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'with_factory', 'arguments' => ['foo', true, ['bar' => 'baz']]],
             ['id' => 'send_message', 'arguments' => [true]],
@@ -1296,6 +1299,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.events']],
             ['id' => 'reject_redelivered_message_middleware'],
             ['id' => 'dispatch_after_current_bus'],
+            ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
             ['id' => 'handle_message', 'arguments' => [false]],
@@ -1317,6 +1321,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.commands']],
             ['id' => 'reject_redelivered_message_middleware'],
             ['id' => 'dispatch_after_current_bus'],
+            ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'deduplicate_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
@@ -1329,6 +1334,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'add_bus_name_stamp_middleware', 'arguments' => ['messenger.bus.events']],
             ['id' => 'reject_redelivered_message_middleware'],
             ['id' => 'dispatch_after_current_bus'],
+            ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'deduplicate_middleware'],
             ['id' => 'with_factory', 'arguments' => ['foo', true, ['bar' => 'baz']]],
