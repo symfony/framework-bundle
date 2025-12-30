@@ -22,7 +22,7 @@ class SecretsRevealCommandTest extends TestCase
 {
     public function testExecute()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['secretKey' => 'secretValue']);
 
         $command = new SecretsRevealCommand($vault);
@@ -35,7 +35,7 @@ class SecretsRevealCommandTest extends TestCase
 
     public function testInvalidName()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['secretKey' => 'secretValue']);
 
         $command = new SecretsRevealCommand($vault);
@@ -48,7 +48,7 @@ class SecretsRevealCommandTest extends TestCase
 
     public function testFailedDecrypt()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['secretKey' => null]);
 
         $command = new SecretsRevealCommand($vault);
@@ -64,7 +64,7 @@ class SecretsRevealCommandTest extends TestCase
      */
     public function testLocalVaultOverride()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['secretKey' => 'secretValue']);
 
         $_ENV = ['secretKey' => 'newSecretValue'];
@@ -83,7 +83,7 @@ class SecretsRevealCommandTest extends TestCase
      */
     public function testOnlyLocalVaultContainsName()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['otherKey' => 'secretValue']);
 
         $_ENV = ['secretKey' => 'secretValue'];

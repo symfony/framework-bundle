@@ -193,7 +193,7 @@ class TranslationExtractCommandTest extends TestCase
             ->method('set');
 
         // Calling private method
-        $translationUpdate = $this->createMock(TranslationExtractCommand::class);
+        $translationUpdate = $this->createStub(TranslationExtractCommand::class);
         $reflection = new \ReflectionObject($translationUpdate);
         $method = $reflection->getMethod('removeNoFillTranslations');
         $method->invokeArgs($translationUpdate, [$operation]);
