@@ -361,6 +361,6 @@ TXT
         $tester->run(['command' => 'debug:container', 'name' => 'router', '--show-arguments' => true]);
 
         $tester->assertCommandIsSuccessful();
-        $this->assertStringContainsString('[WARNING] The "--show-arguments" option is deprecated.', $tester->getDisplay());
+        $this->assertStringContainsString('[WARNING] The "--show-arguments" option is deprecated, as arguments are now always shown.', $tester->getDisplay());
     }
 }
