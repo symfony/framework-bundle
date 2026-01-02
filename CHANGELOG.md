@@ -20,6 +20,7 @@ CHANGELOG
    use the `router.request_context.base_url` parameter or the `framework.router.default_uri` config option instead
  * Add decoration stack to `debug:container` command output
  * Add `MicroKernelTrait::getAllowedEnvs()` to list and enforce allowed values for `APP_ENV`
+ * Add `caching.ttl_buffer` option to `http_client.default_options` and `http_client.scoped_clients`
 
 8.0
 ---

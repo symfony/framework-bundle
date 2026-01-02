@@ -8,6 +8,7 @@ $container->loadFromExtension('framework', [
                 'cache_pool' => 'foo',
                 'shared' => false,
                 'max_ttl' => 2,
+                'ttl_buffer' => 200,
             ],
         ],
         'scoped_clients' => [

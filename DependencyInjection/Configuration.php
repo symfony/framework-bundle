@@ -2208,6 +2208,11 @@ class Configuration implements ConfigurationInterface
                         ->defaultNull()
                         ->min(0)
                     ->end()
+                    ->integerNode('ttl_buffer')
+                        ->info('Safety buffer (in seconds) added to the computed TTL of every cached response.')
+                        ->defaultValue(300)
+                        ->min(1)
+                    ->end()
                 ->end();
     }
 
