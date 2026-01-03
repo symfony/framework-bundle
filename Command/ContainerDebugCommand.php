@@ -152,7 +152,7 @@ class ContainerDebugCommand extends Command
             $options = ['tag' => $tag];
         } elseif ($name = $input->getArgument('name')) {
             if ($input->getOption('show-arguments')) {
-                $errorIo->warning('The "--show-arguments" option is deprecated.');
+                $errorIo->warning('The "--show-arguments" option is deprecated, as arguments are now always shown.');
             }
 
             $name = $this->findProperServiceName($input, $errorIo, $object, $name, $input->getOption('show-hidden'));
