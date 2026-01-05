@@ -126,9 +126,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  * }
  * @psalm-type ExtensionType = array<string, mixed>
  * @psalm-type TestConfig = array{
- *     enabled?: scalar|null|Param, // Default: false
+ *     enabled?: scalar|Param|null, // Default: false
  *     options?: array{
- *         name?: scalar|null|Param,
+ *         name?: scalar|Param|null,
  *         count?: int|Param,
  *     },
  *     fromBundle?: bool|Param, // Default: false
