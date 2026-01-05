@@ -165,7 +165,7 @@ class TranslationUpdateCommandTest extends TestCase
             }
         }
 
-        $command = $this->createMock(TranslationUpdateCommand::class);
+        $command = $this->createStub(TranslationUpdateCommand::class);
 
         $method = new \ReflectionMethod(TranslationUpdateCommand::class, 'filterDuplicateTransPaths');
 
@@ -194,15 +194,11 @@ class TranslationUpdateCommandTest extends TestCase
 
     private function createCommandTester($extractedMessages = [], $loadedMessages = [], ?KernelInterface $kernel = null, array $transPaths = [], array $codePaths = []): CommandTester
     {
-        $translator = $this->createMock(Translator::class);
-        $translator
-            ->expects($this->any())
-            ->method('getFallbackLocales')
-            ->willReturn(['en']);
+        $translator = new Translator('fr');
+        $translator->setFallbackLocales(['en']);
 
-        $extractor = $this->createMock(ExtractorInterface::class);
+        $extractor = $this->createStub(ExtractorInterface::class);
         $extractor
-            ->expects($this->any())
             ->method('extract')
             ->willReturnCallback(
                 function ($path, $catalogue) use ($extractedMessages) {
@@ -212,9 +208,8 @@ class TranslationUpdateCommandTest extends TestCase
                 }
             );
 
-        $loader = $this->createMock(TranslationReader::class);
+        $loader = $this->createStub(TranslationReader::class);
         $loader
-            ->expects($this->any())
             ->method('read')
             ->willReturnCallback(
                 function ($path, $catalogue) use ($loadedMessages) {
@@ -222,9 +217,8 @@ class TranslationUpdateCommandTest extends TestCase
                 }
             );
 
-        $writer = $this->createMock(TranslationWriter::class);
+        $writer = $this->createStub(TranslationWriter::class);
         $writer
-            ->expects($this->any())
             ->method('getFormats')
             ->willReturn(
                 ['xlf', 'yml', 'yaml']
@@ -235,21 +229,18 @@ class TranslationUpdateCommandTest extends TestCase
                 ['foo', $this->getBundle($this->translationDir)],
                 ['test', $this->getBundle('test')],
             ];
-            $kernel = $this->createMock(KernelInterface::class);
+            $kernel = $this->createStub(KernelInterface::class);
             $kernel
-                ->expects($this->any())
                 ->method('getBundle')
                 ->willReturnMap($returnValues);
         }
 
         $kernel
-            ->expects($this->any())
             ->method('getBundles')
             ->willReturn([]);
 
         $container = new Container();
         $kernel
-            ->expects($this->any())
             ->method('getContainer')
             ->willReturn($container);
 
@@ -263,9 +254,8 @@ class TranslationUpdateCommandTest extends TestCase
 
     private function getBundle($path)
     {
-        $bundle = $this->createMock(BundleInterface::class);
+        $bundle = $this->createStub(BundleInterface::class);
         $bundle
-            ->expects($this->any())
             ->method('getPath')
             ->willReturn($path)
         ;
