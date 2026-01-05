@@ -13,6 +13,7 @@ namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\Config\Definition\ArrayShapeGenerator;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -171,6 +172,8 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
             $routesTypes = strtr(self::ROUTES_TYPES_TEMPLATE, ['{SHAPE}' => $routesTypes]);
             $routesTypes = substr_replace($phpdoc, $routesTypes, $i);
         }
+
+        $appTypes = str_replace('\\'.ParamConfigurator::class, 'Param', $appTypes);
 
         $configReference = strtr(self::REFERENCE_TEMPLATE, [
             '{APP_TYPES}' => $appTypes,
