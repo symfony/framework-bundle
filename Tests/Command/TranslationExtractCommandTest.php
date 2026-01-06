@@ -262,7 +262,6 @@ class TranslationExtractCommandTest extends TestCase
             );
         if (null !== $writerMessages) {
             $writer
-                ->expects($this->any())
                 ->method('write')
                 ->willReturnCallback(
                     function (MessageCatalogue $catalogue) use ($writerMessages) {
