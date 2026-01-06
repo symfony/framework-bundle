@@ -24,7 +24,7 @@ class SecretsListCommandTest extends TestCase
      */
     public function testExecute()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $vault->method('list')->willReturn(['A' => 'a', 'B' => 'b', 'C' => null, 'D' => null, 'E' => null]);
 
         $_ENV = ['A' => '', 'B' => 'A', 'C' => '', 'D' => false, 'E' => null];

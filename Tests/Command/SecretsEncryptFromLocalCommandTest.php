@@ -42,7 +42,7 @@ class SecretsEncryptFromLocalCommandTest extends TestCase
 
     public function testFailsWhenLocalVaultIsDisabled()
     {
-        $vault = $this->createMock(AbstractVault::class);
+        $vault = $this->createStub(AbstractVault::class);
         $command = new SecretsEncryptFromLocalCommand($vault, null);
         $tester = new CommandTester($command);
 
