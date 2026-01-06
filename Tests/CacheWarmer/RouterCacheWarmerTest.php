@@ -30,7 +30,7 @@ class RouterCacheWarmerTest extends TestCase
         $routerCacheWarmer = new RouterCacheWarmer($container);
 
         $routerCacheWarmer->warmUp('/tmp/cache', '/tmp/build');
-        $routerMock->expects($this->any())->method('warmUp')->with('/tmp/cache', '/tmp/build')->willReturn([]);
+        $routerMock->method('warmUp')->with('/tmp/cache', '/tmp/build')->willReturn([]);
         $this->addToAssertionCount(1);
     }
 
