@@ -23,7 +23,7 @@ class RouterCacheWarmerTest extends TestCase
     {
         $container = new Container();
 
-        $routerMock = $this->getMockBuilder(testRouterInterfaceWithWarmableInterface::class)->onlyMethods(['match', 'generate', 'getContext', 'setContext', 'getRouteCollection', 'warmUp'])->getMock();
+        $routerMock = $this->createStub(testRouterInterfaceWithWarmableInterface::class);
         $routerMock->method('warmUp')->willReturn([]);
 
         $container->set('router', $routerMock);
@@ -38,7 +38,7 @@ class RouterCacheWarmerTest extends TestCase
     {
         $container = new Container();
 
-        $routerMock = $this->getMockBuilder(testRouterInterfaceWithoutWarmableInterface::class)->onlyMethods(['match', 'generate', 'getContext', 'setContext', 'getRouteCollection'])->getMock();
+        $routerMock = $this->createStub(testRouterInterfaceWithoutWarmableInterface::class);
         $container->set('router', $routerMock);
         $routerCacheWarmer = new RouterCacheWarmer($container);
         $this->expectException(\LogicException::class);

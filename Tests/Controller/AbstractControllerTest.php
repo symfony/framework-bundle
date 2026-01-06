@@ -53,6 +53,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
 use Symfony\Component\WebLink\Link;
 use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 
 class AbstractControllerTest extends TestCase
 {
@@ -263,7 +264,7 @@ class AbstractControllerTest extends TestCase
     public function testFile()
     {
         $container = new Container();
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $container->set('http_kernel', $kernel);
 
         $controller = $this->createController();
@@ -421,7 +422,7 @@ class AbstractControllerTest extends TestCase
     #[DataProvider('provideDenyAccessUnlessGrantedSetsAttributesAsArray')]
     public function testdenyAccessUnlessGrantedSetsAttributesAsArray($attribute, $exceptionAttributes)
     {
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker = $this->createStub(AuthorizationCheckerInterface::class);
         $authorizationChecker->method('isGranted')->willReturn(false);
 
         $container = new Container();
@@ -525,10 +526,8 @@ class AbstractControllerTest extends TestCase
 
     public function testStreamTwig()
     {
-        $twig = $this->createMock(Environment::class);
-
         $container = new Container();
-        $container->set('twig', $twig);
+        $container->set('twig', new Environment(new ArrayLoader()));
 
         $controller = $this->createController();
         $controller->setContainer($container);
@@ -557,8 +556,7 @@ class AbstractControllerTest extends TestCase
     public function testAddFlash()
     {
         $flashBag = new FlashBag();
-        $session = $this->createMock(Session::class);
-        $session->expects($this->once())->method('getFlashBag')->willReturn($flashBag);
+        $session = new Session(null, null, $flashBag);
 
         $request = new Request();
         $request->setSession($session);
@@ -629,7 +627,7 @@ class AbstractControllerTest extends TestCase
 
     public function testCreateForm()
     {
-        $config = $this->createMock(FormConfigInterface::class);
+        $config = $this->createStub(FormConfigInterface::class);
         $config->method('getInheritData')->willReturn(false);
         $config->method('getName')->willReturn('');
 
@@ -649,7 +647,7 @@ class AbstractControllerTest extends TestCase
 
     public function testCreateFormBuilder()
     {
-        $formBuilder = $this->createMock(FormBuilderInterface::class);
+        $formBuilder = $this->createStub(FormBuilderInterface::class);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
         $formFactory->expects($this->once())->method('createBuilder')->willReturn($formBuilder);
