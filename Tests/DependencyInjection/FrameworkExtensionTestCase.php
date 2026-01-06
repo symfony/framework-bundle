@@ -1007,7 +1007,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
     public function testMessengerWithoutConsole()
     {
         $extension = $this->createPartialMock(FrameworkExtension::class, ['hasConsole', 'getAlias']);
-        $extension->method('hasConsole')->willReturn(false);
+        $extension->expects($this->atLeastOnce())->method('hasConsole')->willReturn(false);
         $extension->method('getAlias')->willReturn((new FrameworkExtension())->getAlias());
 
         $container = $this->createContainerFromFile('messenger', [], true, false, $extension);
