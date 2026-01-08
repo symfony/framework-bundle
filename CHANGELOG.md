@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
+ * Add support for `framework.secrets.decryption_env_var` to contain dots
 
 8.0
 ---

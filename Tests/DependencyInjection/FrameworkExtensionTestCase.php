@@ -2826,6 +2826,35 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertTrue($container->has('object_mapper'));
     }
 
+    public function testSecretsDecryptionEnvVarWithDot()
+    {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', [
+                'secrets' => [
+                    'enabled' => true,
+                    'vault_directory' => '%kernel.project_dir%/config/secrets/%kernel.environment%',
+                    'decryption_env_var' => 'dynamic.var',
+                ],
+            ]);
+        });
+        $this->assertTrue($container->hasDefinition('secrets.vault'));
+    }
+
+    public function testSecretsDecryptionEnvVarWithInvalidCharacters()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid value "invalid@var" set as "decryption_env_var": only "word" and dot characters are allowed.');
+        $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', [
+                'secrets' => [
+                    'enabled' => true,
+                    'vault_directory' => '%kernel.project_dir%/config/secrets/%kernel.environment%',
+                    'decryption_env_var' => 'invalid@var',
+                ],
+            ]);
+        });
+    }
+
     protected function createContainer(array $data = [])
     {
         return new ContainerBuilder(new EnvPlaceholderParameterBag(array_merge([
