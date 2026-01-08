@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\AppReference;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutesReference;
 
@@ -174,6 +175,10 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         }
 
         $appTypes = str_replace('\\'.ParamConfigurator::class, 'Param', $appTypes);
+
+        if (!class_exists(Expression::class)) {
+            $appTypes = str_replace('|ExpressionConfigurator', '', $appTypes);
+        }
 
         $configReference = strtr(self::REFERENCE_TEMPLATE, [
             '{APP_TYPES}' => $appTypes,
