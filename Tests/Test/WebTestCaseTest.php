@@ -428,9 +428,9 @@ class WebTestCaseTest extends TestCase
     private function createHistoryTester(string $method, bool $returnValue): WebTestCase
     {
         /** @var KernelBrowser&MockObject $client */
-        $client = $this->createMock(KernelBrowser::class);
+        $client = $this->createStub(KernelBrowser::class);
         /** @var History&MockObject $history */
-        $history = $this->createMock(History::class);
+        $history = $this->createStub(History::class);
 
         $history->method($method)->willReturn($returnValue);
         $client->method('getHistory')->willReturn($history);
