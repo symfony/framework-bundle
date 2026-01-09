@@ -11,8 +11,10 @@
 
 namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
+use Symfony\Component\Config\Definition\ArrayNode;
 use Symfony\Component\Config\Definition\ArrayShapeGenerator;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\PrototypedArrayNode;
 use Symfony\Component\Config\Loader\ParamConfigurator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -20,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\AppReference;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutesReference;
 
@@ -116,9 +119,13 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
             if (!$configuration = $this->getConfiguration($extension, $container)) {
                 continue;
             }
+            $tree = $configuration->getConfigTreeBuilder()->buildTree();
+            if ($tree instanceof ArrayNode && !$tree instanceof PrototypedArrayNode && !$tree->getChildren()) {
+                continue;
+            }
             $anyEnvExtensions[$extensionAlias] = $extension;
             $type = $this->camelCase($extensionAlias).'Config';
-            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($configuration->getConfigTreeBuilder()->buildTree()));
+            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($tree));
 
             foreach ($knownEnvs as $env) {
                 if ($envs[$env] ?? $envs['all'] ?? false) {
@@ -132,9 +139,13 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
             if (!$configuration = $this->getConfiguration($extension, $container)) {
                 continue;
             }
+            $tree = $configuration->getConfigTreeBuilder()->buildTree();
+            if ($tree instanceof ArrayNode && !$tree instanceof PrototypedArrayNode && !$tree->getChildren()) {
+                continue;
+            }
             $anyEnvExtensions[$alias] = $extension;
             $type = $this->camelCase($alias).'Config';
-            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($configuration->getConfigTreeBuilder()->buildTree()));
+            $appTypes .= \sprintf("\n * @psalm-type %s = %s", $type, ArrayShapeGenerator::generate($tree));
         }
         krsort($extensionsPerEnv);
 
@@ -174,6 +185,10 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         }
 
         $appTypes = str_replace('\\'.ParamConfigurator::class, 'Param', $appTypes);
+
+        if (!class_exists(Expression::class)) {
+            $appTypes = str_replace('|ExpressionConfigurator', '', $appTypes);
+        }
 
         $configReference = strtr(self::REFERENCE_TEMPLATE, [
             '{APP_TYPES}' => $appTypes,
