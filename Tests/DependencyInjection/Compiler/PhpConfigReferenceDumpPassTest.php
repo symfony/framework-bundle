@@ -97,9 +97,12 @@ class PhpConfigReferenceDumpPassTest extends TestCase
 
         $container->registerExtension(new TestExtension(false));
         $container->registerExtension(new AppExtension());
+        $container->registerExtension(new EmptyConfigExtension());
+        $container->registerExtension(new PrototypedConfigExtension());
 
         $pass = new PhpConfigReferenceDumpPass($this->tempDir.'/reference.php', [
             TestBundle::class => ['all' => true],
+            EmptyConfigBundle::class => ['all' => true],
         ]);
         $pass->process($container);
 
@@ -214,5 +217,66 @@ class AppConfiguration implements ConfigurationInterface
     public function getConfigTreeBuilder(): TreeBuilder
     {
         return new TreeBuilder('app', 'boolean');
+    }
+}
+
+class EmptyConfigBundle extends Bundle
+{
+    public function getContainerExtension(): ?ExtensionInterface
+    {
+        return new EmptyConfigExtension();
+    }
+}
+
+class EmptyConfigExtension extends Extension
+{
+    public function load(array $configs, ContainerBuilder $container): void
+    {
+    }
+
+    public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
+    {
+        return new EmptyConfiguration();
+    }
+}
+
+class EmptyConfiguration implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder(): TreeBuilder
+    {
+        return new TreeBuilder('empty_config');
+    }
+}
+
+class PrototypedConfigExtension extends Extension
+{
+    public function load(array $configs, ContainerBuilder $container): void
+    {
+    }
+
+    public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
+    {
+        return new PrototypedConfiguration();
+    }
+}
+
+class PrototypedConfiguration implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder(): TreeBuilder
+    {
+        $treeBuilder = new TreeBuilder('prototyped_config');
+        $rootNode = $treeBuilder->getRootNode();
+
+        if ($rootNode instanceof ArrayNodeDefinition) {
+            $rootNode
+                ->useAttributeAsKey('name')
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode('value')->end()
+                    ->end()
+                ->end();
+        }
+
+        return $treeBuilder;
     }
 }
