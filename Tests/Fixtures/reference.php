@@ -134,12 +134,16 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     fromBundle?: bool|Param, // Default: false
  * }
  * @psalm-type AppConfig = bool|Param
+ * @psalm-type PrototypedConfigConfig = array<string, array{ // Default: []
+ *         value?: scalar|Param|null,
+ *     }>
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
  *     services?: ServicesConfig,
  *     test?: TestConfig,
  *     app?: AppConfig,
+ *     prototyped_config?: PrototypedConfigConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
