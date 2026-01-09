@@ -59,6 +59,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\JsonStreamer\DependencyInjection\StreamablePass;
 use Symfony\Component\Messenger\DependencyInjection\MessengerPass;
 use Symfony\Component\Mime\DependencyInjection\AddMimeTypeGuesserPass;
+use Symfony\Component\ObjectMapper\DependencyInjection\ReverseMappingPass;
 use Symfony\Component\PropertyInfo\DependencyInjection\PropertyInfoConstructorPass;
 use Symfony\Component\PropertyInfo\DependencyInjection\PropertyInfoPass;
 use Symfony\Component\Routing\DependencyInjection\AddExpressionLanguageProvidersPass;
@@ -203,6 +204,7 @@ class FrameworkBundle extends Bundle
         $container->addCompilerPass(new VirtualRequestStackPass());
         $container->addCompilerPass(new TranslationUpdateCommandPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $this->addCompilerPassIfExists($container, StreamablePass::class);
+        $this->addCompilerPassIfExists($container, ReverseMappingPass::class);
 
         if ($container->getParameter('kernel.debug')) {
             if ($container->hasParameter('.kernel.config_dir') && $container->hasParameter('.kernel.bundles_definition')) {
