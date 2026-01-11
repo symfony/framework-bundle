@@ -267,6 +267,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertTrue($container->hasDefinition('profiler'), '->registerProfilerConfiguration() loads profiling.xml');
         $this->assertTrue($container->hasDefinition('data_collector.config'), '->registerProfilerConfiguration() loads collectors.xml');
+        $this->assertTrue($container->hasDefinition('.data_collector.command'));
     }
 
     public function testDisabledProfiler()
@@ -275,6 +276,26 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertFalse($container->hasDefinition('profiler'), '->registerProfilerConfiguration() does not load profiling.xml');
         $this->assertFalse($container->hasDefinition('data_collector.config'), '->registerProfilerConfiguration() does not load collectors.xml');
+    }
+
+    public function testProfilerWithoutConsole()
+    {
+        $extension = new class extends FrameworkExtension {
+            protected function hasConsole(): bool
+            {
+                return false;
+            }
+
+            public function getAlias(): string
+            {
+                return 'framework';
+            }
+        };
+
+        $container = $this->createContainerFromFile('profiler', [], true, false, $extension);
+        $container->compile();
+
+        $this->assertFalse($container->hasDefinition('.data_collector.command'));
     }
 
     public function testProfilerCollectSerializerDataEnabled()
