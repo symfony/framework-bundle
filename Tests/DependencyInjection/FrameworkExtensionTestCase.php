@@ -30,6 +30,7 @@ use Symfony\Component\Cache\Adapter\RedisTagAwareAdapter;
 use Symfony\Component\Cache\Adapter\TagAwareAdapter;
 use Symfony\Component\Cache\DependencyInjection\CachePoolPass;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Console\DataCollector\CommandDataCollector;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
@@ -268,6 +269,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertTrue($container->hasDefinition('profiler'), '->registerProfilerConfiguration() loads profiling.xml');
         $this->assertTrue($container->hasDefinition('data_collector.config'), '->registerProfilerConfiguration() loads collectors.xml');
+
+        if (class_exists(CommandDataCollector::class)) {
+            $this->assertTrue($container->hasDefinition('.data_collector.command'));
+        }
     }
 
     public function testDisabledProfiler()
@@ -276,6 +281,26 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertFalse($container->hasDefinition('profiler'), '->registerProfilerConfiguration() does not load profiling.xml');
         $this->assertFalse($container->hasDefinition('data_collector.config'), '->registerProfilerConfiguration() does not load collectors.xml');
+    }
+
+    public function testProfilerWithoutConsole()
+    {
+        $extension = new class extends FrameworkExtension {
+            protected function hasConsole(): bool
+            {
+                return false;
+            }
+
+            public function getAlias(): string
+            {
+                return 'framework';
+            }
+        };
+
+        $container = $this->createContainerFromFile('profiler', [], true, false, $extension);
+        $container->compile();
+
+        $this->assertFalse($container->hasDefinition('.data_collector.command'));
     }
 
     public function testProfilerCollectSerializerDataEnabled()

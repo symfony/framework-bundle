@@ -76,6 +76,18 @@ abstract class KernelTestCase extends TestCase
         static::$kernel = $kernel;
         static::$booted = true;
 
+        // If the cache warmer is registered, it means that the cache has been
+        // warmed up, so the current container is not fresh anymore. Let's
+        // reboot a fresh one.
+        if (self::getContainer()->initialized('cache_warmer')) {
+            static::ensureKernelShutdown();
+
+            $kernel = static::createKernel($options);
+            $kernel->boot();
+            static::$kernel = $kernel;
+            static::$booted = true;
+        }
+
         return static::$kernel;
     }
 
