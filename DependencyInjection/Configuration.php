@@ -378,7 +378,7 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                         ->ifArray()
                         ->then(static function ($v) {
-                            if (false !== ($v['enabled'] ?? true)) {
+                            if (true === $v['enabled']) {
                                 $workflows = $v;
                                 unset($workflows['enabled']);
 
