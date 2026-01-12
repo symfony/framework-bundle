@@ -810,8 +810,9 @@ class FrameworkExtension extends Extension
             ->addTag('container.excluded', ['source' => 'because it\'s a test case']);
         $container->registerForAutoconfiguration(\UnitEnum::class)
             ->addTag('container.excluded', ['source' => 'because it\'s an enum']);
-        $container->registerAttributeForAutoconfiguration(AsMessage::class, static function (ChildDefinition $definition) {
+        $container->registerAttributeForAutoconfiguration(AsMessage::class, static function (ChildDefinition $definition, AsMessage $attribute): void {
             $definition->addTag('container.excluded', ['source' => 'because it\'s a messenger message']);
+            $definition->addTag('messenger.message', ['serializedTypeName' => $attribute->serializedTypeName]);
         });
         $container->registerAttributeForAutoconfiguration(\Attribute::class, static function (ChildDefinition $definition) {
             $definition->addTag('container.excluded', ['source' => 'because it\'s a PHP attribute']);

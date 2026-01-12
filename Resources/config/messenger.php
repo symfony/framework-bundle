@@ -73,6 +73,7 @@ return static function (ContainerConfigurator $container) {
                 service('serializer'),
                 abstract_arg('format'),
                 abstract_arg('context'),
+                abstract_arg('message type to serialized type map'),
             ])
 
         ->set('serializer.normalizer.flatten_exception', FlattenExceptionNormalizer::class)
