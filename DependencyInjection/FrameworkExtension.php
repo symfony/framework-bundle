@@ -995,6 +995,10 @@ class FrameworkExtension extends Extension
         if (!$container->getParameter('kernel.debug') || !$this->hasConsole() || !$container->has('debug.stopwatch')) {
             $container->removeDefinition('console_profiler_listener');
         }
+
+        if (!$this->hasConsole()) {
+            $container->removeDefinition('.data_collector.command');
+        }
     }
 
     private function registerWorkflowConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
