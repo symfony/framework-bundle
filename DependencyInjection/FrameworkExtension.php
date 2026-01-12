@@ -170,6 +170,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Semaphore\PersistingStoreInterface as SemaphoreStoreInterface;
 use Symfony\Component\Semaphore\Semaphore;
 use Symfony\Component\Semaphore\SemaphoreFactory;
+use Symfony\Component\Semaphore\Serializer\SemaphoreKeyNormalizer;
 use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
 use Symfony\Component\Serializer\Attribute as SerializerMapping;
 use Symfony\Component\Serializer\Attribute\ExtendsSerializationFor;
@@ -2246,6 +2247,11 @@ class FrameworkExtension extends Extension
     private function registerSemaphoreConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
     {
         $loader->load('semaphore.php');
+
+        // BC layer Semaphore < 7.4
+        if (!interface_exists(DenormalizerInterface::class) || !class_exists(SemaphoreKeyNormalizer::class)) {
+            $container->removeDefinition('serializer.normalizer.semaphore_key');
+        }
 
         foreach ($config['resources'] as $resourceName => $resourceStore) {
             $storeDsn = $container->resolveEnvPlaceholders($resourceStore, null, $usedEnvs);
