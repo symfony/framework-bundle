@@ -72,7 +72,12 @@ class Application extends BaseApplication
             $this->renderRegistrationErrors($input, $output);
         }
 
-        $this->setDispatcher($this->kernel->getContainer()->get('event_dispatcher'));
+        $container = $this->kernel->getContainer();
+        $this->setDispatcher($container->get('event_dispatcher'));
+
+        if ($container->has('console.argument_resolver')) {
+            $this->setArgumentResolver($container->get('console.argument_resolver'));
+        }
 
         return parent::doRun($input, $output);
     }
