@@ -7,6 +7,7 @@ CHANGELOG
  * Add `createFormFlowBuilder` method to `AbstractController` and `ControllerHelper`
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
  * Add support for `framework.secrets.decryption_env_var` to contain dots
+ * Enable mocking non-shared services in tests
 
 8.0
 ---
