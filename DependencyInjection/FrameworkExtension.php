@@ -1285,7 +1285,7 @@ class FrameworkExtension extends Extension
         }
     }
 
-    private function registerRouterConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader, array $enabledLocales = []): void
+    private function registerRouterConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader, array $enabledLocales): void
     {
         if (!$this->readConfigEnabled('router', $container, $config)) {
             $container->removeDefinition('console.command.router_debug');
@@ -1305,8 +1305,21 @@ class FrameworkExtension extends Extension
         }
 
         if ($enabledLocales) {
-            $enabledLocales = implode('|', array_map('preg_quote', $enabledLocales));
-            $container->getDefinition('routing.loader')->replaceArgument(2, ['_locale' => $enabledLocales]);
+            $usedEnvs = [];
+            $container->resolveEnvPlaceholders($enabledLocales, null, $usedEnvs);
+
+            if (!$usedEnvs) {
+                $locales = implode('|', array_map('preg_quote', $enabledLocales));
+            } else {
+                $locales = (new Definition('string'))
+                    ->setFactory('implode')
+                    ->setArguments(['|', (new Definition('array'))
+                        ->setFactory('array_map')
+                        ->setArguments(['preg_quote', $enabledLocales]),
+                    ]);
+            }
+
+            $container->getDefinition('routing.loader')->replaceArgument(2, ['_locale' => $locales]);
         }
 
         if (!ContainerBuilder::willBeAvailable('symfony/expression-language', ExpressionLanguage::class, ['symfony/framework-bundle', 'symfony/routing'])) {
