@@ -809,6 +809,26 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(['_locale' => 'fr|en'], $container->getDefinition('routing.loader')->getArgument(2));
     }
 
+    public function testRouterEnabledLocalesWithEnvPlaceholders()
+    {
+        $container = $this->createContainerFromFile('router_enabled_locales_env');
+        $requirements = $container->getDefinition('routing.loader')->getArgument(2);
+
+        $this->assertIsArray($requirements);
+        $this->assertArrayHasKey('_locale', $requirements);
+
+        $requirementDefinition = $requirements['_locale'];
+        $this->assertInstanceOf(Definition::class, $requirementDefinition);
+        $this->assertSame('implode', $requirementDefinition->getFactory());
+
+        $this->assertSame('|', $requirementDefinition->getArgument(0));
+
+        $arrayMap = $requirementDefinition->getArgument(1);
+        $this->assertInstanceOf(Definition::class, $arrayMap);
+        $this->assertSame('array_map', $arrayMap->getFactory());
+        $this->assertSame('preg_quote', $arrayMap->getArgument(0));
+    }
+
     public function testRouterRequiresResourceOption()
     {
         $container = $this->createContainer();
