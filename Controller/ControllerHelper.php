@@ -360,7 +360,7 @@ class ControllerHelper implements ServiceSubscriberInterface
     /**
      * Creates and returns a form flow builder instance.
      */
-    protected function createFormFlowBuilder(mixed $data = null, array $options = []): FormFlowBuilderInterface
+    public function createFormFlowBuilder(mixed $data = null, array $options = []): FormFlowBuilderInterface
     {
         return $this->container->get('form.factory')->createBuilder(FormFlowType::class, $data, $options);
     }
