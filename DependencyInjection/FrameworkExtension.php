@@ -81,6 +81,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Glob;
+use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
+use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapperInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormTypeExtensionInterface;
 use Symfony\Component\Form\FormTypeGuesserInterface;
@@ -882,6 +884,11 @@ class FrameworkExtension extends Extension
     {
         $loader->load('form.php');
 
+        if (!property_exists(ValidatorExtension::class, 'violationMapper')) {
+            $container->removeDefinition('form.violation_mapper');
+            $container->removeAlias(ViolationMapperInterface::class);
+            $container->getDefinition('form.type_extension.form.validator')->replaceArgument(1, false);
+        }
         if (null === $config['form']['csrf_protection']['enabled']) {
             $this->writeConfigEnabled('form.csrf_protection', $config['csrf_protection']['enabled'], $config['form']['csrf_protection']);
         }
