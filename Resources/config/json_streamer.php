@@ -32,6 +32,7 @@ return static function (ContainerConfigurator $container) {
                 service('json_streamer.write.property_metadata_loader'),
                 param('.json_streamer.stream_writers_dir'),
                 service('config_cache_factory')->ignoreOnInvalid(),
+                param('.json_streamer.default_options'),
             ])
         ->set('json_streamer.stream_reader', JsonStreamReader::class)
             ->args([
@@ -39,6 +40,7 @@ return static function (ContainerConfigurator $container) {
                 service('json_streamer.read.property_metadata_loader'),
                 param('.json_streamer.stream_readers_dir'),
                 service('config_cache_factory')->ignoreOnInvalid(),
+                param('.json_streamer.default_options'),
             ])
         ->alias(JsonStreamWriter::class, 'json_streamer.stream_writer')
         ->alias(JsonStreamReader::class, 'json_streamer.stream_reader')

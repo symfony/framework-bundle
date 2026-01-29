@@ -106,6 +106,7 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
+use Symfony\Component\JsonStreamer\Mapping\PropertyMetadata;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\JsonStreamer\ValueTransformer\ValueTransformerInterface;
@@ -2162,8 +2163,15 @@ class FrameworkExtension extends Extension
         $container->registerAliasForArgument('json_streamer.stream_writer', StreamWriterInterface::class, 'json.stream_writer');
         $container->registerAliasForArgument('json_streamer.stream_reader', StreamReaderInterface::class, 'json.stream_reader');
 
+        $container->setParameter('.json_streamer.default_options', $config['default_options']);
         $container->setParameter('.json_streamer.stream_writers_dir', '%kernel.cache_dir%/json_streamer/stream_writer');
         $container->setParameter('.json_streamer.stream_readers_dir', '%kernel.cache_dir%/json_streamer/stream_reader');
+
+        // BC layer for "symfony/json-streamer" < 8.0
+        if (method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
+            $container->getDefinition('json_streamer.stream_writer')->replaceArgument(4, null);
+            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, null);
+        }
     }
 
     private function registerPropertyInfoConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
