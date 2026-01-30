@@ -486,6 +486,7 @@
         <xsd:sequence>
             <xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
         </xsd:sequence>
+        <xsd:attribute name="key" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="event_to_dispatch">
