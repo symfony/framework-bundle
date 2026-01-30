@@ -2008,6 +2008,7 @@ class FrameworkExtension extends Extension
 
         if (!$config['stateless_token_ids']) {
             $container->removeDefinition('security.csrf.same_origin_token_manager');
+            $container->removeDefinition('security.csrf.same_origin_listener');
 
             return;
         }
@@ -2016,6 +2017,9 @@ class FrameworkExtension extends Extension
             ->replaceArgument(3, $config['stateless_token_ids'])
             ->replaceArgument(4, $config['check_header'])
             ->replaceArgument(5, $config['cookie_name']);
+
+        $container->getDefinition('security.csrf.same_origin_listener')
+            ->replaceArgument(0, $config['cookie_name']);
 
         if (!$this->isInitializedConfigEnabled('session')) {
             $container->setAlias('security.csrf.token_manager', 'security.csrf.same_origin_token_manager');
