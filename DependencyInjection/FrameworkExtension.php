@@ -2265,6 +2265,11 @@ class FrameworkExtension extends Extension
             // Generate stores
             $storeDefinitions = [];
             foreach ($resourceStores as $resourceStore) {
+                if (\in_array($resourceStore, ['flock', 'semaphore'], true)) {
+                    $storeDefinitionId = \sprintf('.lock.%s.store', $resourceStore);
+                    $storeDefinitions[] = new Reference($storeDefinitionId);
+                    continue;
+                }
                 $usedEnvs = [];
                 $storeDsn = $container->resolveEnvPlaceholders($resourceStore, null, $usedEnvs);
                 if (!$usedEnvs && !str_contains($resourceStore, ':') && !\in_array($resourceStore, ['flock', 'semaphore', 'in-memory', 'null'], true)) {
@@ -2278,9 +2283,7 @@ class FrameworkExtension extends Extension
 
                 $container->setDefinition($storeDefinitionId = '.lock.'.$resourceName.'.store.'.$container->hash($storeDsn), $storeDefinition);
 
-                $storeDefinition = new Reference($storeDefinitionId);
-
-                $storeDefinitions[] = $storeDefinition;
+                $storeDefinitions[] = new Reference($storeDefinitionId);
             }
 
             // Wrap array of stores with CombinedStore

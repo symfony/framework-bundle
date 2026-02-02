@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Add support for configuring JsonStreamer's `default_options`
+ * Add project-scoped `flock` and `semaphore` lock store services
  * Add `createFormFlowBuilder` method to `AbstractController` and `ControllerHelper`
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
  * Add support for `framework.secrets.decryption_env_var` to contain dots

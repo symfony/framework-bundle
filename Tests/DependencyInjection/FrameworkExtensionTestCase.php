@@ -67,6 +67,7 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Fragment\FragmentUriGeneratorInterface;
+use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransportFactory;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransportFactory;
@@ -2750,12 +2751,16 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container = $this->createContainerFromFile('lock');
 
         self::assertTrue($container->hasDefinition('lock.default.factory'));
-        $storeDef = $container->getDefinition($container->getDefinition('lock.default.factory')->getArgument(0));
+        $storeId = (string) $container->getDefinition('lock.default.factory')->getArgument(0);
+        $storeDef = $container->getDefinition($storeId);
 
         if (class_exists(SemaphoreStore::class) && SemaphoreStore::isSupported()) {
-            self::assertSame('semaphore', $storeDef->getArgument(0));
+            self::assertSame('.lock.semaphore.store', $storeId);
+            self::assertSame(SemaphoreStore::class, $storeDef->getClass());
+            self::assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
         } else {
-            self::assertSame('flock', $storeDef->getArgument(0));
+            self::assertSame('.lock.flock.store', $storeId);
+            self::assertSame(FlockStore::class, $storeDef->getClass());
         }
     }
 
@@ -2764,20 +2769,22 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container = $this->createContainerFromFile('lock_named');
 
         self::assertTrue($container->hasDefinition('lock.foo.factory'));
-        $storeDef = $container->getDefinition($container->getDefinition('lock.foo.factory')->getArgument(0));
-        self::assertSame('semaphore', $storeDef->getArgument(0));
+        $storeId = (string) $container->getDefinition('lock.foo.factory')->getArgument(0);
+        $storeDef = $container->getDefinition($storeId);
+        self::assertSame('.lock.semaphore.store', $storeId);
+        self::assertSame(SemaphoreStore::class, $storeDef->getClass());
+        self::assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
 
         self::assertTrue($container->hasDefinition('lock.bar.factory'));
-        $storeDef = $container->getDefinition($container->getDefinition('lock.bar.factory')->getArgument(0));
-        self::assertSame('flock', $storeDef->getArgument(0));
+        $storeId = (string) $container->getDefinition('lock.bar.factory')->getArgument(0);
+        $storeDef = $container->getDefinition($storeId);
+        self::assertSame('.lock.flock.store', $storeId);
+        self::assertSame(FlockStore::class, $storeDef->getClass());
 
         self::assertTrue($container->hasDefinition('lock.baz.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.baz.factory')->getArgument(0));
         self::assertIsArray($storeDefArg = $storeDef->getArgument(0));
-        $storeDef1 = $container->getDefinition($storeDefArg[0]);
-        $storeDef2 = $container->getDefinition($storeDefArg[1]);
-        self::assertSame('semaphore', $storeDef1->getArgument(0));
-        self::assertSame('flock', $storeDef2->getArgument(0));
+        self::assertSame(['.lock.semaphore.store', '.lock.flock.store'], array_map('strval', $storeDefArg));
 
         self::assertTrue($container->hasDefinition('lock.qux.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.qux.factory')->getArgument(0));
