@@ -81,7 +81,7 @@ abstract class KernelTestCase extends TestCase
         // If the cache warmer is registered, it means that the cache has been
         // warmed up, so the current container is not fresh anymore. Let's
         // reboot a fresh one.
-        if (self::getContainer()->initialized('cache_warmer')) {
+        if ($kernel->getContainer()->initialized('cache_warmer')) {
             static::ensureKernelShutdown();
 
             $kernel = static::createKernel($options);
@@ -143,7 +143,7 @@ abstract class KernelTestCase extends TestCase
 
             $httpCacheDir = null;
             if ($container->has('http_cache')) {
-                $httpCacheDir = static::$kernel->getCacheDir().'/http_cache';
+                $httpCacheDir = static::$kernel->getShareDir().'/http_cache';
             }
 
             if ($container->has('services_resetter')) {
