@@ -151,6 +151,7 @@ return static function (ContainerConfigurator $container) {
         ->set('kernel.controller_attributes_listener', ControllerAttributesListener::class)
             ->args([
                 abstract_arg('attributes with listeners by event'),
+                service('controller.expression_language')->nullOnInvalid(),
             ])
             ->tag('kernel.event_subscriber')
 
