@@ -116,6 +116,7 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStateChecker;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
+use Symfony\Component\JsonStreamer\Mapping\PropertyMetadata;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\JsonStreamer\ValueTransformer\ValueTransformerInterface;
@@ -2231,6 +2232,11 @@ class FrameworkExtension extends Extension
 
         if (\PHP_VERSION_ID >= 80400) {
             $container->removeDefinition('.json_streamer.cache_warmer.lazy_ghost');
+        }
+
+        // forward compatibility with "symfony/json-streamer" 8.1+
+        if (!method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
+            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, []);
         }
     }
 
