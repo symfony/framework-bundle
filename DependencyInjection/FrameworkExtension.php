@@ -104,6 +104,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
+use Symfony\Component\JsonStreamer\Mapping\PropertyMetadata;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\JsonStreamer\ValueTransformer\ValueTransformerInterface;
@@ -2110,6 +2111,11 @@ class FrameworkExtension extends Extension
 
         $container->setParameter('.json_streamer.stream_writers_dir', '%kernel.cache_dir%/json_streamer/stream_writer');
         $container->setParameter('.json_streamer.stream_readers_dir', '%kernel.cache_dir%/json_streamer/stream_reader');
+
+        // forward compatibility with "symfony/json-streamer" 8.1+
+        if (!method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
+            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, []);
+        }
     }
 
     private function registerPropertyInfoConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
