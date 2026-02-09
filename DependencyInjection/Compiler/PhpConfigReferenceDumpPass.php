@@ -43,7 +43,11 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
         {APP_TYPES}
         final class App
         {
-            {APP_PARAM}
+            /**
+             * @param ConfigType $config
+             *
+             * @psalm-return ConfigType
+             */
             public static function config(array $config): array
             {
                 return AppReference::config($config);
@@ -168,7 +172,6 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
                 '{SHAPE}' => $this->getShapeForExtensions($extensions, $container, '    '),
             ]), $i, 0);
         }
-        $appParam = $r->getMethod('config')->getDocComment();
 
         $r = new \ReflectionClass(RoutesReference::class);
 
@@ -192,7 +195,6 @@ class PhpConfigReferenceDumpPass implements CompilerPassInterface
 
         $configReference = strtr(self::REFERENCE_TEMPLATE, [
             '{APP_TYPES}' => $appTypes,
-            '{APP_PARAM}' => $appParam,
             '{ROUTES_TYPES}' => $routesTypes,
             '{ROUTES_PARAM}' => $r->getMethod('config')->getDocComment(),
         ]);
