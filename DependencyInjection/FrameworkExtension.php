@@ -2238,9 +2238,15 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('.json_streamer.cache_warmer.lazy_ghost');
         }
 
-        // forward compatibility with "symfony/json-streamer" 8.1+
+        // forward compatibility with "symfony/json-streamer" 8.0+
         if (!method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
-            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, []);
+            $reader = $container->getDefinition('json_streamer.stream_reader');
+
+            $args = $reader->getArguments();
+            unset($args[4]);
+
+            $reader->setArguments($args);
+            $container->removeDefinition('.json_streamer.cache_warmer.lazy_ghost');
         }
     }
 
