@@ -1687,6 +1687,7 @@ class Configuration implements ConfigurationInterface
                                 })
                             ->end()
                             ->prototype('array')
+                                ->acceptAndWrap(['string'], 'senders')
                                 ->performNoDeepMerging()
                                 ->children()
                                     ->arrayNode('senders')
