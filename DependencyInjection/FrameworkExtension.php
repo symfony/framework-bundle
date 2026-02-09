@@ -2112,9 +2112,14 @@ class FrameworkExtension extends Extension
         $container->setParameter('.json_streamer.stream_writers_dir', '%kernel.cache_dir%/json_streamer/stream_writer');
         $container->setParameter('.json_streamer.stream_readers_dir', '%kernel.cache_dir%/json_streamer/stream_reader');
 
-        // forward compatibility with "symfony/json-streamer" 8.1+
+        // forward compatibility with "symfony/json-streamer" 8.0+
         if (!method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
-            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, []);
+            $reader = $container->getDefinition('json_streamer.stream_reader');
+
+            $args = $reader->getArguments();
+            unset($args[4]);
+
+            $reader->setArguments($args);
         }
     }
 
