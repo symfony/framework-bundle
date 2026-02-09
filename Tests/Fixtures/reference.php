@@ -81,7 +81,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     decoration_inner_name?: string,
  *     decoration_priority?: int,
  *     decoration_on_invalid?: 'exception'|'ignore'|null,
- *     autowire?: bool,
+ *     %Aautowire?: bool,
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,
  *     constructor?: string,
@@ -162,7 +162,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         services?: ServicesConfig,
  *         test?: TestConfig,
  *     },
- *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%%env%% pattern or match an extension alias
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
