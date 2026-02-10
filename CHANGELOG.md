@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Add `marshaller` option to cache pool configuration to allow per-pool marshaller services
  * Add support for `lock://` DSN in semaphore configuration to use the Lock component as a semaphore store
  * Add support for configuring JsonStreamer's `default_options`
  * Add project-scoped `flock` and `semaphore` lock store services
