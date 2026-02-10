@@ -45,6 +45,7 @@ use Symfony\Component\Console\ArgumentResolver\ValueResolver\BackedEnumValueReso
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\BuiltinTypeValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\DateTimeValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\DefaultValueResolver;
+use Symfony\Component\Console\ArgumentResolver\ValueResolver\InputFileValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\MapInputValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\ServiceValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\UidValueResolver;
@@ -430,6 +431,9 @@ return static function (ContainerConfigurator $container) {
 
         ->set('console.argument_resolver.uid', UidValueResolver::class)
             ->tag('console.argument_value_resolver', ['priority' => 100, 'name' => UidValueResolver::class])
+
+        ->set('console.argument_resolver.input_file', InputFileValueResolver::class)
+            ->tag('console.argument_value_resolver', ['priority' => 100, 'name' => InputFileValueResolver::class])
 
         ->set('console.argument_resolver.builtin_type', BuiltinTypeValueResolver::class)
             ->tag('console.argument_value_resolver', ['priority' => 100, 'name' => BuiltinTypeValueResolver::class])
