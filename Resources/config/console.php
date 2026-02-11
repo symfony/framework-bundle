@@ -51,6 +51,7 @@ use Symfony\Component\Console\ArgumentResolver\ValueResolver\ServiceValueResolve
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\UidValueResolver;
 use Symfony\Component\Console\ArgumentResolver\ValueResolver\VariadicValueResolver;
 use Symfony\Component\Console\EventListener\ErrorListener;
+use Symfony\Component\Console\EventListener\ValidateQuestionInputListener;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\Dotenv\Command\DebugCommand as DotenvDebugCommand;
 use Symfony\Component\ErrorHandler\Command\ErrorDumpCommand;
@@ -83,6 +84,12 @@ return static function (ContainerConfigurator $container) {
             ->tag('monolog.logger', ['channel' => 'console'])
 
         ->set('console.suggest_missing_package_subscriber', SuggestMissingPackageSubscriber::class)
+            ->tag('kernel.event_subscriber')
+
+        ->set('.console.validate_question_input_listener', ValidateQuestionInputListener::class)
+            ->args([
+                service('validator'),
+            ])
             ->tag('kernel.event_subscriber')
 
         ->set('console.command.about', AboutCommand::class)

@@ -55,6 +55,7 @@ use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterf
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\AsTargetedValueResolver as AsTargetedConsoleValueResolver;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\EventListener\ValidateQuestionInputListener;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
@@ -1797,12 +1798,17 @@ class FrameworkExtension extends Extension
     {
         if (!$this->readConfigEnabled('validation', $container, $config)) {
             $container->removeDefinition('console.command.validator_debug');
+            $container->removeDefinition('.console.validate_question_input_listener');
 
             return;
         }
 
         if (!class_exists(Validation::class)) {
             throw new LogicException('Validation support cannot be enabled as the Validator component is not installed. Try running "composer require symfony/validator".');
+        }
+
+        if (!class_exists(ValidateQuestionInputListener::class)) {
+            $container->removeDefinition('.console.validate_question_input_listener');
         }
 
         $loader->load('validator.php');
