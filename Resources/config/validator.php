@@ -13,6 +13,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\FrameworkBundle\CacheWarmer\ValidatorCacheWarmer;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Validator\Constraints\EmailValidator;
@@ -77,6 +78,7 @@ return static function (ContainerConfigurator $container) {
             ->abstract()
             ->tag('container.excluded')
             ->tag('validator.constraint_validator')
+            ->bind(ClockInterface::class, service('clock')->nullOnInvalid())
 
         ->set('validator.expression', ExpressionValidator::class)
             ->args([service('validator.expression_language')->nullOnInvalid()])
