@@ -2282,6 +2282,7 @@ class FrameworkExtension extends Extension
                 if (\in_array($resourceStore, ['flock', 'semaphore'], true)) {
                     $storeDefinitionId = \sprintf('.lock.%s.store', $resourceStore);
                     $storeDefinitions[] = new Reference($storeDefinitionId);
+                    $container->getDefinition($storeDefinitionId)->addTag('lock.store');
                     continue;
                 }
                 $usedEnvs = [];

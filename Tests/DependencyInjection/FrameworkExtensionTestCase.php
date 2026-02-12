@@ -1440,8 +1440,8 @@ abstract class FrameworkExtensionTestCase extends TestCase
     public function testTranslatorProvidersMergedEnabledLocales()
     {
         $container = $this->createContainerFromFile('translator_providers');
-        self::assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_pull')->getArgument(5));
-        self::assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_push')->getArgument(3));
+        $this->assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_pull')->getArgument(5));
+        $this->assertSame(['es', 'en', 'fr', 'de', 'pl'], $container->getDefinition('console.command.translation_push')->getArgument(3));
     }
 
     public function testTranslatorMultipleFallbacks()
@@ -2786,17 +2786,21 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromFile('lock');
 
-        self::assertTrue($container->hasDefinition('lock.default.factory'));
+        $this->assertTrue($container->hasDefinition('lock.default.factory'));
         $storeId = (string) $container->getDefinition('lock.default.factory')->getArgument(0);
         $storeDef = $container->getDefinition($storeId);
 
         if (class_exists(SemaphoreStore::class) && SemaphoreStore::isSupported()) {
-            self::assertSame('.lock.semaphore.store', $storeId);
-            self::assertSame(SemaphoreStore::class, $storeDef->getClass());
-            self::assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
+            $this->assertSame('.lock.semaphore.store', $storeId);
+            $this->assertSame(SemaphoreStore::class, $storeDef->getClass());
+            $this->assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
+            $this->assertTrue($storeDef->hasTag('lock.store'));
+            $this->assertFalse($container->getDefinition('.lock.flock.store')->hasTag('lock.store'));
         } else {
-            self::assertSame('.lock.flock.store', $storeId);
-            self::assertSame(FlockStore::class, $storeDef->getClass());
+            $this->assertSame('.lock.flock.store', $storeId);
+            $this->assertSame(FlockStore::class, $storeDef->getClass());
+            $this->assertTrue($storeDef->hasTag('lock.store'));
+            $this->assertFalse($container->getDefinition('.lock.semaphore.store')->hasTag('lock.store'));
         }
     }
 
@@ -2804,39 +2808,41 @@ abstract class FrameworkExtensionTestCase extends TestCase
     {
         $container = $this->createContainerFromFile('lock_named');
 
-        self::assertTrue($container->hasDefinition('lock.foo.factory'));
+        $this->assertTrue($container->hasDefinition('lock.foo.factory'));
         $storeId = (string) $container->getDefinition('lock.foo.factory')->getArgument(0);
         $storeDef = $container->getDefinition($storeId);
-        self::assertSame('.lock.semaphore.store', $storeId);
-        self::assertSame(SemaphoreStore::class, $storeDef->getClass());
-        self::assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
+        $this->assertSame('.lock.semaphore.store', $storeId);
+        $this->assertSame(SemaphoreStore::class, $storeDef->getClass());
+        $this->assertSame('%kernel.project_dir%', $storeDef->getArgument(0));
+        $this->assertTrue($storeDef->hasTag('lock.store'));
 
-        self::assertTrue($container->hasDefinition('lock.bar.factory'));
+        $this->assertTrue($container->hasDefinition('lock.bar.factory'));
         $storeId = (string) $container->getDefinition('lock.bar.factory')->getArgument(0);
         $storeDef = $container->getDefinition($storeId);
-        self::assertSame('.lock.flock.store', $storeId);
-        self::assertSame(FlockStore::class, $storeDef->getClass());
+        $this->assertSame('.lock.flock.store', $storeId);
+        $this->assertSame(FlockStore::class, $storeDef->getClass());
+        $this->assertTrue($storeDef->hasTag('lock.store'));
 
-        self::assertTrue($container->hasDefinition('lock.baz.factory'));
+        $this->assertTrue($container->hasDefinition('lock.baz.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.baz.factory')->getArgument(0));
-        self::assertIsArray($storeDefArg = $storeDef->getArgument(0));
-        self::assertSame(['.lock.semaphore.store', '.lock.flock.store'], array_map('strval', $storeDefArg));
+        $this->assertIsArray($storeDefArg = $storeDef->getArgument(0));
+        $this->assertSame(['.lock.semaphore.store', '.lock.flock.store'], array_map('strval', $storeDefArg));
 
-        self::assertTrue($container->hasDefinition('lock.qux.factory'));
+        $this->assertTrue($container->hasDefinition('lock.qux.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.qux.factory')->getArgument(0));
-        self::assertStringContainsString('REDIS_DSN', $storeDef->getArgument(0));
+        $this->assertStringContainsString('REDIS_DSN', $storeDef->getArgument(0));
 
-        self::assertTrue($container->hasDefinition('lock.corge.factory'));
+        $this->assertTrue($container->hasDefinition('lock.corge.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.corge.factory')->getArgument(0));
-        self::assertSame('in-memory', $storeDef->getArgument(0));
+        $this->assertSame('in-memory', $storeDef->getArgument(0));
 
-        self::assertTrue($container->hasDefinition('lock.grault.factory'));
+        $this->assertTrue($container->hasDefinition('lock.grault.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.grault.factory')->getArgument(0));
-        self::assertSame('mysql:host=localhost;dbname=test', $storeDef->getArgument(0));
+        $this->assertSame('mysql:host=localhost;dbname=test', $storeDef->getArgument(0));
 
-        self::assertTrue($container->hasDefinition('lock.garply.factory'));
+        $this->assertTrue($container->hasDefinition('lock.garply.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.garply.factory')->getArgument(0));
-        self::assertSame('null', $storeDef->getArgument(0));
+        $this->assertSame('null', $storeDef->getArgument(0));
     }
 
     public function testLockWithService()
@@ -2845,9 +2851,9 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
         $container->compile();
 
-        self::assertTrue($container->hasDefinition('lock.default.factory'));
+        $this->assertTrue($container->hasDefinition('lock.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.default.factory')->getArgument(0));
-        self::assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
+        $this->assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
     }
 
     public function testLockWithServiceAndEnv()
@@ -2856,35 +2862,35 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
         $container->compile();
 
-        self::assertTrue($container->hasDefinition('lock.foo.factory'));
-        self::assertTrue($container->hasDefinition('lock.bar.factory'));
+        $this->assertTrue($container->hasDefinition('lock.foo.factory'));
+        $this->assertTrue($container->hasDefinition('lock.bar.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('lock.bar.factory')->getArgument(0));
 
         $connection = $storeDef->getArgument(0);
-        self::assertInstanceOf(Reference::class, $connection);
-        self::assertEquals('my_service', $connection->__toString());
+        $this->assertInstanceOf(Reference::class, $connection);
+        $this->assertEquals('my_service', $connection->__toString());
     }
 
     public function testDefaultSemaphore()
     {
         $container = $this->createContainerFromFile('semaphore');
 
-        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
-        self::assertSame('redis://localhost', $storeDef->getArgument(0));
+        $this->assertSame('redis://localhost', $storeDef->getArgument(0));
     }
 
     public function testNamedSemaphores()
     {
         $container = $this->createContainerFromFile('semaphore_named');
 
-        self::assertTrue($container->hasDefinition('semaphore.foo.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.foo.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.foo.factory')->getArgument(0));
-        self::assertSame('redis://paas.com', $storeDef->getArgument(0));
+        $this->assertSame('redis://paas.com', $storeDef->getArgument(0));
 
-        self::assertTrue($container->hasDefinition('semaphore.qux.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.qux.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.qux.factory')->getArgument(0));
-        self::assertStringContainsString('REDIS_DSN', $storeDef->getArgument(0));
+        $this->assertStringContainsString('REDIS_DSN', $storeDef->getArgument(0));
     }
 
     public function testSemaphoreWithService()
@@ -2893,34 +2899,34 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
         $container->compile();
 
-        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
-        self::assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
+        $this->assertEquals(new Reference('my_service'), $storeDef->getArgument(0));
     }
 
     public function testSemaphoreWithLock()
     {
         $container = $this->createContainerFromFile('semaphore_lock');
 
-        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
-        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
-        self::assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
+        $this->assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        $this->assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
     }
 
     public function testSemaphoreWithNamedLock()
     {
         $container = $this->createContainerFromFile('semaphore_lock_named');
 
-        self::assertTrue($container->hasDefinition('semaphore.default.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.default.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.default.factory')->getArgument(0));
-        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
-        self::assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
+        $this->assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        $this->assertEquals(new Reference('lock.default.factory'), $storeDef->getArgument(0));
 
-        self::assertTrue($container->hasDefinition('semaphore.bar.factory'));
+        $this->assertTrue($container->hasDefinition('semaphore.bar.factory'));
         $storeDef = $container->getDefinition($container->getDefinition('semaphore.bar.factory')->getArgument(0));
-        self::assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
-        self::assertEquals(new Reference('lock.foo.factory'), $storeDef->getArgument(0));
+        $this->assertSame([SemaphoreStoreFactory::class, 'createStore'], $storeDef->getFactory());
+        $this->assertEquals(new Reference('lock.foo.factory'), $storeDef->getArgument(0));
     }
 
     public function testJsonStreamerEnabled()
