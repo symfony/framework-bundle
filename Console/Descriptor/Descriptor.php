@@ -386,6 +386,36 @@ abstract class Descriptor implements DescriptorInterface
         }
     }
 
+    /**
+     * @return array<array{id: string, class: ?string, priority: int}>
+     */
+    protected function getDecorationStack(ContainerBuilder $container, string $id): array
+    {
+        $stack = [];
+
+        while ($container->hasDefinition($id) || $container->hasAlias($id)) {
+            // resolve Alias and continue
+            if ($container->hasAlias($id)) {
+                $id = (string) $container->getAlias($id);
+                continue;
+            }
+
+            $definition = $container->getDefinition($id);
+            $class = $definition->getClass();
+            $priority = $definition->decorationPriority ?? 0;
+
+            $stack[] = ['id' => $id, 'class' => $class, 'priority' => $priority];
+
+            if (!$nextId = $definition->innerServiceId) {
+                break;
+            }
+
+            $id = $nextId;
+        }
+
+        return $stack;
+    }
+
     private function filterRoutesByHttpMethod(RouteCollection $routes, string $method): RouteCollection
     {
         if (!$method) {
