@@ -78,6 +78,7 @@ use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\AuthenticationEvents;
+use Symfony\Component\Semaphore\Store\LockStore;
 use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
 use Symfony\Component\Serializer\DependencyInjection\SerializerPass;
 use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
@@ -2906,6 +2907,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testSemaphoreWithLock()
     {
+        if (!class_exists(LockStore::class)) {
+            $this->markTestSkipped('LockStore not available');
+        }
+
         $container = $this->createContainerFromFile('semaphore_lock');
 
         $this->assertTrue($container->hasDefinition('semaphore.default.factory'));
@@ -2916,6 +2921,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testSemaphoreWithNamedLock()
     {
+        if (!class_exists(LockStore::class)) {
+            $this->markTestSkipped('LockStore not available');
+        }
+
         $container = $this->createContainerFromFile('semaphore_lock_named');
 
         $this->assertTrue($container->hasDefinition('semaphore.default.factory'));

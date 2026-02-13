@@ -180,6 +180,7 @@ use Symfony\Component\Semaphore\PersistingStoreInterface as SemaphoreStoreInterf
 use Symfony\Component\Semaphore\Semaphore;
 use Symfony\Component\Semaphore\SemaphoreFactory;
 use Symfony\Component\Semaphore\Serializer\SemaphoreKeyNormalizer;
+use Symfony\Component\Semaphore\Store\LockStore;
 use Symfony\Component\Semaphore\Store\StoreFactory as SemaphoreStoreFactory;
 use Symfony\Component\Serializer\Attribute as SerializerMapping;
 use Symfony\Component\Serializer\Attribute\ExtendsSerializationFor;
@@ -2341,6 +2342,11 @@ class FrameworkExtension extends Extension
 
         foreach ($config['resources'] as $resourceName => $resourceStore) {
             $storeDsn = $container->resolveEnvPlaceholders($resourceStore, null, $usedEnvs);
+
+            if (str_starts_with($storeDsn, 'lock://') && !class_exists(LockStore::class)) {
+                throw new LogicException('Cannot use a lock store as the installed version of the Semaphore component does not support it. Try running "composer require symfony/semaphore:^8.1".');
+            }
+
             $storeDefinition = new Definition(SemaphoreStoreInterface::class);
             $storeDefinition->setFactory([SemaphoreStoreFactory::class, 'createStore']);
             $storeDefinition->setArguments([match (true) {
