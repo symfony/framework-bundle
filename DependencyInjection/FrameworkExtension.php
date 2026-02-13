@@ -2374,6 +2374,10 @@ class FrameworkExtension extends Extension
 
     private function registerSemaphoreConfiguration(array $config, ContainerBuilder $container, PhpFileLoader $loader): void
     {
+        if (!class_exists(Semaphore::class)) {
+            throw new LogicException('Semaphore support cannot be enabled as the Semaphore component is not installed. Try running "composer require symfony/semaphore".');
+        }
+
         $loader->load('semaphore.php');
 
         foreach ($config['resources'] as $resourceName => $resourceStore) {
