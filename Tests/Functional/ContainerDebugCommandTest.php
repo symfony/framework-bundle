@@ -94,10 +94,10 @@ class ContainerDebugCommandTest extends AbstractWebTestCase
         $tester = new ApplicationTester($application);
 
         $tester->run(['command' => 'debug:container', 'name' => 'deprecated', '--format' => 'txt']);
-        $this->assertStringContainsString('[WARNING] The "deprecated" service is deprecated since foo/bar 1.9 and will be removed in 2.0', $tester->getDisplay());
+        $this->assertStringContainsString('The "deprecated" service is deprecated since foo/bar 1.9 and will be removed in 2.0', preg_replace('/\s+/', ' ', $tester->getDisplay()));
 
         $tester->run(['command' => 'debug:container', 'name' => 'deprecated_alias', '--format' => 'txt']);
-        $this->assertStringContainsString('[WARNING] The "deprecated_alias" alias is deprecated since foo/bar 1.9 and will be removed in 2.0', $tester->getDisplay());
+        $this->assertStringContainsString('The "deprecated_alias" alias is deprecated since foo/bar 1.9 and will be removed in 2.0', preg_replace('/\s+/', ' ', $tester->getDisplay()));
     }
 
     public function testExcludedService()
@@ -214,10 +214,10 @@ TXT
         file_put_contents($path, serialize([[
             'type' => 16384,
             'message' => 'The "Symfony\Bundle\FrameworkBundle\Controller\Controller" class is deprecated since Symfony 4.2, use Symfony\Bundle\FrameworkBundle\Controller\AbstractController instead.',
-            'file' => '/home/hamza/projet/contrib/sf/vendor/symfony/framework-bundle/Controller/Controller.php',
+            'file' => '/home/hamza/project/contrib/sf/vendor/symfony/framework-bundle/Controller/Controller.php',
             'line' => 17,
             'trace' => [[
-                'file' => '/home/hamza/projet/contrib/sf/src/Controller/DefaultController.php',
+                'file' => '/home/hamza/project/contrib/sf/src/Controller/DefaultController.php',
                 'line' => 9,
                 'function' => 'spl_autoload_call',
             ]],
@@ -233,7 +233,7 @@ TXT
 
         $tester->assertCommandIsSuccessful();
         $this->assertStringContainsString('Symfony\Bundle\FrameworkBundle\Controller\Controller', $tester->getDisplay());
-        $this->assertStringContainsString('/home/hamza/projet/contrib/sf/vendor/symfony/framework-bundle/Controller/Controller.php', $tester->getDisplay());
+        $this->assertStringContainsString('/home/hamza/project/contrib/sf/vendor/symfony/framework-bundle/Controller/Controller.php', $tester->getDisplay());
     }
 
     public function testGetDeprecationNone()
