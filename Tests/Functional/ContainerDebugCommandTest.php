@@ -94,10 +94,10 @@ class ContainerDebugCommandTest extends AbstractWebTestCase
         $tester = new ApplicationTester($application);
 
         $tester->run(['command' => 'debug:container', 'name' => 'deprecated', '--format' => 'txt']);
-        $this->assertStringContainsString('[WARNING] The "deprecated" service is deprecated since foo/bar 1.9 and will be removed in 2.0', $tester->getDisplay());
+        $this->assertStringContainsString('The "deprecated" service is deprecated since foo/bar 1.9 and will be removed in 2.0', preg_replace('/\s+/', ' ', $tester->getDisplay()));
 
         $tester->run(['command' => 'debug:container', 'name' => 'deprecated_alias', '--format' => 'txt']);
-        $this->assertStringContainsString('[WARNING] The "deprecated_alias" alias is deprecated since foo/bar 1.9 and will be removed in 2.0', $tester->getDisplay());
+        $this->assertStringContainsString('The "deprecated_alias" alias is deprecated since foo/bar 1.9 and will be removed in 2.0', preg_replace('/\s+/', ' ', $tester->getDisplay()));
     }
 
     public function testExcludedService()
