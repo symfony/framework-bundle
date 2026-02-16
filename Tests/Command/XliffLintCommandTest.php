@@ -92,7 +92,6 @@ EOF;
             ->willReturn(new HelperSet());
 
         $application
-            ->expects($this->any())
             ->method('getDefinition')
             ->willReturn(new InputDefinition());
 
