@@ -11,12 +11,14 @@
 
 namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
+use Symfony\Component\Console\ArgumentResolver\ValueResolver\TraceableValueResolver;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Gathers and configures the console argument value resolvers.
@@ -42,6 +44,19 @@ class ConsoleArgumentValueResolverPass implements CompilerPassInterface
                 unset($resolvers[$name]);
             } else {
                 $namedResolvers[$name] ??= clone $resolver;
+            }
+        }
+
+        if ($container->getParameter('kernel.debug') && $container->has('debug.stopwatch')) {
+            foreach ($resolvers as $name => $resolver) {
+                $resolvers[$name] = new Reference('.debug.console.value_resolver.'.$resolver);
+                $container->register('.debug.console.value_resolver.'.$resolver, TraceableValueResolver::class)
+                    ->setArguments([$resolver, new Reference('debug.stopwatch')]);
+            }
+            foreach ($namedResolvers as $name => $resolver) {
+                $namedResolvers[$name] = new Reference('.debug.console.value_resolver.'.$resolver);
+                $container->register('.debug.console.value_resolver.'.$resolver, TraceableValueResolver::class)
+                    ->setArguments([$resolver, new Reference('debug.stopwatch')]);
             }
         }
 
