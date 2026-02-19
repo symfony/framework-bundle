@@ -31,6 +31,11 @@ use Symfony\Component\Routing\RouteCollection;
 trait MicroKernelTrait
 {
     /**
+     * @var list<string> The list of allowed environments - typically prod, dev, test - empty allows any environments
+     */
+    private array $allowedEnvs = [];
+
+    /**
      * Configures the container.
      *
      * You can register extensions:
@@ -255,12 +260,18 @@ trait MicroKernelTrait
         $parameters = parent::getKernelParameters();
         $bundlesPath = $this->getBundlesPath();
         $bundlesDefinition = !is_file($bundlesPath) ? [FrameworkBundle::class => ['all' => true]] : require $bundlesPath;
-        $knownEnvs = [$this->environment => true];
 
-        foreach ($bundlesDefinition as $envs) {
-            $knownEnvs += $envs;
+        if (!$knownEnvs = array_flip($this->allowedEnvs)) {
+            $knownEnvs = [$this->environment => true];
+
+            foreach ($bundlesDefinition as $envs) {
+                $knownEnvs += $envs;
+            }
+            unset($knownEnvs['all']);
+        } elseif (!isset($knownEnvs[$this->environment])) {
+            throw new \InvalidArgumentException(\sprintf('The environment "%s" is not registered as allowed in "%s::$allowedEnvs".', $this->environment, static::class));
         }
-        unset($knownEnvs['all']);
+
         $parameters['.container.known_envs'] = array_keys($knownEnvs);
         $parameters['.kernel.config_dir'] = $this->getConfigDir();
         $parameters['.kernel.bundles_definition'] = $bundlesDefinition;

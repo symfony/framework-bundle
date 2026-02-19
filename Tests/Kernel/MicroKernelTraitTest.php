@@ -241,6 +241,25 @@ class MicroKernelTraitTest extends TestCase
         ], $parameters['.kernel.bundles_definition']);
     }
 
+    public function testAllowedEnvsRestrictsKnownEnvs()
+    {
+        $kernel = $this->kernel = new AllowedEnvsKernel('prod', ['dev', 'test', 'prod']);
+
+        $parameters = $kernel->getKernelParameters();
+
+        $this->assertSame(['dev', 'test', 'prod'], $parameters['.container.known_envs']);
+    }
+
+    public function testAllowedEnvsThrowsWhenCurrentEnvNotAllowed()
+    {
+        $kernel = $this->kernel = new AllowedEnvsKernel('staging', ['dev', 'test', 'prod']);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The environment "staging" is not registered as allowed in "'.AllowedEnvsKernel::class.'::$allowedEnvs".');
+
+        $kernel->getKernelParameters();
+    }
+
     public function testRelativeEnvDirsAreResolvedFromProjectDir()
     {
         $_SERVER['APP_CACHE_DIR'] = 'var/custom-cache';
@@ -268,5 +287,23 @@ class EnvDirKernel extends Kernel
     public function getProjectDir(): string
     {
         return $this->projectDir;
+    }
+}
+
+class AllowedEnvsKernel extends Kernel
+{
+    use MicroKernelTrait {
+        getKernelParameters as public;
+    }
+
+    public function __construct(string $environment, array $allowedEnvs)
+    {
+        parent::__construct($environment, false);
+        $this->allowedEnvs = $allowedEnvs;
+    }
+
+    public function getCacheDir(): string
+    {
+        return sys_get_temp_dir().'/sf_allowed_envs_kernel/'.$this->environment;
     }
 }
