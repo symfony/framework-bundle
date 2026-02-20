@@ -31,9 +31,12 @@ use Symfony\Component\Routing\RouteCollection;
 trait MicroKernelTrait
 {
     /**
-     * @var list<string> The list of allowed environments - typically prod, dev, test - empty allows any environments
+     * @return list<string> The list of allowed environments - typically prod, dev, test - empty allows any environments
      */
-    private array $allowedEnvs = [];
+    private function getAllowedEnvs(): array
+    {
+        return [];
+    }
 
     /**
      * Configures the container.
@@ -261,7 +264,7 @@ trait MicroKernelTrait
         $bundlesPath = $this->getBundlesPath();
         $bundlesDefinition = !is_file($bundlesPath) ? [FrameworkBundle::class => ['all' => true]] : require $bundlesPath;
 
-        if (!$knownEnvs = array_flip($this->allowedEnvs)) {
+        if (!$knownEnvs = array_flip($this->getAllowedEnvs())) {
             $knownEnvs = [$this->environment => true];
 
             foreach ($bundlesDefinition as $envs) {
@@ -269,7 +272,7 @@ trait MicroKernelTrait
             }
             unset($knownEnvs['all']);
         } elseif (!isset($knownEnvs[$this->environment])) {
-            throw new \InvalidArgumentException(\sprintf('The environment "%s" is not registered as allowed in "%s::$allowedEnvs".', $this->environment, static::class));
+            throw new \InvalidArgumentException(\sprintf('The environment "%s" is not registered as allowed by "%s::getAllowedEnvs()".', $this->environment, static::class));
         }
 
         $parameters['.container.known_envs'] = array_keys($knownEnvs);

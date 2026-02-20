@@ -18,6 +18,7 @@ CHANGELOG
  * Deprecate parameters `router.request_context.scheme` and `router.request_context.host`;
    use the `router.request_context.base_url` parameter or the `framework.router.default_uri` config option instead
  * Add decoration stack to `debug:container` command output
+ * Add `MicroKernelTrait::getAllowedEnvs()` to list and enforce allowed values for `APP_ENV`
 
 8.0
 ---
