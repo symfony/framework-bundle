@@ -255,7 +255,7 @@ class MicroKernelTraitTest extends TestCase
         $kernel = $this->kernel = new AllowedEnvsKernel('staging', ['dev', 'test', 'prod']);
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The environment "staging" is not registered as allowed in "'.AllowedEnvsKernel::class.'::$allowedEnvs".');
+        $this->expectExceptionMessage('The environment "staging" is not registered as allowed by "'.AllowedEnvsKernel::class.'::getAllowedEnvs()".');
 
         $kernel->getKernelParameters();
     }
@@ -296,10 +296,19 @@ class AllowedEnvsKernel extends Kernel
         getKernelParameters as public;
     }
 
-    public function __construct(string $environment, array $allowedEnvs)
+    public function __construct(string $environment, private array $allowedEnvs)
     {
         parent::__construct($environment, false);
-        $this->allowedEnvs = $allowedEnvs;
+    }
+
+    private function getAllowedEnvs(): array
+    {
+        return $this->allowedEnvs;
+    }
+
+    public function registerBundles(): iterable
+    {
+        return [];
     }
 
     public function getCacheDir(): string
