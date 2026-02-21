@@ -185,8 +185,9 @@ class TranslationExtractCommandTest extends TestCase
         $operation = $this->createMock(MessageCatalogueInterface::class);
         $operation
             ->method('all')
-            ->with('messages')
-            ->willReturn($messages);
+            ->willReturnMap([
+                ['messages', $messages],
+            ]);
         $operation
             ->expects($this->exactly($noFillCounter))
             ->method('set');
