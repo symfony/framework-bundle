@@ -2313,7 +2313,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $definition = $container->getDefinition('http_client.caching');
         $this->assertSame(CachingHttpClient::class, $definition->getClass());
         $this->assertSame('http_client', $definition->getDecoratedService()[0]);
-        $this->assertCount(6, $arguments = $definition->getArguments());
+        $this->assertCount(5, $arguments = $definition->getArguments());
         $this->assertInstanceOf(Reference::class, $arguments[0]);
         $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
@@ -2322,7 +2322,6 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(['X-powered' => 'PHP'], $arguments[2]['headers']);
         $this->assertFalse($arguments[3]);
         $this->assertSame(2, $arguments[4]);
-        $this->assertSame(200, $arguments[5]);
 
         $this->assertTrue($container->hasDefinition('bar.caching'));
         $definition = $container->getDefinition('bar.caching');

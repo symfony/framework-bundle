@@ -2948,7 +2948,6 @@ class FrameworkExtension extends Extension
                 $defaultOptions,
                 $options['shared'],
                 $options['max_ttl'],
-                $options['ttl_buffer'],
             ]);
     }
 
