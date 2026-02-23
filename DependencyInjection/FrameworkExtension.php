@@ -2592,7 +2592,7 @@ class FrameworkExtension extends Extension
         $failureTransportReferencesByTransportName = array_map(static fn ($failureTransportName) => $senderReferences[$failureTransportName], $failureTransportsByName);
 
         $messageToSendersMapping = [];
-        foreach ($config['routing'] as $message => $messageConfiguration) {
+        foreach ($config['routing'] as $message => $messageSenders) {
             if ('*' !== $message && !class_exists($message) && !interface_exists($message, false) && !preg_match('/^(?:[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*+\\\\)++\*$/', $message)) {
                 if (str_contains($message, '*')) {
                     throw new LogicException(\sprintf('Invalid Messenger routing configuration: invalid namespace "%s" wildcard.', $message));
@@ -2602,13 +2602,13 @@ class FrameworkExtension extends Extension
             }
 
             // make sure senderAliases contains all senders
-            foreach ($messageConfiguration['senders'] as $sender) {
+            foreach ($messageSenders as $sender) {
                 if (!isset($senderReferences[$sender])) {
                     throw new LogicException(\sprintf('Invalid Messenger routing configuration: the "%s" class is being routed to a sender called "%s". This is not a valid transport or service id.', $message, $sender));
                 }
             }
 
-            $messageToSendersMapping[$message] = $messageConfiguration['senders'];
+            $messageToSendersMapping[$message] = $messageSenders;
         }
 
         $sendersServiceLocator = ServiceLocatorTagPass::register($container, $senderReferences);

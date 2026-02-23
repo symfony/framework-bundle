@@ -1671,23 +1671,20 @@ class Configuration implements ConfigurationInterface
                                 ->then(static function ($config) {
                                     $newConfig = [];
                                     foreach ($config as $k => $v) {
-                                        $newConfig[$k] = [
-                                            'senders' => $v['senders'] ?? (\is_array($v) ? array_values($v) : [$v]),
-                                        ];
+                                        if (isset($v['senders'])) {
+                                            trigger_deprecation('symfony/framework-bundle', '8.1', 'Using the "senders" nesting level for messenger routing configuration is deprecated and will be removed in version 9.0. Use a flat list of senders instead.');
+                                        }
+                                        $newConfig[$k] = $v['senders'] ?? (\is_array($v) ? array_values($v) : [$v]);
                                     }
 
                                     return $newConfig;
                                 })
                             ->end()
-                            ->prototype('array')
-                                ->acceptAndWrap(['string'], 'senders')
+                            ->arrayPrototype()
+                                ->requiresAtLeastOneElement()
+                                ->acceptAndWrap(['string'])
                                 ->performNoDeepMerging()
-                                ->children()
-                                    ->arrayNode('senders')
-                                        ->requiresAtLeastOneElement()
-                                        ->prototype('scalar')->end()
-                                    ->end()
-                                ->end()
+                                ->scalarPrototype()->end()
                             ->end()
                         ->end()
                         ->arrayNode('serializer')

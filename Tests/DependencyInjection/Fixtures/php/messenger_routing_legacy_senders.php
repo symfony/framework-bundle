@@ -11,7 +11,9 @@ $container->loadFromExtension('framework', [
         ],
         'routing' => [
             DummyMessage::class => ['amqp', 'messenger.transport.audit'],
-            SecondMessage::class => ['amqp', 'audit'],
+            SecondMessage::class => [
+                'senders' => ['amqp', 'audit'],
+            ],
             'Symfony\*' => 'amqp',
             '*' => 'amqp',
         ],
