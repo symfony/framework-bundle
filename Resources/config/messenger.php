@@ -28,6 +28,7 @@ use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
 use Symfony\Component\Messenger\Handler\RedispatchMessageHandler;
 use Symfony\Component\Messenger\Middleware\AddBusNameStampMiddleware;
 use Symfony\Component\Messenger\Middleware\AddDefaultStampsMiddleware;
+use Symfony\Component\Messenger\Middleware\DecodeFailedMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\DeduplicateMiddleware;
 use Symfony\Component\Messenger\Middleware\DispatchAfterCurrentBusMiddleware;
 use Symfony\Component\Messenger\Middleware\FailedMessageProcessingMiddleware;
@@ -132,6 +133,15 @@ return static function (ContainerConfigurator $container) {
         ->set('messenger.middleware.reject_redelivered_message_middleware', RejectRedeliveredMessageMiddleware::class)
 
         ->set('messenger.middleware.failed_message_processing_middleware', FailedMessageProcessingMiddleware::class)
+
+        ->set('messenger.transport.serializer_locator', ServiceLocator::class)
+            ->args([[]])
+            ->tag('container.service_locator')
+
+        ->set('messenger.middleware.decode_failed_message_middleware', DecodeFailedMessageMiddleware::class)
+            ->args([
+                service('messenger.transport.serializer_locator'),
+            ])
 
         ->set('messenger.middleware.traceable', TraceableMiddleware::class)
             ->abstract()

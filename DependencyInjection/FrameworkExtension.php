@@ -130,6 +130,7 @@ use Symfony\Component\Messenger\Bridge as MessengerBridge;
 use Symfony\Component\Messenger\Handler\BatchHandlerInterface;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Middleware\DecodeFailedMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\RouterContextMiddleware;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface as MessengerTransportFactoryInterface;
@@ -2449,6 +2450,7 @@ class FrameworkExtension extends Extension
                 ['id' => 'add_bus_name_stamp_middleware'],
                 ['id' => 'reject_redelivered_message_middleware'],
                 ['id' => 'dispatch_after_current_bus'],
+                ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
                 ['id' => 'failed_message_processing_middleware'],
             ],
             'after' => [
@@ -2536,6 +2538,7 @@ class FrameworkExtension extends Extension
         $senderAliases = [];
         $transportRetryReferences = [];
         $transportRateLimiterReferences = [];
+        $serializerReferencesByTransport = [];
         $serializerIds = [];
         foreach ($config['transports'] as $name => $transport) {
             $serializerId = $transport['serializer'] ?? 'messenger.default_serializer';
@@ -2543,6 +2546,7 @@ class FrameworkExtension extends Extension
                 'alias' => $name,
                 'is_failure_transport' => \in_array($name, $failureTransports, true),
             ];
+            $serializerReferencesByTransport[$name] = new Reference($serializerId);
             if (str_starts_with($transport['dsn'], 'sync://')) {
                 $tags['is_consumable'] = false;
             }
@@ -2578,6 +2582,12 @@ class FrameworkExtension extends Extension
 
                 $transportRateLimiterReferences[$name] = new Reference('limiter.'.$transport['rate_limiter']);
             }
+        }
+
+        if (class_exists(DecodeFailedMessageMiddleware::class)) {
+            $container->getDefinition('messenger.transport.serializer_locator')->replaceArgument(0, $serializerReferencesByTransport);
+        } else {
+            $container->removeDefinition('messenger.middleware.decode_failed_message_middleware');
         }
 
         $senderReferences = [];
