@@ -13,6 +13,8 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Configuration;
@@ -1009,6 +1011,18 @@ class ConfigurationTest extends TestCase
                     'default' => ['include_built_in_normalizers' => false],
                 ],
             ],
+        ]]);
+    }
+
+    #[Group('legacy')]
+    #[IgnoreDeprecations]
+    public function testTerminateOnCacheHitDeprecation()
+    {
+        $this->expectUserDeprecationMessage('Since symfony/framework-bundle 8.1: Setting the "framework.http_cache.terminate_on_cache_hit" configuration option is deprecated. It will be removed in version 9.0.');
+
+        $processor = new Processor();
+        $processor->processConfiguration(new Configuration(true), [[
+            'http_cache' => ['terminate_on_cache_hit' => true],
         ]]);
     }
 }

@@ -10,6 +10,7 @@ CHANGELOG
  * Add project-scoped `flock` and `semaphore` lock store services
  * Add `createFormFlowBuilder` method to `AbstractController` and `ControllerHelper`
  * Deprecate setting the `framework.profiler.collect_serializer_data` config option
+ * Deprecate the `framework.http_cache.terminate_on_cache_hit` config option
  * Add support for `framework.secrets.decryption_env_var` to contain dots
  * Enable mocking non-shared services in tests
  * Add support for setting `mock_response_factory` per scoped HTTP client
