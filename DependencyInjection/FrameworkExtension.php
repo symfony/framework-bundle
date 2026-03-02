@@ -306,19 +306,6 @@ class FrameworkExtension extends Extension
                 $container->removeDefinition('console.messenger.application');
                 $container->removeDefinition('console.messenger.execute_command_handler');
             }
-
-            if (!interface_exists(ConsoleValueResolverInterface::class)) {
-                $container->removeDefinition('console.argument_resolver');
-                $container->removeDefinition('console.argument_resolver.backed_enum');
-                $container->removeDefinition('console.argument_resolver.uid');
-                $container->removeDefinition('console.argument_resolver.builtin_type');
-                $container->removeDefinition('console.argument_resolver.datetime');
-                $container->removeDefinition('console.argument_resolver.map_input');
-                $container->removeDefinition('console.argument_resolver.service');
-                $container->removeDefinition('console.argument_resolver.default');
-                $container->removeDefinition('console.argument_resolver.variadic');
-                $container->removeDefinition('console.argument_resolver.input_file');
-            }
         }
 
         // Load Cache configuration first as it is used by other components
@@ -1283,10 +1270,6 @@ class FrameworkExtension extends Extension
 
         if ($debug && class_exists(Stopwatch::class)) {
             $loader->load('debug.php');
-
-            if (!interface_exists(ConsoleValueResolverInterface::class)) {
-                $container->removeDefinition('debug.console.argument_resolver');
-            }
         }
 
         $definition = $container->findDefinition('debug.error_handler_configurator');
