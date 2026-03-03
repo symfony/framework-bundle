@@ -2784,6 +2784,11 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
         $this->assertFalse($container->getDefinition('webhook.transport')->hasErrors());
         $this->assertEquals('webhook.payload_serializer.serializer', $container->getDefinition('webhook.body_configurator.json')->getArgument(0));
+
+        $this->assertSame('Webhook-Event', $container->getDefinition('webhook.headers_configurator')->getArgument(0));
+        $this->assertSame('Webhook-Id', $container->getDefinition('webhook.headers_configurator')->getArgument(1));
+        $this->assertSame('sha256', $container->getDefinition('webhook.signer')->getArgument(0));
+        $this->assertSame('Webhook-Signature', $container->getDefinition('webhook.signer')->getArgument(1));
     }
 
     public function testWebhookWithoutSerializer()

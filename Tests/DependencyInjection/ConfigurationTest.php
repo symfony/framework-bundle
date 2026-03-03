@@ -984,6 +984,10 @@ class ConfigurationTest extends TestCase
                 'enabled' => !class_exists(FullStack::class) && class_exists(WebhookController::class),
                 'routing' => [],
                 'message_bus' => 'messenger.default_bus',
+                'event_header_name' => 'Webhook-Event',
+                'id_header_name' => 'Webhook-Id',
+                'signature_header_name' => 'Webhook-Signature',
+                'signing_algorithm' => 'sha256',
             ],
             'remote-event' => [
                 'enabled' => !class_exists(FullStack::class) && class_exists(RemoteEvent::class),

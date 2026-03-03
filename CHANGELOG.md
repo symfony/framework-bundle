@@ -23,6 +23,7 @@ CHANGELOG
  * Change `caching.max_ttl` option to default to `86400` (24h) instead of `null`
  * Deprecate setting `caching.max_ttl` to `null`, use a positive integer instead
  * Deprecate `senders` nesting level for messenger routing config; use string or a list of strings instead
+ * Allow configuring Webhook's header names and signing algo
 
 8.0
 ---

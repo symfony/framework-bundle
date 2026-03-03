@@ -3378,6 +3378,14 @@ class FrameworkExtension extends Extension
 
         $jsonBodyConfigurator = $container->getDefinition('webhook.body_configurator.json');
         $jsonBodyConfigurator->replaceArgument(0, new Reference($serializerEnabled ? 'webhook.payload_serializer.serializer' : 'webhook.payload_serializer.json'));
+
+        $container->getDefinition('webhook.headers_configurator')
+            ->replaceArgument(0, $config['event_header_name'])
+            ->replaceArgument(1, $config['id_header_name']);
+
+        $container->getDefinition('webhook.signer')
+            ->replaceArgument(0, $config['signing_algorithm'])
+            ->replaceArgument(1, $config['signature_header_name']);
     }
 
     private function registerRemoteEventConfiguration(PhpFileLoader $loader): void
