@@ -1669,23 +1669,11 @@ class Configuration implements ConfigurationInterface
                             ->beforeNormalization()
                                 ->ifArray()
                                 ->then(static function ($config) {
-                                    // If XML config with only one routing attribute
-                                    if (2 === \count($config) && isset($config['message-class']) && isset($config['sender'])) {
-                                        $config = [0 => $config];
-                                    }
-
                                     $newConfig = [];
                                     foreach ($config as $k => $v) {
-                                        if (!\is_int($k)) {
-                                            $newConfig[$k] = [
-                                                'senders' => $v['senders'] ?? (\is_array($v) ? array_values($v) : [$v]),
-                                            ];
-                                        } else {
-                                            $newConfig[$v['message-class']]['senders'] = array_map(
-                                                static fn ($a) => \is_string($a) ? $a : $a['service'],
-                                                array_values($v['sender'])
-                                            );
-                                        }
+                                        $newConfig[$k] = [
+                                            'senders' => $v['senders'] ?? (\is_array($v) ? array_values($v) : [$v]),
+                                        ];
                                     }
 
                                     return $newConfig;
