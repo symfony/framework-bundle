@@ -205,6 +205,7 @@ use Symfony\Component\TypeInfo\TypeResolver\PhpDocAwareReflectionTypeResolver;
 use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
 use Symfony\Component\TypeInfo\TypeResolver\TypeResolverInterface;
 use Symfony\Component\Uid\Factory\UuidFactory;
+use Symfony\Component\Uid\Uuid47Transformer;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Validator\Attribute\ExtendsValidationFor;
 use Symfony\Component\Validator\Constraint;
@@ -3481,6 +3482,11 @@ class FrameworkExtension extends Extension
         if (isset($config['name_based_uuid_namespace'])) {
             $container->getDefinition('name_based_uuid.factory')
                 ->setArguments([$config['name_based_uuid_namespace']]);
+        }
+
+        if (!class_exists(Uuid47Transformer::class)) {
+            $container->removeDefinition('uuid47_transformer');
+            $container->removeAlias(Uuid47Transformer::class);
         }
     }
 
