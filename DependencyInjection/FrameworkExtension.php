@@ -1314,6 +1314,7 @@ class FrameworkExtension extends Extension
         }
 
         $container->setParameter('session.storage.options', $options);
+        $container->setParameter('session.metadata.cookie_lifetime', $options['cookie_lifetime'] ?? null);
 
         // session handler (the internal callback registered with PHP session management)
         if (null === ($config['handler_id'] ?? $config['save_path'] ?? null)) {
