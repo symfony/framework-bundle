@@ -118,7 +118,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     stack: list<DefinitionType|AliasType|PrototypeType|array<class-string, ArgumentsType|null>>,
  *     public?: bool,
  *     deprecated?: DeprecationType,
- * }
+ * %A}
  * @psalm-type ServicesConfig = array{
  *     _defaults?: DefaultsType,
  *     _instanceof?: InstanceofType,
