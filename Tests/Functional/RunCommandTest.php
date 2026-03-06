@@ -36,14 +36,14 @@ class RunCommandTest extends AbstractWebTestCase
     {
         $result = static::runCommand('list');
 
-        $this->assertIsSuccessful($result);
+        $this->assertCommandIsSuccessful($result);
     }
 
     public function testRunCommandWithArguments()
     {
         $result = static::runCommand('list', ['namespace' => 'debug']);
 
-        $this->assertIsSuccessful($result);
+        $this->assertCommandIsSuccessful($result);
         $this->assertStringContainsString('debug', $result->getOutput());
     }
 }
