@@ -1270,6 +1270,10 @@ class FrameworkExtension extends Extension
 
         if ($debug && class_exists(Stopwatch::class)) {
             $loader->load('debug.php');
+
+            if (!$this->hasConsole()) {
+                $container->removeDefinition('debug.console.argument_resolver');
+            }
         }
 
         $definition = $container->findDefinition('debug.error_handler_configurator');
