@@ -60,6 +60,7 @@ use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
@@ -112,6 +113,8 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
 use Symfony\Component\JsonStreamer\JsonStreamWriter;
 use Symfony\Component\JsonStreamer\Mapping\PropertyMetadata;
+use Symfony\Component\JsonStreamer\Transformer\PropertyValueTransformerInterface;
+use Symfony\Component\JsonStreamer\Transformer\ValueObjectTransformerInterface;
 use Symfony\Component\JsonStreamer\ValueTransformer\ValueTransformerInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
@@ -2179,8 +2182,11 @@ class FrameworkExtension extends Extension
             throw new LogicException('JsonStreamer support cannot be enabled as the JsonStreamer component is not installed. Try running "composer require symfony/json-streamer".');
         }
 
-        $container->registerForAutoconfiguration(ValueTransformerInterface::class)
-            ->addTag('json_streamer.value_transformer');
+        $container->registerForAutoconfiguration(PropertyValueTransformerInterface::class)
+            ->addTag('json_streamer.property_value_transformer');
+
+        $container->registerForAutoconfiguration(ValueObjectTransformerInterface::class)
+            ->addTag('json_streamer.value_object_transformer');
 
         $loader->load('json_streamer.php');
 
@@ -2192,6 +2198,30 @@ class FrameworkExtension extends Extension
         if (method_exists(PropertyMetadata::class, 'getNativeToStreamValueTransformer')) {
             $container->getDefinition('json_streamer.stream_writer')->replaceArgument(4, null);
             $container->getDefinition('json_streamer.stream_reader')->replaceArgument(4, null);
+        }
+
+        // BC layer for "symfony/json-streamer" < 8.1
+        if (!interface_exists(PropertyValueTransformerInterface::class)) {
+            $container->registerForAutoconfiguration(ValueTransformerInterface::class)
+                ->addTag('json_streamer.value_transformer');
+
+            $valueTransformers = new ServiceLocatorArgument(new TaggedIteratorArgument('json_streamer.value_transformer', null, true));
+
+            $container->getDefinition('json_streamer.stream_writer')->replaceArgument(0, $valueTransformers);
+            $container->getDefinition('json_streamer.stream_reader')->replaceArgument(0, $valueTransformers);
+            $container->getDefinition('.json_streamer.write.property_metadata_loader.attribute')->replaceArgument(1, $valueTransformers);
+            $container->getDefinition('.json_streamer.read.property_metadata_loader.attribute')->replaceArgument(1, $valueTransformers);
+            $container->getDefinition('.json_streamer.cache_warmer.streamer')->replaceArgument(7, $valueTransformers);
+
+            $container->removeDefinition('.json_streamer.value_object_transformer.date_time');
+        }
+
+        // FC layer for "symfony/json-streamer" >= 8.1
+        if (interface_exists(PropertyValueTransformerInterface::class)) {
+            $container->removeDefinition('.json_streamer.read.property_metadata_loader.date_time');
+            $container->removeDefinition('.json_streamer.write.property_metadata_loader.date_time');
+            $container->getDefinition('json_streamer.value_transformer.date_time_to_string')->clearTag('json_streamer.value_transformer');
+            $container->getDefinition('json_streamer.value_transformer.string_to_date_time')->clearTag('json_streamer.value_transformer');
         }
     }
 
