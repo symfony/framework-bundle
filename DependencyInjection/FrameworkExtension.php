@@ -1847,6 +1847,9 @@ class FrameworkExtension extends Extension
         $this->registerMappingFilesFromConfig($container, $config, $fileRecorder);
     }
 
+    /**
+     * @param-immediately-invoked-callable $fileRecorder
+     */
     private function registerMappingFilesFromDir(string $dir, callable $fileRecorder): void
     {
         foreach (Finder::create()->followLinks()->files()->in($dir)->name('/\.(xml|ya?ml)$/')->sortByName() as $file) {
@@ -1854,6 +1857,9 @@ class FrameworkExtension extends Extension
         }
     }
 
+    /**
+     * @param-immediately-invoked-callable $fileRecorder
+     */
     private function registerMappingFilesFromConfig(ContainerBuilder $container, array $config, callable $fileRecorder): void
     {
         foreach ($config['mapping']['paths'] as $path) {
