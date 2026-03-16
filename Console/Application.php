@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Console;
 
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\ListCommand;
@@ -24,11 +25,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Contracts\Service\ContainerAwareInterface;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Application extends BaseApplication
+class Application extends BaseApplication implements ContainerAwareInterface
 {
     private bool $commandsRegistered = false;
     private array $registrationErrors = [];
@@ -50,6 +52,13 @@ class Application extends BaseApplication
     public function getKernel(): KernelInterface
     {
         return $this->kernel;
+    }
+
+    public function getContainer(): ContainerInterface
+    {
+        $this->kernel->boot();
+
+        return $this->kernel->getContainer();
     }
 
     public function reset(): void

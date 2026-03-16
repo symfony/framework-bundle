@@ -32,6 +32,7 @@
         "symfony/polyfill-mbstring": "^1.0",
         "symfony/polyfill-php85": "^1.33",
         "symfony/routing": "^7.4|^8.0",
+        "symfony/service-contracts": "^3.7",
         "symfony/var-exporter": "^8.1"
     },
     "require-dev": {
