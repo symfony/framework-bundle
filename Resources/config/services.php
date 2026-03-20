@@ -22,6 +22,7 @@ use Symfony\Component\Config\ResourceCheckerConfigCacheFactory;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\DependencyInjection\Config\ContainerParametersResourceChecker;
 use Symfony\Component\DependencyInjection\EnvVarProcessor;
+use Symfony\Component\DependencyInjection\Kernel\FileLocator;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -39,7 +40,7 @@ use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpFoundation\UrlHelper;
 use Symfony\Component\HttpKernel\CacheClearer\ChainCacheClearer;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerAggregate;
-use Symfony\Component\HttpKernel\Config\FileLocator;
+use Symfony\Component\HttpKernel\Config\FileLocator as LegacyFileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetter;
 use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetterInterface;
 use Symfony\Component\HttpKernel\EventListener\LocaleAwareListener;
@@ -153,6 +154,8 @@ return static function (ContainerConfigurator $container) {
                 service('kernel'),
             ])
         ->alias(FileLocator::class, 'file_locator')
+        ->alias(LegacyFileLocator::class, 'file_locator')
+            ->deprecate('symfony/http-kernel', '8.1', 'The "%alias_id%" alias is deprecated, use "'.FileLocator::class.'" instead.')
 
         ->set('uri_signer', UriSigner::class)
             ->args([
