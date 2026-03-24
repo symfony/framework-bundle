@@ -26,6 +26,7 @@ CHANGELOG
  * Deprecate setting `caching.max_ttl` to `null`, use a positive integer instead
  * Deprecate `senders` nesting level for messenger routing config; use string or a list of strings instead
  * Allow configuring Webhook's header names and signing algo
+ * Deprecate registering console commands by overriding `Bundle::registerCommands()`, use the `#[AsCommand]` attribute or the `console.command` service tag instead
 
 8.0
 ---
