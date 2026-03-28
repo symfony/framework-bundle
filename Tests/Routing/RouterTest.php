@@ -341,6 +341,23 @@ class RouterTest extends TestCase
         $router->getRouteCollection();
     }
 
+    public function testEnvPlaceholderInResolvedValue()
+    {
+        $routes = new RouteCollection();
+
+        $route = new Route('foo');
+        $route->setHost('%route.host%');
+        $routes->add('foo', $route);
+
+        $router = new Router($container = $this->getServiceContainer($routes), 'foo');
+        $container->setParameter('route.host', 'env_abcdef1234567890_APP_HOST_abcdef1234567890abcdef1234567890');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The container parameter "route.host" resolves to an env var, which is not allowed in routing configuration.');
+
+        $router->getRouteCollection();
+    }
+
     public function testHostPlaceholders()
     {
         $routes = new RouteCollection();
