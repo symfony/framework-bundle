@@ -195,7 +195,7 @@ class Application extends BaseApplication implements ContainerAwareInterface
         foreach ($this->kernel->getBundles() as $bundle) {
             if ($bundle instanceof Bundle
                 && \method_exists($bundle, 'registerCommands')
-                && new \ReflectionMethod($bundle, 'registerCommands')->getDeclaringClass()->getName() !== Bundle::class
+                && Bundle::class !== new \ReflectionMethod($bundle, 'registerCommands')->getDeclaringClass()->getName()
             ) {
                 trigger_deprecation('symfony/framework-bundle', '8.1', 'Overriding the "%s::registerCommands()" method in "%s" is deprecated, use the "#[AsCommand]" attribute or the "console.command" service tag instead.', Bundle::class, get_debug_type($bundle));
 
