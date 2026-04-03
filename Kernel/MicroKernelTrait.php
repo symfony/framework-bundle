@@ -32,6 +32,7 @@ trait MicroKernelTrait
         initializeBundles as protected doInitializeBundles;
         initializeContainer as protected doInitializeContainer;
         getKernelParameters as private doGetKernelParameters;
+        getBundlesDefinition as private doGetBundlesDefinition;
     }
 
     public function getLogDir(): string
@@ -139,8 +140,16 @@ trait MicroKernelTrait
     protected function getKernelParameters(): array
     {
         $parameters = $this->doGetKernelParameters() + parent::getKernelParameters();
-        $parameters['.kernel.bundles_definition'] = $parameters['.kernel.bundles_definition'] ?: [FrameworkBundle::class => ['all' => true]];
+
+        foreach ($this->bundles as $name => $bundle) {
+            $parameters['kernel.bundles_metadata'][$name]['namespace'] = $bundle->getNamespace();
+        }
 
         return $parameters;
+    }
+
+    private function getBundlesDefinition(): array
+    {
+        return $this->doGetBundlesDefinition() ?: [FrameworkBundle::class => ['all' => true]];
     }
 }
