@@ -42,6 +42,7 @@ use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass;
 use Symfony\Component\Console\DependencyInjection\RegisterCommandArgumentLocatorsPass;
 use Symfony\Component\Console\DependencyInjection\RemoveEmptyCommandArgumentLocatorsPass;
+use Symfony\Component\DependencyInjection\Compiler\AddBehaviorDescribingTagsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\RegisterReverseContainerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -158,13 +159,22 @@ class FrameworkBundle extends Bundle
                 KernelEvents::RESPONSE,
                 KernelEvents::FINISH_REQUEST,
             ],
-            [
+            class_exists(ConsoleEvents::class) ? [
                 ConsoleEvents::COMMAND,
                 ConsoleEvents::TERMINATE,
                 ConsoleEvents::ERROR,
-            ]
+            ] : []
         ));
 
+        $container->addCompilerPass(new AddBehaviorDescribingTagsPass([
+            'container.do_not_inline',
+            'container.service_locator',
+            'container.service_subscriber',
+            'kernel.event_subscriber',
+            'kernel.event_listener',
+            'kernel.locale_aware',
+            'kernel.reset',
+        ]), PassConfig::TYPE_BEFORE_OPTIMIZATION, 200);
         $container->addCompilerPass(new AssetsContextPass());
         $container->addCompilerPass(new LoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -32);
         $container->addCompilerPass(new RegisterControllerArgumentLocatorsPass());
