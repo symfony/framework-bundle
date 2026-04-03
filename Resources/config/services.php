@@ -19,7 +19,6 @@ use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\SelfCheckingResourceChecker;
 use Symfony\Component\Config\ResourceCheckerConfigCacheFactory;
-use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\DependencyInjection\Config\ContainerParametersResourceChecker;
 use Symfony\Component\DependencyInjection\EnvVarProcessor;
 use Symfony\Component\DependencyInjection\Kernel\FileLocator;
@@ -31,7 +30,6 @@ use Symfony\Component\DependencyInjection\ReverseContainer;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as EventDispatcherInterfaceComponentAlias;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,7 +46,6 @@ use Symfony\Component\HttpKernel\HttpCache\Store;
 use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Runtime\Runner\Symfony\HttpKernelRunner;
 use Symfony\Component\Runtime\Runner\Symfony\ResponseRunner;
@@ -56,18 +53,9 @@ use Symfony\Component\Runtime\SymfonyRuntime;
 use Symfony\Component\String\LazyString;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\Component\Workflow\WorkflowEvents;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 return static function (ContainerConfigurator $container) {
-    // this parameter is used at compile time in RegisterListenersPass
-    $container->parameters()->set('event_dispatcher.event_aliases', array_merge(
-        class_exists(ConsoleEvents::class) ? ConsoleEvents::ALIASES : [],
-        class_exists(FormEvents::class) ? FormEvents::ALIASES : [],
-        KernelEvents::ALIASES,
-        class_exists(WorkflowEvents::class) ? WorkflowEvents::ALIASES : []
-    ));
-
     $container->services()
 
         ->set('parameter_bag', ContainerBag::class)
