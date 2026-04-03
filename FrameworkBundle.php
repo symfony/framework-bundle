@@ -14,7 +14,6 @@ namespace Symfony\Bundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddDebugLogProcessorPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AssetsContextPass;
-use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ConsoleArgumentValueResolverPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\DeprecateJsonStreamerValueTransformerTagPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ErrorLoggerCompilerPass;
@@ -38,18 +37,16 @@ use Symfony\Component\Cache\DependencyInjection\CachePoolClearerPass;
 use Symfony\Component\Cache\DependencyInjection\CachePoolPass;
 use Symfony\Component\Cache\DependencyInjection\CachePoolPrunerPass;
 use Symfony\Component\Config\Resource\ClassExistenceResource;
-use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass;
-use Symfony\Component\Console\DependencyInjection\RegisterCommandArgumentLocatorsPass;
-use Symfony\Component\Console\DependencyInjection\RemoveEmptyCommandArgumentLocatorsPass;
+use Symfony\Component\Console\ConsoleBundle;
 use Symfony\Component\DependencyInjection\Compiler\AddBehaviorDescribingTagsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\RegisterReverseContainerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
+use Symfony\Component\DependencyInjection\Kernel\ServicesBundle;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\EventDispatcher\DependencyInjection\AddEventAliasesPass;
-use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\Form\DependencyInjection\FormPass;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpClient\DependencyInjection\HttpClientPass;
@@ -112,6 +109,8 @@ class_exists(Registry::class);
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
+#[RequiredBundle(ServicesBundle::class)]
+#[RequiredBundle(ConsoleBundle::class, ignoreOnInvalid: true)]
 class FrameworkBundle extends Bundle
 {
     public function boot(): void
@@ -148,7 +147,6 @@ class FrameworkBundle extends Bundle
         $container->addCompilerPass(new AddEventAliasesPass(
             array_merge(
                 KernelEvents::ALIASES,
-                class_exists(ConsoleEvents::class) ? ConsoleEvents::ALIASES : [],
                 class_exists(FormEvents::class) ? FormEvents::ALIASES : [],
                 class_exists(WorkflowEvents::class) ? WorkflowEvents::ALIASES : [],
             ),
@@ -159,39 +157,21 @@ class FrameworkBundle extends Bundle
                 KernelEvents::RESPONSE,
                 KernelEvents::FINISH_REQUEST,
             ],
-            class_exists(ConsoleEvents::class) ? [
-                ConsoleEvents::COMMAND,
-                ConsoleEvents::TERMINATE,
-                ConsoleEvents::ERROR,
-            ] : []
         ));
 
-        $container->addCompilerPass(new AddBehaviorDescribingTagsPass([
-            'kernel.event_subscriber',
-            'kernel.event_listener',
-            'kernel.locale_aware',
-            'kernel.reset',
-        ]), PassConfig::TYPE_BEFORE_OPTIMIZATION, 200);
+        $container->addCompilerPass(new AddBehaviorDescribingTagsPass(['kernel.locale_aware']), PassConfig::TYPE_BEFORE_OPTIMIZATION, 200);
         $container->addCompilerPass(new AssetsContextPass());
         $container->addCompilerPass(new LoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -32);
         $container->addCompilerPass(new RegisterControllerArgumentLocatorsPass());
         $container->addCompilerPass(new RemoveEmptyControllerArgumentLocatorsPass(), PassConfig::TYPE_BEFORE_REMOVING);
-        $this->addCompilerPassIfExists($container, RegisterCommandArgumentLocatorsPass::class);
-        $this->addCompilerPassIfExists($container, RemoveEmptyCommandArgumentLocatorsPass::class, PassConfig::TYPE_BEFORE_REMOVING);
-        $this->addCompilerPassIfExists($container, ConsoleArgumentValueResolverPass::class);
         $container->addCompilerPass(new RoutingResolverPass());
         $this->addCompilerPassIfExists($container, RoutingControllerPass::class);
         $this->addCompilerPassIfExists($container, DataCollectorTranslatorPass::class);
         $container->addCompilerPass(new ProfilerPass());
-        // must be registered before removing private services as some might be listeners/subscribers
-        // but as late as possible to get resolved parameters
-        $container->addCompilerPass(new RegisterListenersPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $this->addCompilerPassIfExists($container, ControllerAttributesListenerPass::class, PassConfig::TYPE_BEFORE_REMOVING);
         $this->addCompilerPassIfExists($container, AddConstraintValidatorsPass::class);
         $this->addCompilerPassIfExists($container, AddValidatorInitializersPass::class);
         $this->addCompilerPassIfExists($container, AttributeMetadataPass::class);
-        $this->addCompilerPassIfExists($container, AddConsoleCommandPass::class, PassConfig::TYPE_BEFORE_REMOVING);
-        // must be registered before the AddConsoleCommandPass
         $container->addCompilerPass(new TranslationLintCommandPass(), PassConfig::TYPE_BEFORE_REMOVING, 10);
         // must be registered as late as possible to get access to all Twig paths registered in
         // twig.template_iterator definition

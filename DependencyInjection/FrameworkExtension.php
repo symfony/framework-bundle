@@ -21,12 +21,8 @@ use phpDocumentor\Reflection\DocBlockFactoryInterface;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use PhpParser\Parser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
-use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Clock\ClockInterface as PsrClockInterface;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Psr\Http\Client\ClientInterface;
-use Psr\Log\LoggerAwareInterface;
 use Symfony\Bridge\Monolog\Processor\DebugProcessor;
 use Symfony\Bridge\Twig\Extension\CsrfExtension;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,18 +39,13 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\ChainAdapter;
 use Symfony\Component\Cache\Adapter\TagAwareAdapter;
 use Symfony\Component\Cache\DependencyInjection\CachePoolPass;
-use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\Config\ResourceCheckerInterface;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\ArgumentResolver\ValueResolver\ValueResolverInterface as ConsoleValueResolverInterface;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\AsTargetedValueResolver as AsTargetedConsoleValueResolver;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\EventListener\ValidateQuestionInputListener;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\DependencyInjection\Alias;
@@ -62,23 +53,17 @@ use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\EnvVarLoaderInterface;
-use Symfony\Component\DependencyInjection\EnvVarProcessorInterface;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ServiceLocator;
-use Symfony\Component\Dotenv\Command\DebugCommand;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Dotenv\Command\DebugCommand as DotenvDebugCommand;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -232,10 +217,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\CallbackInterface;
 use Symfony\Contracts\Cache\NamespacedPoolInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\Service\ResetInterface;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
 
 /**
@@ -276,17 +258,9 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('serialize_controller_result_listener');
         }
 
-        if (!ContainerBuilder::willBeAvailable('symfony/clock', ClockInterface::class, ['symfony/framework-bundle'])) {
-            $container->removeDefinition('clock');
-            $container->removeAlias(ClockInterface::class);
-            $container->removeAlias(PsrClockInterface::class);
-        }
-
         if (!ContainerBuilder::willBeAvailable('symfony/expression-language', ExpressionLanguage::class, ['symfony/framework-bundle'])) {
             $container->removeDefinition('controller.expression_language');
         }
-
-        $container->registerAliasForArgument('parameter_bag', PsrContainerInterface::class);
 
         $loader->load('process.php');
 
@@ -308,7 +282,7 @@ class FrameworkExtension extends Extension
                 $container->removeDefinition('console.command.translation_lint');
             }
 
-            if (!class_exists(DebugCommand::class)) {
+            if (!class_exists(DotenvDebugCommand::class)) {
                 $container->removeDefinition('console.command.dotenv_debug');
             }
 
@@ -679,37 +653,8 @@ class FrameworkExtension extends Extension
             ->addTag('assets.package');
         $container->registerForAutoconfiguration(AssetCompilerInterface::class)
             ->addTag('asset_mapper.compiler');
-        $container->registerAttributeForAutoconfiguration(AsCommand::class, static function (ChildDefinition $definition, AsCommand $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
-            $tagAttributes = [
-                'command' => $attribute->name,
-                'description' => $attribute->description,
-                'help' => $attribute->help ?? null,
-            ];
-
-            if ($reflector instanceof \ReflectionMethod) {
-                $tagAttributes['method'] = $reflector->getName();
-            }
-
-            $definition->addTag('console.command', $tagAttributes);
-            $definition->addTag('console.command.service_arguments');
-        });
-        $container->registerForAutoconfiguration(Command::class)
-            ->addTag('console.command')
-            ->addTag('console.command.service_arguments');
-        $container->registerForAutoconfiguration(ConsoleValueResolverInterface::class)
-            ->addTag('console.argument_value_resolver');
-        $container->registerForAutoconfiguration(ResourceCheckerInterface::class)
-            ->addTag('config_cache.resource_checker');
-        $container->registerForAutoconfiguration(EnvVarLoaderInterface::class)
-            ->addTag('container.env_var_loader');
-        $container->registerForAutoconfiguration(EnvVarProcessorInterface::class)
-            ->addTag('container.env_var_processor');
         $container->registerForAutoconfiguration(CallbackInterface::class)
             ->addTag('container.reversible');
-        $container->registerForAutoconfiguration(ServiceLocator::class)
-            ->addTag('container.service_locator');
-        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)
-            ->addTag('container.service_subscriber');
         $container->registerForAutoconfiguration(ValueResolverInterface::class)
             ->addTag('controller.argument_value_resolver');
         $container->registerForAutoconfiguration(AbstractController::class)
@@ -726,14 +671,8 @@ class FrameworkExtension extends Extension
             ->addTag('kernel.cache_clearer');
         $container->registerForAutoconfiguration(CacheWarmerInterface::class)
             ->addTag('kernel.cache_warmer');
-        $container->registerForAutoconfiguration(EventDispatcherInterface::class)
-            ->addTag('event_dispatcher.dispatcher');
-        $container->registerForAutoconfiguration(EventSubscriberInterface::class)
-            ->addTag('kernel.event_subscriber');
         $container->registerForAutoconfiguration(LocaleAwareInterface::class)
             ->addTag('kernel.locale_aware');
-        $container->registerForAutoconfiguration(ResetInterface::class)
-            ->addTag('kernel.reset', ['method' => 'reset']);
         $container->registerForAutoconfiguration(PropertyListExtractorInterface::class)
             ->addTag('property_info.list_extractor');
         $container->registerForAutoconfiguration(PropertyTypeExtractorInterface::class)
@@ -766,19 +705,7 @@ class FrameworkExtension extends Extension
             ->addTag('messenger.transport_factory');
         $container->registerForAutoconfiguration(MimeTypeGuesserInterface::class)
             ->addTag('mime.mime_type_guesser');
-        $container->registerForAutoconfiguration(LoggerAwareInterface::class)
-            ->addMethodCall('setLogger', [new Reference('logger')]);
 
-        $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition, AsEventListener $attribute, \ReflectionClass|\ReflectionMethod $reflector) {
-            $tagAttributes = get_object_vars($attribute);
-            if ($reflector instanceof \ReflectionMethod) {
-                if (isset($tagAttributes['method'])) {
-                    throw new LogicException(\sprintf('AsEventListener attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
-                }
-                $tagAttributes['method'] = $reflector->getName();
-            }
-            $definition->addTag('kernel.event_listener', $tagAttributes);
-        });
         $container->registerAttributeForAutoconfiguration(AsController::class, static function (ChildDefinition $definition, AsController $attribute): void {
             $definition->addTag('controller.service_arguments');
         });
@@ -830,20 +757,11 @@ class FrameworkExtension extends Extension
             );
         }
 
-        $container->registerForAutoconfiguration(CompilerPassInterface::class)
-            ->addTag('container.excluded', ['source' => 'because it\'s a compiler pass']);
         $container->registerForAutoconfiguration(Constraint::class)
             ->addTag('container.excluded', ['source' => 'because it\'s a validation constraint']);
-        $container->registerForAutoconfiguration(TestCase::class)
-            ->addTag('container.excluded', ['source' => 'because it\'s a test case']);
-        $container->registerForAutoconfiguration(\UnitEnum::class)
-            ->addTag('container.excluded', ['source' => 'because it\'s an enum']);
         $container->registerAttributeForAutoconfiguration(AsMessage::class, static function (ChildDefinition $definition, AsMessage $attribute): void {
             $definition->addTag('container.excluded', ['source' => 'because it\'s a messenger message']);
             $definition->addTag('messenger.message', ['serializedTypeName' => $attribute->serializedTypeName]);
-        });
-        $container->registerAttributeForAutoconfiguration(\Attribute::class, static function (ChildDefinition $definition) {
-            $definition->addTag('container.excluded', ['source' => 'because it\'s a PHP attribute']);
         });
         $container->registerAttributeForAutoconfiguration(Entity::class, static function (ChildDefinition $definition) {
             $definition->addTag('container.excluded', ['source' => 'because it\'s a Doctrine entity']);
@@ -861,11 +779,6 @@ class FrameworkExtension extends Extension
                 'list' => $attribute->asList,
             ])->addTag('container.excluded', ['source' => 'because it\'s a streamable JSON']);
         });
-
-        if (!$container->getParameter('kernel.debug')) {
-            // remove tagged iterator argument for resource checkers
-            $container->getDefinition('config_cache_factory')->setArguments([]);
-        }
 
         if (!$config['disallow_search_engine_index']) {
             $container->removeDefinition('disallow_search_engine_index_response_listener');
