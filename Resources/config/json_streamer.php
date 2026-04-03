@@ -22,6 +22,7 @@ use Symfony\Component\JsonStreamer\Mapping\Write\AttributePropertyMetadataLoader
 use Symfony\Component\JsonStreamer\Mapping\Write\DateTimeTypePropertyMetadataLoader as WriteDateTimeTypePropertyMetadataLoader;
 use Symfony\Component\JsonStreamer\Transformer\DateIntervalValueObjectTransformer;
 use Symfony\Component\JsonStreamer\Transformer\DateTimeValueObjectTransformer;
+use Symfony\Component\JsonStreamer\Transformer\DateTimeZoneValueObjectTransformer;
 use Symfony\Component\JsonStreamer\ValueTransformer\DateTimeToStringValueTransformer;
 use Symfony\Component\JsonStreamer\ValueTransformer\StringToDateTimeValueTransformer;
 
@@ -109,6 +110,9 @@ return static function (ContainerConfigurator $container) {
             ->tag('json_streamer.value_object_transformer')
 
         ->set('.json_streamer.value_object_transformer.date_interval', DateIntervalValueObjectTransformer::class)
+            ->tag('json_streamer.value_object_transformer')
+
+        ->set('.json_streamer.value_object_transformer.date_time_zone', DateTimeZoneValueObjectTransformer::class)
             ->tag('json_streamer.value_object_transformer')
 
         // cache
