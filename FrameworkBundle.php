@@ -167,9 +167,6 @@ class FrameworkBundle extends Bundle
         ));
 
         $container->addCompilerPass(new AddBehaviorDescribingTagsPass([
-            'container.do_not_inline',
-            'container.service_locator',
-            'container.service_subscriber',
             'kernel.event_subscriber',
             'kernel.event_listener',
             'kernel.locale_aware',
