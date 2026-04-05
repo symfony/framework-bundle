@@ -47,7 +47,7 @@ trait MicroKernelTrait
      *
      *     $container->parameters()->set('halloween', 'lot of fun');
      */
-    private function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
+    private function configureContainer(ContainerConfigurator $container): void
     {
         $configDir = preg_replace('{/config$}', '/{config}', $this->getConfigDir());
 
