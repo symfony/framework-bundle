@@ -65,6 +65,7 @@ use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Component\HttpClient\ThrottlingHttpClient;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpKernel\DependencyInjection\LoggerPass;
+use Symfony\Component\HttpKernel\EventListener\RateLimitAttributeListener;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -2419,6 +2420,16 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('.inner', (string) $arguments[0]);
         $this->assertInstanceOf(Reference::class, $arguments[1]);
         $this->assertSame('foo.throttling.limiter', (string) $arguments[1]);
+    }
+
+    public function testRateLimiterAttributeListener()
+    {
+        $container = $this->createContainerFromFile('http_client_rate_limiter');
+
+        $this->assertTrue($container->hasDefinition('rate_limiter.attribute_listener'));
+        $definition = $container->getDefinition('rate_limiter.attribute_listener');
+        $this->assertSame(RateLimitAttributeListener::class, $definition->getClass());
+        $this->assertTrue($definition->hasTag('kernel.event_subscriber'));
     }
 
     public static function provideMailer(): iterable
