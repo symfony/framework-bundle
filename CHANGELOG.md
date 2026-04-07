@@ -29,6 +29,7 @@ CHANGELOG
  * Deprecate registering console commands by overriding `Bundle::registerCommands()`, use the `#[AsCommand]` attribute or the `console.command` service tag instead
  * Deprecate calling `FrameworkExtension::load()` directly without first loading `ServicesBundle`'s extension
  * Add support for the `#[RateLimit]` attribute on controllers when `framework.rate_limiter` is configured
+ * Add `--sort` option to `debug:router` command to sort routes by a given column
 
 8.0
 ---
