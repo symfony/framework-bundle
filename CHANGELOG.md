@@ -27,6 +27,7 @@ CHANGELOG
  * Deprecate `senders` nesting level for messenger routing config; use string or a list of strings instead
  * Allow configuring Webhook's header names and signing algo
  * Deprecate registering console commands by overriding `Bundle::registerCommands()`, use the `#[AsCommand]` attribute or the `console.command` service tag instead
+ * Deprecate calling `FrameworkExtension::load()` directly without first loading `ServicesBundle`'s extension
 
 8.0
 ---
