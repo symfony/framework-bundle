@@ -584,15 +584,11 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return $v['supports'] && isset($v['support_strategy']);
-                                    })
+                                    ->ifTrue(static fn ($v) => $v['supports'] && isset($v['support_strategy']))
                                     ->thenInvalid('"supports" and "support_strategy" cannot be used together.')
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return !$v['supports'] && !isset($v['support_strategy']);
-                                    })
+                                    ->ifTrue(static fn ($v) => !$v['supports'] && !isset($v['support_strategy']))
                                     ->thenInvalid('"supports" or "support_strategy" should be configured.')
                                 ->end()
                                 ->beforeNormalization()
@@ -773,21 +769,15 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                     ->validate()
-                        ->ifTrue(static function ($v) {
-                            return isset($v['version_strategy']) && isset($v['version']);
-                        })
+                        ->ifTrue(static fn ($v) => isset($v['version_strategy']) && isset($v['version']))
                         ->thenInvalid('You cannot use both "version_strategy" and "version" at the same time under "assets".')
                     ->end()
                     ->validate()
-                        ->ifTrue(static function ($v) {
-                            return isset($v['version_strategy']) && isset($v['json_manifest_path']);
-                        })
+                        ->ifTrue(static fn ($v) => isset($v['version_strategy']) && isset($v['json_manifest_path']))
                         ->thenInvalid('You cannot use both "version_strategy" and "json_manifest_path" at the same time under "assets".')
                     ->end()
                     ->validate()
-                        ->ifTrue(static function ($v) {
-                            return isset($v['version']) && isset($v['json_manifest_path']);
-                        })
+                        ->ifTrue(static fn ($v) => isset($v['version']) && isset($v['json_manifest_path']))
                         ->thenInvalid('You cannot use both "version" and "json_manifest_path" at the same time under "assets".')
                     ->end()
                     ->fixXmlConfig('package')
@@ -819,21 +809,15 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return isset($v['version_strategy']) && isset($v['version']);
-                                    })
+                                    ->ifTrue(static fn ($v) => isset($v['version_strategy']) && isset($v['version']))
                                     ->thenInvalid('You cannot use both "version_strategy" and "version" at the same time under "assets" packages.')
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return isset($v['version_strategy']) && isset($v['json_manifest_path']);
-                                    })
+                                    ->ifTrue(static fn ($v) => isset($v['version_strategy']) && isset($v['json_manifest_path']))
                                     ->thenInvalid('You cannot use both "version_strategy" and "json_manifest_path" at the same time under "assets" packages.')
                                 ->end()
                                 ->validate()
-                                    ->ifTrue(static function ($v) {
-                                        return isset($v['version']) && isset($v['json_manifest_path']);
-                                    })
+                                    ->ifTrue(static fn ($v) => isset($v['version']) && isset($v['json_manifest_path']))
                                     ->thenInvalid('You cannot use both "version" and "json_manifest_path" at the same time under "assets" packages.')
                                 ->end()
                             ->end()
@@ -1613,9 +1597,7 @@ class Configuration implements ConfigurationInterface
                                             ];
                                         } else {
                                             $newConfig[$v['message-class']]['senders'] = array_map(
-                                                static function ($a) {
-                                                    return \is_string($a) ? $a : $a['service'];
-                                                },
+                                                static fn ($a) => \is_string($a) ? $a : $a['service'],
                                                 array_values($v['sender'])
                                             );
                                         }
@@ -1662,9 +1644,7 @@ class Configuration implements ConfigurationInterface
                             ->arrayPrototype()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(static function (string $dsn) {
-                                        return ['dsn' => $dsn];
-                                    })
+                                    ->then(static fn (string $dsn) => ['dsn' => $dsn])
                                 ->end()
                                 ->fixXmlConfig('option')
                                 ->children()
