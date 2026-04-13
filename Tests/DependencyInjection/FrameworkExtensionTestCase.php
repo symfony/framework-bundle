@@ -3051,10 +3051,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             'container.build_time' => 23456789,
         ], $data)));
 
-        // FrameworkBundle depends on ServicesBundle; ensure its services are loaded during compile
-        $servicesBundle = new ServicesBundle();
-        $container->registerExtension($servicesBundle->getContainerExtension());
-        $container->loadFromExtension('services');
+        new ServicesBundle()->getContainerExtension()->load([], $container);
 
         return $container;
     }
