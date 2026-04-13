@@ -1671,7 +1671,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('message_class')
                             ->beforeNormalization()
                                 ->ifArray()
-                                ->then(function ($config) {
+                                ->then(static function ($config) {
                                     $newConfig = [];
                                     foreach ($config as $k => $v) {
                                         $newConfig[$k] = [

@@ -11,7 +11,7 @@
 
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-return function (RoutingConfigurator $routes): void {
+return static function (RoutingConfigurator $routes): void {
     $routes->add('_webhook_controller', '/{type}')
         ->controller('webhook.controller::handle')
         ->requirements(['type' => '.+'])
