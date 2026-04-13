@@ -356,11 +356,11 @@ class WithMapRequestPayloadController
 
         return new Response(
             <<<XML
-            <response>
-                <comment>{$body->comment}</comment>
-                <approved>{$body->approved}</approved>
-            </response>
-            XML
+                <response>
+                    <comment>{$body->comment}</comment>
+                    <approved>{$body->approved}</approved>
+                </response>
+                XML
         );
     }
 }
