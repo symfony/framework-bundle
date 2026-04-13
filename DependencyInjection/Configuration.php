@@ -2452,9 +2452,7 @@ class Configuration implements ConfigurationInterface
                                         })
                                     ->end()
                                     ->validate()
-                                        ->ifTrue(static function ($v) {
-                                            return \extension_loaded('openssl') && null !== $v && !\defined('OPENSSL_CIPHER_'.$v);
-                                        })
+                                        ->ifTrue(static fn ($v) => \extension_loaded('openssl') && null !== $v && !\defined('OPENSSL_CIPHER_'.$v))
                                         ->thenInvalid('You must provide a valid cipher.')
                                     ->end()
                                 ->end()
