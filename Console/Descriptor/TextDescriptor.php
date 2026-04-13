@@ -96,13 +96,13 @@ class TextDescriptor extends Descriptor
         if ($shouldShowScheme) {
             $tableHeaders[] = 'Scheme';
         } else {
-            array_walk($tableRows, function (&$row) { unset($row['Scheme']); });
+            array_walk($tableRows, static function (&$row) { unset($row['Scheme']); });
         }
 
         if ($shouldShowHost) {
             $tableHeaders[] = 'Host';
         } else {
-            array_walk($tableRows, function (&$row) { unset($row['Host']); });
+            array_walk($tableRows, static function (&$row) { unset($row['Host']); });
         }
 
         $tableHeaders[] = 'Path';
@@ -564,7 +564,7 @@ class TextDescriptor extends Descriptor
         } else {
             $title .= ' Grouped by Event';
             // Try to see if "events" exists
-            $registeredListeners = \array_key_exists('events', $options) ? array_combine($options['events'], array_map(fn ($event) => $eventDispatcher->getListeners($event), $options['events'])) : $eventDispatcher->getListeners();
+            $registeredListeners = \array_key_exists('events', $options) ? array_combine($options['events'], array_map(static fn ($event) => $eventDispatcher->getListeners($event), $options['events'])) : $eventDispatcher->getListeners();
         }
 
         $options['output']->title($title);
@@ -622,7 +622,7 @@ class TextDescriptor extends Descriptor
         }
 
         return implode('|', array_map(
-            fn (string $method): string => \sprintf('<fg=%s>%s</>', self::VERB_COLORS[$method] ?? 'default', $method),
+            static fn (string $method): string => \sprintf('<fg=%s>%s</>', self::VERB_COLORS[$method] ?? 'default', $method),
             $methods
         ));
     }

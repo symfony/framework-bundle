@@ -43,7 +43,7 @@ class KernelTestCaseFreshCacheTest extends AbstractWebTestCase
         static::ensureKernelShutdown();
 
         // Create the tracked file between boots
-        @mkdir(\dirname(self::$trackedFile), 0777, true);
+        @mkdir(\dirname(self::$trackedFile), 0o777, true);
         file_put_contents(self::$trackedFile, 'placeholder');
 
         // Reboot: should detect the resource change and rebuild the container
