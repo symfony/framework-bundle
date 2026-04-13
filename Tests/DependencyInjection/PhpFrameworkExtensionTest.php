@@ -38,7 +38,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testAssetsCannotHavePathAndUrl()
     {
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -55,7 +55,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testAssetPackageCannotHavePathAndUrl()
     {
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -77,7 +77,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidDefinitionException::class);
         $this->expectExceptionMessage('A transition from a place/state must have an unique name. Multiple transitions named "a_to_b" from place/state "a" were found on StateMachine "article".');
-        $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -112,7 +112,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage($message);
-        $this->createContainerFromClosure(function ($container) use ($class) {
+        $this->createContainerFromClosure(static function ($container) use ($class) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -154,7 +154,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testWorkflowDefaultMarkingStoreDefinition()
     {
-        $container = $this->createContainerFromClosure(function ($container) {
+        $container = $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -215,7 +215,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testRateLimiterLockFactoryWithLockDisabled()
     {
         try {
-            $this->createContainerFromClosure(function (ContainerBuilder $container) {
+            $this->createContainerFromClosure(static function (ContainerBuilder $container) {
                 $container->loadFromExtension('framework', [
                     'annotations' => false,
                     'http_method_override' => false,
@@ -236,7 +236,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testRateLimiterAutoLockFactoryWithLockEnabled()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -255,7 +255,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testRateLimiterAutoLockFactoryWithLockDisabled()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -276,7 +276,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testRateLimiterDisableLockFactory()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -297,7 +297,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testRateLimiterIsTagged()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -321,7 +321,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
             $this->markTestSkipped('CompoundRateLimiterFactory is not available.');
         }
 
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -368,7 +368,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         }
 
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -388,7 +388,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
         }
 
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -406,7 +406,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectNotToPerformAssertions();
 
-        $this->createContainerFromClosure(function (ContainerBuilder $container) use ($mode) {
+        $this->createContainerFromClosure(static function (ContainerBuilder $container) use ($mode) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -429,7 +429,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testMessengerSigningSerializerWiring()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->register('signed_handler', 'stdClass')
                 ->addTag('messenger.message_handler', ['handles' => DummyMessage::class, 'sign' => true]);
 

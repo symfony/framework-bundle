@@ -50,7 +50,7 @@ class ConfigBuilderCacheWarmer implements CacheWarmerInterface
 
         if ($this->kernel instanceof Kernel) {
             /** @var ContainerBuilder $container */
-            $container = \Closure::bind(function (Kernel $kernel) {
+            $container = \Closure::bind(static function (Kernel $kernel) {
                 $containerBuilder = $kernel->getContainerBuilder();
                 $kernel->prepareContainer($containerBuilder);
 

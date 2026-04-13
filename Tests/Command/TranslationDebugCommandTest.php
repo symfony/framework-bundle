@@ -178,7 +178,7 @@ class TranslationDebugCommandTest extends TestCase
             $extractor
                 ->method('extract')
                 ->willReturnCallback(
-                    function ($path, $catalogue) use ($extractedMessages) {
+                    static function ($path, $catalogue) use ($extractedMessages) {
                         $catalogue->add($extractedMessages);
                     }
                 );
@@ -188,7 +188,7 @@ class TranslationDebugCommandTest extends TestCase
         $loader
             ->method('read')
             ->willReturnCallback(
-                function ($path, $catalogue) use ($loadedMessages) {
+                static function ($path, $catalogue) use ($loadedMessages) {
                     $catalogue->add($loadedMessages);
                 }
             );
@@ -250,7 +250,7 @@ class TranslationDebugCommandTest extends TestCase
         $extractor
             ->method('extract')
             ->willReturnCallback(
-                function ($path, $catalogue) use ($extractedMessagesWithDomains) {
+                static function ($path, $catalogue) use ($extractedMessagesWithDomains) {
                     foreach ($extractedMessagesWithDomains as $domain => $message) {
                         $catalogue->add($message, $domain);
                     }
