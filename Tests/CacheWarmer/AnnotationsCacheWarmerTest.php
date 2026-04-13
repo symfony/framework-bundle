@@ -108,7 +108,7 @@ class AnnotationsCacheWarmerTest extends TestCase
         $this->expectDeprecation('Since symfony/framework-bundle 6.4: The "Symfony\Bundle\FrameworkBundle\CacheWarmer\AnnotationsCacheWarmer" class is deprecated without replacement.');
         $warmer = new AnnotationsCacheWarmer(new AnnotationReader(), tempnam($this->cacheDir, __FUNCTION__));
 
-        spl_autoload_register($classLoader = function ($class) use ($annotatedClass) {
+        spl_autoload_register($classLoader = static function ($class) use ($annotatedClass) {
             if ($class === $annotatedClass) {
                 throw new \DomainException('This exception should be caught by the warmer.');
             }
@@ -155,7 +155,7 @@ class AnnotationsCacheWarmerTest extends TestCase
             ->onlyMethods(['doWarmUp'])
             ->getMock();
 
-        $warmer->method('doWarmUp')->willReturnCallback(function ($cacheDir, ArrayAdapter $arrayAdapter) {
+        $warmer->method('doWarmUp')->willReturnCallback(static function ($cacheDir, ArrayAdapter $arrayAdapter) {
             $arrayAdapter->getItem('foo_miss');
 
             $item = $arrayAdapter->getItem('bar_hit');

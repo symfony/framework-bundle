@@ -31,7 +31,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testAssetsCannotHavePathAndUrl()
     {
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -48,7 +48,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testAssetPackageCannotHavePathAndUrl()
     {
         $this->expectException(\LogicException::class);
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -70,7 +70,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage('The "places" option must be an array in workflow configuration.');
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'workflows' => [
                     'article' => [
@@ -85,7 +85,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage('The "transitions" option must be an array in workflow configuration.');
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'workflows' => [
                     'article' => [
@@ -100,7 +100,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectException(InvalidDefinitionException::class);
         $this->expectExceptionMessage('A transition from a place/state must have an unique name. Multiple transitions named "a_to_b" from place/state "a" were found on StateMachine "article".');
-        $this->createContainerFromClosure(function ($container) {
+        $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -131,7 +131,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testWorkflowDefaultMarkingStoreDefinition()
     {
-        $container = $this->createContainerFromClosure(function ($container) {
+        $container = $this->createContainerFromClosure(static function ($container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -192,7 +192,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     public function testRateLimiterWithLockFactory()
     {
         try {
-            $this->createContainerFromClosure(function (ContainerBuilder $container) {
+            $this->createContainerFromClosure(static function (ContainerBuilder $container) {
                 $container->loadFromExtension('framework', [
                     'annotations' => false,
                     'http_method_override' => false,
@@ -210,7 +210,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
             $this->assertEquals('Rate limiter "with_lock" requires the Lock component to be configured.', $e->getMessage());
         }
 
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -229,7 +229,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
     public function testRateLimiterLockFactory()
     {
-        $container = $this->createContainerFromClosure(function (ContainerBuilder $container) {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
@@ -254,7 +254,7 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
     {
         $this->expectNotToPerformAssertions();
 
-        $this->createContainerFromClosure(function (ContainerBuilder $container) use ($mode) {
+        $this->createContainerFromClosure(static function (ContainerBuilder $container) use ($mode) {
             $container->loadFromExtension('framework', [
                 'annotations' => false,
                 'http_method_override' => false,
