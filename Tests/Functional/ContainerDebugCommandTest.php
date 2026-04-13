@@ -185,8 +185,9 @@ class ContainerDebugCommandTest extends AbstractWebTestCase
 
              * UNKNOWN
 
-            TXT
-            , $tester->getDisplay(true));
+            TXT,
+            $tester->getDisplay(true)
+        );
 
         putenv('REAL');
     }
