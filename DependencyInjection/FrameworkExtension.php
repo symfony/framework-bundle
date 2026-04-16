@@ -65,7 +65,6 @@ use Symfony\Component\DependencyInjection\Kernel\ServicesBundle;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Dotenv\Command\DebugCommand as DotenvDebugCommand;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -288,10 +287,6 @@ class FrameworkExtension extends Extension
 
             if (!class_exists(BaseTranslationLintCommand::class)) {
                 $container->removeDefinition('console.command.translation_lint');
-            }
-
-            if (!class_exists(DotenvDebugCommand::class)) {
-                $container->removeDefinition('console.command.dotenv_debug');
             }
 
             if (!class_exists(RunCommandMessageHandler::class)) {
