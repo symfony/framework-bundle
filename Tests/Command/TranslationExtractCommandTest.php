@@ -184,6 +184,9 @@ class TranslationExtractCommandTest extends TestCase
         // Preparing mock
         $operation = $this->createMock(MessageCatalogueInterface::class);
         $operation
+            ->method('getDomains')
+            ->willReturn(['messages']);
+        $operation
             ->method('all')
             ->willReturnMap([
                 ['messages', $messages],
@@ -197,6 +200,39 @@ class TranslationExtractCommandTest extends TestCase
         $reflection = new \ReflectionObject($translationUpdate);
         $method = $reflection->getMethod('removeNoFillTranslations');
         $method->invokeArgs($translationUpdate, [$operation]);
+    }
+
+    public function testRemoveNoFillTranslationsAcrossAllDomains()
+    {
+        $operation = $this->createMock(MessageCatalogueInterface::class);
+        $operation
+            ->method('getDomains')
+            ->willReturn(['messages', 'validators', 'validators+intl-icu']);
+        $operation
+            ->method('all')
+            ->willReturnMap([
+                ['messages', ['greeting' => "\0NoFill\0Hello"]],
+                ['validators', ['err' => 'plain error']],
+                ['validators+intl-icu', ['desc' => "\0NoFill\0Description is mandatory"]],
+            ]);
+
+        $calls = [];
+        $operation
+            ->expects($this->exactly(2))
+            ->method('set')
+            ->willReturnCallback(static function ($id, $translation, $domain) use (&$calls): void {
+                $calls[] = [$id, $translation, $domain];
+            });
+
+        $translationUpdate = $this->createStub(TranslationExtractCommand::class);
+        $reflection = new \ReflectionObject($translationUpdate);
+        $method = $reflection->getMethod('removeNoFillTranslations');
+        $method->invokeArgs($translationUpdate, [$operation]);
+
+        $this->assertSame([
+            ['greeting', '', 'messages'],
+            ['desc', '', 'validators+intl-icu'],
+        ], $calls);
     }
 
     public static function removeNoFillProvider(): array
