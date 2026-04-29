@@ -127,6 +127,12 @@ class FrameworkBundle extends Bundle
         if ($this->container->hasParameter('kernel.trust_x_sendfile_type_header') && $this->container->getParameter('kernel.trust_x_sendfile_type_header')) {
             BinaryFileResponse::trustXSendfileTypeHeader();
         }
+
+        // Instantiate the mime_types service so its setDefault() call fires.
+        // The service is made public by AddMimeTypeGuesserPass only when custom guessers are tagged.
+        if ($this->container->has('mime_types')) {
+            $this->container->get('mime_types');
+        }
     }
 
     public function build(ContainerBuilder $container): void
