@@ -118,6 +118,7 @@ use Symfony\Component\Mercure\HubRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge as MessengerBridge;
+use Symfony\Component\Messenger\EventListener\ReleaseDeduplicationLockOnFailureListener;
 use Symfony\Component\Messenger\Handler\BatchHandlerInterface;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -2409,6 +2410,10 @@ class FrameworkExtension extends Extension
             $defaultMiddleware['before'][] = ['id' => 'deduplicate_middleware'];
         } else {
             $container->removeDefinition('messenger.middleware.deduplicate_middleware');
+            $container->removeDefinition('messenger.failure.release_deduplication_lock_on_failure_listener');
+        }
+        if (!class_exists(ReleaseDeduplicationLockOnFailureListener::class)) {
+            $container->removeDefinition('messenger.failure.release_deduplication_lock_on_failure_listener');
         }
 
         foreach ($config['buses'] as $busId => $bus) {
