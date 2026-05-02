@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Console;
 
+use Composer\InstalledVersions;
 use Symfony\Component\Console\Application as BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\ListCommand;
@@ -36,7 +37,7 @@ class Application extends BaseApplication
     public function __construct(
         private KernelInterface $kernel,
     ) {
-        parent::__construct('Symfony', Kernel::VERSION);
+        parent::__construct('Symfony', class_exists(InstalledVersions::class) ? InstalledVersions::getPrettyVersion('symfony/http-kernel') ?? InstalledVersions::getPrettyVersion('symfony/symfony') : Kernel::MAJOR_VERSION.'.'.Kernel::MINOR_VERSION);
 
         $inputDefinition = $this->getDefinition();
         $inputDefinition->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $kernel->getEnvironment()));
