@@ -1673,18 +1673,20 @@ class FrameworkExtension extends Extension
         }
 
         $classToServices = [
-            TranslationBridge\Crowdin\CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
-            TranslationBridge\Loco\LocoProviderFactory::class => 'translation.provider_factory.loco',
-            TranslationBridge\Lokalise\LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
-            TranslationBridge\Phrase\PhraseProviderFactory::class => 'translation.provider_factory.phrase',
+            TranslationBridge\Crowdin\CrowdinProviderFactory::class => ['symfony/crowdin-translation-provider', ['translation.provider_factory.crowdin']],
+            TranslationBridge\Loco\LocoProviderFactory::class => ['symfony/loco-translation-provider', ['translation.provider_factory.loco', 'translation.provider_factory.loco.http_client']],
+            TranslationBridge\Lokalise\LokaliseProviderFactory::class => ['symfony/lokalise-translation-provider', ['translation.provider_factory.lokalise']],
+            TranslationBridge\Phrase\PhraseProviderFactory::class => ['symfony/phrase-translation-provider', ['translation.provider_factory.phrase']],
         ];
 
         $parentPackages = ['symfony/framework-bundle', 'symfony/translation', 'symfony/http-client'];
 
-        foreach ($classToServices as $class => $service) {
-            $package = substr($service, \strlen('translation.provider_factory.'));
+        foreach ($classToServices as $class => [$package, $services]) {
+            if ($container->hasDefinition('http_client') && ContainerBuilder::willBeAvailable($package, $class, $parentPackages)) {
+                continue;
+            }
 
-            if (!$container->hasDefinition('http_client') || !ContainerBuilder::willBeAvailable(\sprintf('symfony/%s-translation-provider', $package), $class, $parentPackages)) {
+            foreach ($services as $service) {
                 $container->removeDefinition($service);
             }
         }
