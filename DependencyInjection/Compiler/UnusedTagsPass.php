@@ -44,6 +44,7 @@ class UnusedTagsPass implements CompilerPassInterface
         'container.service_locator',
         'container.service_locator_context',
         'container.service_subscriber',
+        'container.tracked_for_reset',
         'controller.argument_value_resolver',
         'controller.service_arguments',
         'controller.targeted_value_resolver',
