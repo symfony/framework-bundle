@@ -298,12 +298,14 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
             'policy' => 'fixed_window',
             'limit' => 10,
             'interval' => '1 hour',
+            'anchor_at' => null,
             'id' => 'first',
         ], $container->getDefinition('limiter.first')->getArgument(0));
         $this->assertSame([
             'policy' => 'sliding_window',
             'limit' => 10,
             'interval' => '1 hour',
+            'anchor_at' => null,
             'id' => 'second',
         ], $container->getDefinition('limiter.second')->getArgument(0));
 
@@ -346,6 +348,25 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
             $container->loadFromExtension('framework', [
                 'rate_limiter' => [
                     'compound' => ['policy' => 'compound', 'limiters' => ['invalid1', 'invalid2']],
+                ],
+            ]);
+        });
+    }
+
+    public function testRateLimiterAnchorAtRequiresMonthlyOrYearlyInterval()
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The "anchor_at" option requires an "interval" of at least one month.');
+
+        $this->createContainerFromClosure(static function ($container) {
+            $container->loadFromExtension('framework', [
+                'rate_limiter' => [
+                    'sub_month' => [
+                        'policy' => 'fixed_window',
+                        'limit' => 10,
+                        'interval' => '1 hour',
+                        'anchor_at' => '2024-01-01 00:00:00 UTC',
+                    ],
                 ],
             ]);
         });
