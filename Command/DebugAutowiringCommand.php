@@ -113,7 +113,8 @@ class DebugAutowiringCommand extends ContainerDebugCommand
             if ($isNewGroup = !str_starts_with($serviceId, $previousId.' $')) {
                 $text[] = '';
                 $previousId = preg_replace('/ \$.*/', '', $serviceId);
-                $description = Descriptor::getClassDescription($previousId, $resolvedServiceId);
+                $skipReflection = $container->hasAlias($previousId) && $container->getAlias($previousId)->isDeprecated();
+                $description = $skipReflection ? '' : Descriptor::getClassDescription($previousId, $resolvedServiceId);
                 if ('' !== $description && isset($hasAlias[$previousId])) {
                     continue;
                 }
@@ -143,7 +144,7 @@ class DebugAutowiringCommand extends ContainerDebugCommand
                 if ($isNewGroup) {
                     // Build the main type line with optional file link
                     $typeLine = \sprintf('<fg=yellow>%s</>', $previousId);
-                    if ('' !== $fileLink = $this->getFileLink($previousId)) {
+                    if (!$skipReflection && '' !== $fileLink = $this->getFileLink($previousId)) {
                         $typeLine = \sprintf('<fg=yellow;href=%s>%s</>', $fileLink, $previousId);
                     }
 
