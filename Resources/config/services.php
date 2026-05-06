@@ -14,6 +14,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use Symfony\Bundle\FrameworkBundle\HttpCache\HttpCache;
 use Symfony\Component\DependencyInjection\Kernel\FileLocator;
 use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\DependencyInjection\ServicesResetterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\UrlHelper;
 use Symfony\Component\HttpKernel\CacheClearer\ChainCacheClearer;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerAggregate;
 use Symfony\Component\HttpKernel\Config\FileLocator as LegacyFileLocator;
+use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetterInterface as LegacyServicesResetterInterface;
 use Symfony\Component\HttpKernel\EventListener\LocaleAwareListener;
 use Symfony\Component\HttpKernel\HttpCache\Store;
 use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
@@ -98,7 +100,7 @@ return static function (ContainerConfigurator $container) {
         ->alias(KernelInterface::class, 'kernel')
 
         ->alias(LegacyFileLocator::class, 'file_locator')
-            ->deprecate('symfony/http-kernel', '8.1', 'The "%alias_id%" alias is deprecated, use "'.FileLocator::class.'" instead.')
+            ->deprecate('symfony/framework-bundle', '8.1', 'The "%alias_id%" alias is deprecated, use "'.FileLocator::class.'" instead.')
 
         ->set('uri_signer', UriSigner::class)
             ->args([
@@ -109,6 +111,9 @@ return static function (ContainerConfigurator $container) {
             ])
             ->lazy()
         ->alias(UriSigner::class, 'uri_signer')
+
+        ->alias(LegacyServicesResetterInterface::class, 'services_resetter')
+            ->deprecate('symfony/framework-bundle', '8.1', 'The "%alias_id%" alias is deprecated, use "'.ServicesResetterInterface::class.'" instead.')
 
         ->set('locale_aware_listener', LocaleAwareListener::class)
             ->args([
