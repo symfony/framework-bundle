@@ -2910,7 +2910,7 @@ class FrameworkExtension extends Extension
             throw new LogicException('Caching cannot be enabled as version 7.4+ of the HttpClient component is required.');
         }
 
-        $container
+        $definition = $container
             ->register($name.'.caching', CachingHttpClient::class)
             ->setDecoratedService($name, null, 20)
             ->setArguments([
@@ -2920,6 +2920,12 @@ class FrameworkExtension extends Extension
                 $options['shared'],
                 $options['max_ttl'],
             ]);
+
+        if (method_exists(CachingHttpClient::class, 'setLogger')) {
+            $definition
+                ->addMethodCall('setLogger', [new Reference('logger')])
+                ->addTag('monolog.logger', ['channel' => 'http_client']);
+        }
     }
 
     private function registerThrottlingHttpClient(string $rateLimiter, string $name, ContainerBuilder $container): void
