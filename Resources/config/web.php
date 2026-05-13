@@ -83,10 +83,13 @@ return static function (ContainerConfigurator $container) {
             ->tag('controller.argument_value_resolver', ['priority' => 100, 'name' => RequestAttributeValueResolver::class])
 
         ->set('argument_resolver.request', RequestValueResolver::class)
-            ->tag('controller.argument_value_resolver', ['priority' => 50, 'name' => RequestValueResolver::class])
+            // Run before EntityValueResolver (DoctrineBundle, priority 110) so type-hinted
+            // Request arguments do not trigger entity-manager bootstrap. Keep this above
+            // DoctrineBundle's EntityValueResolver priority if it ever changes.
+            ->tag('controller.argument_value_resolver', ['priority' => 120, 'name' => RequestValueResolver::class])
 
         ->set('argument_resolver.session', SessionValueResolver::class)
-            ->tag('controller.argument_value_resolver', ['priority' => 50, 'name' => SessionValueResolver::class])
+            ->tag('controller.argument_value_resolver', ['priority' => 120, 'name' => SessionValueResolver::class])
 
         ->set('argument_resolver.service', ServiceValueResolver::class)
             ->args([

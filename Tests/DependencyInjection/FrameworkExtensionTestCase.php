@@ -169,6 +169,22 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(ArrayAdapter::class, $cache->getClass(), 'ArrayAdapter should be used in debug mode');
     }
 
+    public function testRequestAndSessionValueResolversRunBeforeEntityValueResolver()
+    {
+        $container = $this->createContainerFromFile('full');
+
+        // DoctrineBundle ships EntityValueResolver at priority 110. Lower priorities trigger an
+        // entity-manager bootstrap on every Request/Session controller argument before the
+        // dedicated resolver is asked, costing tens of ms per request.
+        $entityValueResolverPriority = 110;
+
+        $requestTag = $container->getDefinition('argument_resolver.request')->getTag('controller.argument_value_resolver');
+        $this->assertGreaterThan($entityValueResolverPriority, $requestTag[0]['priority']);
+
+        $sessionTag = $container->getDefinition('argument_resolver.session')->getTag('controller.argument_value_resolver');
+        $this->assertGreaterThan($entityValueResolverPriority, $sessionTag[0]['priority']);
+    }
+
     public function testCsrfProtectionNeedsSessionToBeEnabled()
     {
         $this->expectException(\LogicException::class);
