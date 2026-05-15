@@ -139,6 +139,9 @@ trait MicroKernelTrait
      */
     protected function getKernelParameters(): array
     {
+        // `doGetKernelParameters() + parent::getKernelParameters()` is left-biased on the shared
+        // `kernel.bundles_metadata` key, so the namespace written by parent::getKernelParameters()
+        // is shadowed. Re-apply it here to keep both `path` (from KernelTrait) and `namespace`.
         $parameters = $this->doGetKernelParameters() + parent::getKernelParameters();
 
         foreach ($this->bundles as $name => $bundle) {

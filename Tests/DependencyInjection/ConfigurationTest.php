@@ -971,6 +971,7 @@ class ConfigurationTest extends TestCase
                 'default_uuid_version' => 7,
                 'name_based_uuid_version' => 5,
                 'time_based_uuid_version' => 7,
+                'uuid47_secret' => null,
             ],
             'html_sanitizer' => [
                 'enabled' => !class_exists(FullStack::class) && class_exists(HtmlSanitizer::class),

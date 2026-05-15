@@ -2598,6 +2598,10 @@ class FrameworkExtension extends Extension
             $messageToSerializersMapping[$message] = array_keys($messageToSerializersMapping[$message]);
         }
 
+        // Transports can carry any message class regardless of routing, so every transport
+        // serializer must be decoration-eligible whenever signing is requested.
+        $messageToSerializersMapping['*'] = array_values(array_unique($serializerIds));
+
         $container->getDefinition('messenger.signing_serializer')
             ->replaceArgument(2, $messageToSerializersMapping);
 
@@ -2806,6 +2810,10 @@ class FrameworkExtension extends Extension
                 ->addTag('kernel.reset', ['method' => 'reset']);
         } else {
             $defaultTransportId = 'http_client.mock_transport';
+        }
+
+        if ('http_client.transport' !== $defaultTransportId) {
+            $container->getDefinition('http_client')->setArgument(0, [new Reference($defaultTransportId)]);
         }
 
         foreach ($config['scoped_clients'] as $name => $scopeConfig) {
@@ -3464,6 +3472,9 @@ class FrameworkExtension extends Extension
         if (!class_exists(Uuid47Transformer::class)) {
             $container->removeDefinition('uuid47_transformer');
             $container->removeAlias(Uuid47Transformer::class);
+        } elseif (null !== ($config['uuid47_secret'] ?? null)) {
+            $container->getDefinition('uuid47_transformer')
+                ->setArguments([$config['uuid47_secret']]);
         }
     }
 

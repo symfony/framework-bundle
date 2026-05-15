@@ -85,7 +85,7 @@ use Symfony\Component\Validator\DependencyInjection\AddAutoMappingConfigurationP
 use Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass;
 use Symfony\Component\Validator\DependencyInjection\AddValidatorInitializersPass;
 use Symfony\Component\Validator\DependencyInjection\AttributeMetadataPass;
-use Symfony\Component\VarExporter\Internal\Hydrator;
+use Symfony\Component\VarExporter\Internal\LazyObjectRegistry;
 use Symfony\Component\VarExporter\Internal\Registry;
 use Symfony\Component\Workflow\DependencyInjection\WorkflowDebugPass;
 use Symfony\Component\Workflow\DependencyInjection\WorkflowGuardListenerPass;
@@ -100,7 +100,7 @@ class_exists(PhpArrayAdapter::class);
 class_exists(PhpFilesAdapter::class);
 class_exists(Dotenv::class);
 class_exists(ErrorHandler::class);
-class_exists(Hydrator::class);
+class_exists(LazyObjectRegistry::class);
 class_exists(Registry::class);
 
 /**

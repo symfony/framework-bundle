@@ -2555,6 +2555,39 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('.http_client.mock_transport.my_response_factory', (string) $arguments[0]);
     }
 
+    public function testHttpClientRootClientMockedFromTopLevelFactory()
+    {
+        $container = $this->createContainerFromFile('http_client_mock_response_factory');
+
+        $definition = $container->getDefinition('http_client');
+        $arguments = $definition->getArgument(0);
+        $this->assertCount(1, $arguments);
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('.http_client.mock_transport.my_factory', (string) $arguments[0]);
+    }
+
+    public function testHttpClientRootClientMockedFromBooleanTopLevel()
+    {
+        $container = $this->createContainerFromFile('http_client_mock');
+
+        $definition = $container->getDefinition('http_client');
+        $arguments = $definition->getArgument(0);
+        $this->assertCount(1, $arguments);
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('http_client.mock_transport', (string) $arguments[0]);
+    }
+
+    public function testHttpClientRootClientNotMockedByDefault()
+    {
+        $container = $this->createContainerFromFile('http_client_scoped_without_query_option');
+
+        $definition = $container->getDefinition('http_client');
+        $arguments = $definition->getArgument(0);
+        $this->assertCount(1, $arguments);
+        $this->assertInstanceOf(Reference::class, $arguments[0]);
+        $this->assertSame('http_client.transport', (string) $arguments[0]);
+    }
+
     public function testRegisterParameterCollectingBehaviorDescribingTags()
     {
         $container = $this->createContainerFromFile('default_config', [], true, false);

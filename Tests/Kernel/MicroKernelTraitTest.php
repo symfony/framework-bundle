@@ -222,6 +222,21 @@ class MicroKernelTraitTest extends TestCase
         $this->assertSame(['Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true]], $parameters['.kernel.bundles_definition']);
     }
 
+    public function testGetKernelParametersPopulatesBundleMetadataNamespace()
+    {
+        $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
+
+        $reflectionInitializeBundles = new \ReflectionMethod($kernel, 'initializeBundles');
+        $reflectionInitializeBundles->invoke($kernel);
+
+        $parameters = $kernel->getKernelParameters();
+
+        $this->assertArrayHasKey('kernel.bundles_metadata', $parameters);
+        $this->assertArrayHasKey('FrameworkBundle', $parameters['kernel.bundles_metadata']);
+        $this->assertSame('Symfony\\Bundle\\FrameworkBundle', $parameters['kernel.bundles_metadata']['FrameworkBundle']['namespace']);
+        $this->assertArrayHasKey('path', $parameters['kernel.bundles_metadata']['FrameworkBundle']);
+    }
+
     public function testGetKernelParametersWithBundlesFile()
     {
         $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
