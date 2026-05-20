@@ -2670,6 +2670,10 @@ class FrameworkExtension extends Extension
             $messageToSerializersMapping[$message] = array_keys($messageToSerializersMapping[$message]);
         }
 
+        // Transports can carry any message class regardless of routing, so every transport
+        // serializer must be decoration-eligible whenever signing is requested.
+        $messageToSerializersMapping['*'] = array_values(array_unique($serializerIds));
+
         $container->getDefinition('messenger.signing_serializer')
             ->replaceArgument(2, $messageToSerializersMapping);
 
