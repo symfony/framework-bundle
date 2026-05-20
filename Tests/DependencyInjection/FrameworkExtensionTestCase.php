@@ -1709,6 +1709,16 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame('messages', $container->getParameter('validator.translation_domain'));
     }
 
+    public function testValidationPropertyMetadataExistenceCheck()
+    {
+        $container = $this->createContainerFromFile('validation_property_metadata_existence_check');
+
+        $calls = $container->getDefinition('validator.builder')->getMethodCalls();
+        $methods = array_column($calls, 0);
+
+        $this->assertContains('enablePropertyMetadataExistenceCheck', $methods);
+    }
+
     public function testValidationMapping()
     {
         $container = $this->createContainerFromFile('validation_mapping');

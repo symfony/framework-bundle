@@ -1791,6 +1791,10 @@ class FrameworkExtension extends Extension
             $validatorBuilder->addMethodCall('disableTranslation');
         }
 
+        if ($config['property_metadata_existence_check'] ?? false) {
+            $validatorBuilder->addMethodCall('enablePropertyMetadataExistenceCheck');
+        }
+
         $container->setParameter('validator.auto_mapping', $config['auto_mapping']);
         if (!$propertyInfoEnabled || !class_exists(PropertyInfoLoader::class)) {
             $container->removeDefinition('validator.property_info_loader');

@@ -1170,6 +1170,10 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('disable_translation')
                             ->defaultFalse()
                         ->end()
+                        ->booleanNode('property_metadata_existence_check')
+                            ->info('When enabled, validateProperty() and validatePropertyValue() throw an exception if no metadata is found for the given property.')
+                            ->defaultFalse()
+                        ->end()
                         ->arrayNode('auto_mapping')
                             ->info('A collection of namespaces for which auto-mapping will be enabled by default, or null to opt-in with the EnableAutoMapping constraint.')
                             ->example([

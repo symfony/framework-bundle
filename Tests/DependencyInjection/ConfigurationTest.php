@@ -772,6 +772,7 @@ class ConfigurationTest extends TestCase
                 'static_method' => ['loadValidatorMetadata'],
                 'translation_domain' => 'validators',
                 'disable_translation' => false,
+                'property_metadata_existence_check' => false,
                 'mapping' => [
                     'paths' => [],
                 ],
