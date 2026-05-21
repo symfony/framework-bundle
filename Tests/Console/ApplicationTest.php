@@ -21,9 +21,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -163,9 +161,7 @@ class ApplicationTest extends TestCase
         $this->assertSame($newCommand, $application->get('example'));
     }
 
-    #[Group('legacy')]
-    #[IgnoreDeprecations]
-    public function testRunOnlyWarnsOnUnregistrableCommand()
+    public function testEagerCommandRegistrationFailureIsRethrown()
     {
         $container = new ContainerBuilder();
         $container->register('event_dispatcher', EventDispatcher::class);
@@ -173,99 +169,45 @@ class ApplicationTest extends TestCase
         $container->setParameter('console.command.ids', [ThrowingCommand::class => ThrowingCommand::class]);
 
         $kernel = $this->createStub(KernelInterface::class);
-        $kernel
-            ->method('getBundles')
-            ->willReturn([$this->createBundleMock(
-                [(new Command('fine'))->setCode(static function (InputInterface $input, OutputInterface $output): int {
-                    $output->write('fine');
-
-                    return 0;
-                })]
-            )]);
-        $kernel
-            ->method('getContainer')
-            ->willReturn($container);
+        $kernel->method('getBundles')->willReturn([]);
+        $kernel->method('getContainer')->willReturn($container);
 
         $application = new Application($kernel);
         $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
 
-        $tester = new ApplicationTester($application);
-        $tester->run(['command' => 'fine']);
-        $output = $tester->getDisplay();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(\sprintf('Eagerly loading command "%s" failed', ThrowingCommand::class));
 
-        $tester->assertCommandIsSuccessful();
-        $this->assertStringContainsString('Some commands could not be registered:', $output);
-        $this->assertStringContainsString('throwing', $output);
-        $this->assertStringContainsString('fine', $output);
+        (new ApplicationTester($application))->run(['command' => 'fine']);
     }
 
     #[Group('legacy')]
     #[IgnoreDeprecations]
-    public function testRegistrationErrorsAreDisplayedOnCommandNotFound()
+    public function testBundleCommandRegistrationFailureIsRethrown()
     {
         $container = new ContainerBuilder();
         $container->register('event_dispatcher', EventDispatcher::class);
+
+        $bundle = new class extends Bundle {
+            public function registerCommands(\Symfony\Component\Console\Application $application): void
+            {
+                throw new \LogicException('bundle boom');
+            }
+        };
 
         $kernel = $this->createStub(KernelInterface::class);
-        $kernel
-            ->method('getBundles')
-            ->willReturn([$this->createBundleMock(
-                [(new Command(null))->setCode(static function (InputInterface $input, OutputInterface $output): int {
-                    $output->write('fine');
-
-                    return 0;
-                })]
-            )]);
-        $kernel
-            ->method('getContainer')
-            ->willReturn($container);
+        $kernel->method('getBundles')->willReturn([$bundle]);
+        $kernel->method('getContainer')->willReturn($container);
 
         $application = new Application($kernel);
         $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
 
-        $tester = new ApplicationTester($application);
-        $tester->run(['command' => 'fine']);
-        $output = $tester->getDisplay();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(\sprintf('"%s::registerCommands()" failed', $bundle::class));
 
-        $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Some commands could not be registered:', $output);
-        $this->assertStringContainsString('Command "fine" is not defined.', $output);
-    }
-
-    #[Group('legacy')]
-    #[IgnoreDeprecations]
-    public function testRunOnlyWarnsOnUnregistrableCommandAtTheEnd()
-    {
-        $container = new ContainerBuilder();
-        $container->register('event_dispatcher', EventDispatcher::class);
-        $container->register(ThrowingCommand::class, ThrowingCommand::class);
-        $container->setParameter('console.command.ids', [ThrowingCommand::class => ThrowingCommand::class]);
-
-        $kernel = $this->createMock(KernelInterface::class);
-        $kernel->expects($this->once())->method('boot');
-        $kernel
-            ->method('getBundles')
-            ->willReturn([$this->createBundleMock(
-                [(new Command('fine'))->setCode(static function (InputInterface $input, OutputInterface $output): int {
-                    $output->write('fine');
-
-                    return 0;
-                })]
-            )]);
-        $kernel
-            ->method('getContainer')
-            ->willReturn($container);
-
-        $application = new Application($kernel);
-        $application->setAutoExit(false);
-
-        $tester = new ApplicationTester($application);
-        $tester->run(['command' => 'list']);
-
-        $tester->assertCommandIsSuccessful();
-        $display = explode('List commands', $tester->getDisplay());
-
-        $this->assertStringContainsString(trim('[WARNING] Some commands could not be registered:'), trim($display[1]));
+        (new ApplicationTester($application))->run(['command' => 'fine']);
     }
 
     public function testSuggestingPackagesWithExactMatch()
