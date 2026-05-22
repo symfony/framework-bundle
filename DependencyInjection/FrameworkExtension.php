@@ -2703,24 +2703,6 @@ class FrameworkExtension extends Extension
             }
         }
 
-        if ($webhookEnabled) {
-            $webhookRequestParsers = [
-                MailerBridge\Brevo\Webhook\BrevoRequestParser::class => 'mailer.webhook.request_parser.brevo',
-                MailerBridge\Mailgun\Webhook\MailgunRequestParser::class => 'mailer.webhook.request_parser.mailgun',
-                MailerBridge\Mailjet\Webhook\MailjetRequestParser::class => 'mailer.webhook.request_parser.mailjet',
-                MailerBridge\Postmark\Webhook\PostmarkRequestParser::class => 'mailer.webhook.request_parser.postmark',
-                MailerBridge\Sendgrid\Webhook\SendgridRequestParser::class => 'mailer.webhook.request_parser.sendgrid',
-            ];
-
-            foreach ($webhookRequestParsers as $class => $service) {
-                $package = substr($service, \strlen('mailer.webhook.request_parser.'));
-
-                if (!ContainerBuilder::willBeAvailable(\sprintf('symfony/%s-mailer', 'gmail' === $package ? 'google' : $package), $class, ['symfony/framework-bundle', 'symfony/mailer'])) {
-                    $container->removeDefinition($service);
-                }
-            }
-        }
-
         $envelopeListener = $container->getDefinition('mailer.envelope_listener');
         $envelopeListener->setArgument(0, $config['envelope']['sender'] ?? null);
         $envelopeListener->setArgument(1, $config['envelope']['recipients'] ?? null);
@@ -2746,6 +2728,23 @@ class FrameworkExtension extends Extension
 
         if ($webhookEnabled) {
             $loader->load('mailer_webhook.php');
+
+            $debug = $container->getParameter('kernel.debug');
+            foreach ([
+                MailerBridge\Brevo\Webhook\BrevoRequestParser::class => 'mailer.webhook.request_parser.brevo',
+                MailerBridge\Mailgun\Webhook\MailgunRequestParser::class => 'mailer.webhook.request_parser.mailgun',
+                MailerBridge\Mailjet\Webhook\MailjetRequestParser::class => 'mailer.webhook.request_parser.mailjet',
+                MailerBridge\Postmark\Webhook\PostmarkRequestParser::class => 'mailer.webhook.request_parser.postmark',
+                MailerBridge\Sendgrid\Webhook\SendgridRequestParser::class => 'mailer.webhook.request_parser.sendgrid',
+            ] as $class => $service) {
+                $package = substr($service, \strlen('mailer.webhook.request_parser.'));
+
+                if (!ContainerBuilder::willBeAvailable(\sprintf('symfony/%s-mailer', 'gmail' === $package ? 'google' : $package), $class, ['symfony/framework-bundle', 'symfony/mailer'])) {
+                    $container->removeDefinition($service);
+                } elseif ($debug && \defined($class.'::PROVIDER_IPS')) {
+                    $container->getDefinition($service)->setArgument('$allowedIPs', [...$class::PROVIDER_IPS, '127.0.0.1']);
+                }
+            }
         }
     }
 
