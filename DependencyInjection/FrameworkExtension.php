@@ -2231,6 +2231,10 @@ class FrameworkExtension extends Extension
                 if ('add_bus_name_stamp_middleware' === $middlewareItem['id']) {
                     $middleware[$key]['arguments'] = [$busId];
                 }
+
+                if ('doctrine_open_transaction_logger' === $middlewareItem['id'] && isset($middleware[$key]['arguments'][0])) {
+                    $middleware[$key]['arguments'] = ['$entityManagerName' => $middleware[$key]['arguments'][0]];
+                }
             }
 
             if ($container->getParameter('kernel.debug') && class_exists(Stopwatch::class)) {
