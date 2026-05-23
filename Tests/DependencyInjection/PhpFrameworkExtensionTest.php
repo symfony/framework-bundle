@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\OutOfBoundsException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\Mailer\Bridge\Brevo\Webhook\BrevoRequestParser;
+use Symfony\Component\Mailer\Bridge\Postmark\Webhook\PostmarkRequestParser;
 use Symfony\Component\Messenger\Tests\Fixtures\DummyMessage;
 use Symfony\Component\RateLimiter\CompoundRateLimiterFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
@@ -455,6 +457,82 @@ class PhpFrameworkExtensionTest extends FrameworkExtensionTestCase
 
         $this->assertTrue($container->hasDefinition('message_bus'));
         $this->assertSame('message_bus', (string) $container->getAlias('messenger.default_bus'));
+    }
+
+    public function testMessengerSigningSerializerWiringForUnroutedMessages()
+    {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->register('signed_handler', 'stdClass')
+                ->addTag('messenger.message_handler', ['handles' => DummyMessage::class, 'sign' => true]);
+
+            $container->loadFromExtension('framework', [
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'messenger' => [
+                    'transports' => [
+                        'async' => ['dsn' => 'in-memory://'],
+                    ],
+                    'routing' => [],
+                    'buses' => [
+                        'message_bus' => ['default_middleware' => ['enabled' => true]],
+                    ],
+                ],
+            ]);
+        });
+
+        $this->assertTrue($container->hasDefinition('messenger.signing_serializer'));
+        $mapping = $container->getDefinition('messenger.signing_serializer')->getArgument(2);
+        $this->assertArrayHasKey('*', $mapping);
+        $this->assertContains('messenger.default_serializer', $mapping['*']);
+    }
+
+    public function testMailerWebhookProdExcludesLocalhost()
+    {
+        if (!\defined(BrevoRequestParser::class.'::PROVIDER_IPS') || !\defined(PostmarkRequestParser::class.'::PROVIDER_IPS')) {
+            $this->markTestSkipped('PROVIDER_IPS not available on the installed bridges.');
+        }
+
+        $container = $this->createContainerFromClosure(static function ($container) {
+            $container->loadFromExtension('framework', [
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'mailer' => ['dsn' => 'smtp://null'],
+                'webhook' => ['enabled' => true],
+                'http_client' => ['enabled' => true],
+                'serializer' => ['enabled' => true],
+            ]);
+        });
+
+        foreach (['mailer.webhook.request_parser.brevo', 'mailer.webhook.request_parser.postmark'] as $service) {
+            $this->assertArrayNotHasKey('$allowedIPs', $container->getDefinition($service)->getArguments());
+        }
+    }
+
+    public function testMailerWebhookDebugAddsLocalhost()
+    {
+        if (!\defined(BrevoRequestParser::class.'::PROVIDER_IPS') || !\defined(PostmarkRequestParser::class.'::PROVIDER_IPS')) {
+            $this->markTestSkipped('PROVIDER_IPS not available on the installed bridges.');
+        }
+
+        $container = $this->createContainerFromClosure(static function ($container) {
+            $container->loadFromExtension('framework', [
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'mailer' => ['dsn' => 'smtp://null'],
+                'webhook' => ['enabled' => true],
+                'http_client' => ['enabled' => true],
+                'serializer' => ['enabled' => true],
+            ]);
+        }, ['kernel.debug' => true]);
+
+        $this->assertSame(
+            [...BrevoRequestParser::PROVIDER_IPS, '127.0.0.1'],
+            $container->getDefinition('mailer.webhook.request_parser.brevo')->getArgument('$allowedIPs')
+        );
+        $this->assertSame(
+            [...PostmarkRequestParser::PROVIDER_IPS, '127.0.0.1'],
+            $container->getDefinition('mailer.webhook.request_parser.postmark')->getArgument('$allowedIPs')
+        );
     }
 }
 
