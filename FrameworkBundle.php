@@ -227,7 +227,7 @@ class FrameworkBundle extends Bundle
      */
     public static function considerProfilerEnabled(): bool
     {
-        return !($GLOBALS['app'] ?? null) instanceof Application || !isset($_SERVER['QUERY_STRING']) && \in_array('--profile', $_SERVER['argv'] ?? [], true);
+        return !($GLOBALS['app'] ?? null) instanceof Application || (\in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true) || !isset($_SERVER['QUERY_STRING'])) && \in_array('--profile', $_SERVER['argv'] ?? [], true);
     }
 
     private function addCompilerPassIfExists(ContainerBuilder $container, string $class, string $type = PassConfig::TYPE_BEFORE_OPTIMIZATION, int $priority = 0): void
