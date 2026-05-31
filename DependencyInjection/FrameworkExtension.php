@@ -2428,7 +2428,7 @@ class FrameworkExtension extends Extension
 
             if ($bus['default_middleware']['enabled']) {
                 $defaultMiddleware['after'][0]['arguments'] = [$bus['default_middleware']['allow_no_senders']];
-                $defaultMiddleware['after'][1]['arguments'] = [$bus['default_middleware']['allow_no_handlers']];
+                $defaultMiddleware['after'][1]['arguments'] = ['index_1' => $bus['default_middleware']['allow_no_handlers']];
 
                 $middleware = array_merge($defaultMiddleware['before'], $middleware, $defaultMiddleware['after']);
             }

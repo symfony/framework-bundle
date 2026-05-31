@@ -1296,7 +1296,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
-            ['id' => 'handle_message', 'arguments' => [false]],
+            ['id' => 'handle_message', 'arguments' => ['index_1' => false]],
         ], $container->getParameter('messenger.bus.commands.middleware'));
         $this->assertTrue($container->has('messenger.bus.events'));
         $this->assertSame([], $container->getDefinition('messenger.bus.events')->getArgument(0));
@@ -1309,7 +1309,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'with_factory', 'arguments' => ['foo', true, ['bar' => 'baz']]],
             ['id' => 'send_message', 'arguments' => [true]],
-            ['id' => 'handle_message', 'arguments' => [false]],
+            ['id' => 'handle_message', 'arguments' => ['index_1' => false]],
         ], $container->getParameter('messenger.bus.events.middleware'));
         $this->assertTrue($container->has('messenger.bus.queries'));
         $this->assertSame([], $container->getDefinition('messenger.bus.queries')->getArgument(0));
@@ -1342,7 +1342,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ...(class_exists(DecodeFailedMessageMiddleware::class) ? [['id' => 'decode_failed_message_middleware']] : []),
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
-            ['id' => 'handle_message', 'arguments' => [false]],
+            ['id' => 'handle_message', 'arguments' => ['index_1' => false]],
         ], $container->getParameter('messenger.bus.events.middleware'));
     }
 
@@ -1365,7 +1365,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'failed_message_processing_middleware'],
             ['id' => 'deduplicate_middleware'],
             ['id' => 'send_message', 'arguments' => [true]],
-            ['id' => 'handle_message', 'arguments' => [false]],
+            ['id' => 'handle_message', 'arguments' => ['index_1' => false]],
         ], $container->getParameter('messenger.bus.commands.middleware'));
         $this->assertTrue($container->has('messenger.bus.events'));
         $this->assertSame([], $container->getDefinition('messenger.bus.events')->getArgument(0));
@@ -1379,7 +1379,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
             ['id' => 'deduplicate_middleware'],
             ['id' => 'with_factory', 'arguments' => ['foo', true, ['bar' => 'baz']]],
             ['id' => 'send_message', 'arguments' => [true]],
-            ['id' => 'handle_message', 'arguments' => [false]],
+            ['id' => 'handle_message', 'arguments' => ['index_1' => false]],
         ], $container->getParameter('messenger.bus.events.middleware'));
         $this->assertTrue($container->has('messenger.bus.queries'));
         $this->assertSame([], $container->getDefinition('messenger.bus.queries')->getArgument(0));
