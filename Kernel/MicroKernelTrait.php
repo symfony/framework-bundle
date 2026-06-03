@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Kernel\KernelTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Loader\PhpFileLoader as RoutingPhpFileLoader;
 use Symfony\Component\Routing\RouteCollection;
@@ -154,5 +155,10 @@ trait MicroKernelTrait
     private function getBundlesDefinition(): array
     {
         return $this->doGetBundlesDefinition() ?: [FrameworkBundle::class => ['all' => true]];
+    }
+
+    private function getEffectiveBuildDir(): string
+    {
+        return \Closure::bind(fn () => $this->warmupDir, $this, Kernel::class)() ?? $this->getBuildDir();
     }
 }

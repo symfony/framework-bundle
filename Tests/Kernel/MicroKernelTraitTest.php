@@ -211,6 +211,31 @@ class MicroKernelTraitTest extends TestCase
         $this->assertSame('OK', $response->getContent());
     }
 
+    public function testRebootDumpsDebugContainerInWarmupDir()
+    {
+        $cacheDir = sys_get_temp_dir().'/'.uniqid('sf_debug_warmup_', true);
+        $warmupDir = $cacheDir.'_warmup';
+        $fs = new Filesystem();
+        $fs->remove([$cacheDir, $warmupDir]);
+
+        $kernel = $this->kernel = new DebugWarmupKernel($cacheDir);
+
+        try {
+            $kernel->boot();
+            $containerClass = $kernel->getContainer()->getParameter('kernel.container_class');
+
+            // Rebooting in a fresh warmup directory must recompile the container there,
+            // so that ContainerBuilderDebugDumpPass (which only runs during compile())
+            // re-dumps the debug container used by tooling (e.g. debug:container, phpstan).
+            $kernel->reboot($warmupDir);
+
+            $this->assertSame(realpath($warmupDir), realpath($kernel->getContainer()->getParameter('kernel.build_dir')));
+            $this->assertFileExists($warmupDir.'/'.$containerClass.'.xml');
+        } finally {
+            $fs->remove($warmupDir);
+        }
+    }
+
     public function testGetKernelParameters()
     {
         $kernel = $this->kernel = new ConcreteMicroKernel('test', false);
@@ -289,6 +314,36 @@ class MicroKernelTraitTest extends TestCase
         $this->assertSame($projectDir.'/var/custom-cache/test', $kernel->getCacheDir());
         $this->assertSame($projectDir.'/var/custom-build/test', $kernel->getBuildDir());
         $this->assertSame($projectDir.'/var/custom-share/test', $kernel->getShareDir());
+    }
+}
+
+class DebugWarmupKernel extends Kernel
+{
+    use MicroKernelTrait;
+
+    public function __construct(private readonly string $cacheDir)
+    {
+        parent::__construct('test', true);
+    }
+
+    public function getCacheDir(): string
+    {
+        return $this->cacheDir;
+    }
+
+    public function getLogDir(): string
+    {
+        return $this->cacheDir;
+    }
+
+    protected function configureContainer(ContainerConfigurator $c): void
+    {
+        $c->extension('framework', ['http_method_override' => false, 'handle_all_throwables' => true]);
+        $c->services()->set('logger', NullLogger::class);
+    }
+
+    protected function configureRoutes(RoutingConfigurator $routes): void
+    {
     }
 }
 
