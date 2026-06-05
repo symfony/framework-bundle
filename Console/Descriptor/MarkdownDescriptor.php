@@ -122,7 +122,7 @@ class MarkdownDescriptor extends Descriptor
             throw new RuntimeException('The deprecation file does not exist, please try warming the cache first.');
         }
 
-        $logs = unserialize(file_get_contents($containerDeprecationFilePath));
+        $logs = unserialize(file_get_contents($containerDeprecationFilePath), ['allowed_classes' => false]);
         if (0 === \count($logs)) {
             $this->write("## There are no deprecations in the logs!\n");
 

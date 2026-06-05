@@ -403,7 +403,7 @@ class TextDescriptor extends Descriptor
             return;
         }
 
-        $logs = unserialize(file_get_contents($containerDeprecationFilePath));
+        $logs = unserialize(file_get_contents($containerDeprecationFilePath), ['allowed_classes' => false]);
         if (0 === \count($logs)) {
             $options['output']->success('There are no deprecations in the logs!');
 
