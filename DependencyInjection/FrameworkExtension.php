@@ -1244,7 +1244,20 @@ class FrameworkExtension extends Extension
             $container->removeDefinition('messenger.middleware.router_context');
         }
 
+        // Read the deprecated "router.request_context.{host,scheme}" parameters before routing.php
+        // sets their defaults, so that an explicit user value takes precedence. They are inlined as
+        // arguments of the "router.request_context" service below: this avoids both triggering their
+        // deprecation and eagerly resolving every env-var-based parameter through ParameterBag::all()
+        // at runtime.
+        $parameters = $container->getParameterBag()->all();
+        $requestContextHost = $parameters['router.request_context.host'] ?? 'localhost';
+        $requestContextScheme = $parameters['router.request_context.scheme'] ?? 'http';
+
         $loader->load('routing.php');
+
+        $container->getDefinition('router.request_context')
+            ->setArgument(1, $requestContextHost)
+            ->setArgument(2, $requestContextScheme);
 
         $container->deprecateParameter('router.request_context.scheme', 'symfony/framework-bundle', '8.1', 'Parameter "router.request_context.scheme" is deprecated, use "router.request_context.base_url" parameter or the "framework.router.default_uri" config option instead.');
         $container->deprecateParameter('router.request_context.host', 'symfony/framework-bundle', '8.1', 'Parameter "router.request_context.host" is deprecated, use "router.request_context.base_url" parameter or the "framework.router.default_uri" config option instead.');

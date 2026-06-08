@@ -158,18 +158,8 @@ return static function (ContainerConfigurator $container) {
             ->factory([RequestContext::class, 'fromUri'])
             ->args([
                 param('router.request_context.base_url'),
-                inline_service('array')->factory('array_first')->args([
-                    inline_service('array')->factory('array_intersect_key')->args([
-                        inline_service('array')->factory([service('parameter_bag'), 'all']),
-                        array_flip(['router.request_context.host']),
-                    ]),
-                ]),
-                inline_service('array')->factory('array_first')->args([
-                    inline_service('array')->factory('array_intersect_key')->args([
-                        inline_service('array')->factory([service('parameter_bag'), 'all']),
-                        array_flip(['router.request_context.scheme']),
-                    ]),
-                ]),
+                abstract_arg('Set in FrameworkExtension from the "router.request_context.host" parameter'),
+                abstract_arg('Set in FrameworkExtension from the "router.request_context.scheme" parameter'),
                 param('request_listener.http_port'),
                 param('request_listener.https_port'),
             ])
