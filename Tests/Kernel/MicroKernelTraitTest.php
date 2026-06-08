@@ -243,6 +243,7 @@ class MicroKernelTraitTest extends TestCase
         $parameters = $kernel->getKernelParameters();
 
         $this->assertSame($kernel->getConfigDir(), $parameters['.kernel.config_dir']);
+        $this->assertSame($kernel->getCharset(), $parameters['kernel.charset']);
         $this->assertSame(['test'], $parameters['.container.known_envs']);
         $this->assertSame(['Symfony\Bundle\FrameworkBundle\FrameworkBundle' => ['all' => true]], $parameters['.kernel.bundles_definition']);
     }
@@ -315,6 +316,26 @@ class MicroKernelTraitTest extends TestCase
         $this->assertSame($projectDir.'/var/custom-build/test', $kernel->getBuildDir());
         $this->assertSame($projectDir.'/var/custom-share/test', $kernel->getShareDir());
     }
+
+    public function testOverriddenConfigDirIsUsedToRegisterBundles()
+    {
+        $projectDir = sys_get_temp_dir().'/'.uniqid('sf_custom_config_dir_', true);
+        $configDir = $projectDir.'/config1/config';
+        $fs = new Filesystem();
+        $fs->mkdir($configDir.'/packages');
+        file_put_contents($configDir.'/bundles.php', "<?php\n\nreturn [\n    Symfony\\Bundle\\FrameworkBundle\\FrameworkBundle::class => ['all' => true],\n];\n");
+        file_put_contents($configDir.'/packages/framework.yaml', "framework:\n    secret: \$ecret\n    http_method_override: false\n    test: true\n");
+
+        $kernel = $this->kernel = new CustomConfigDirKernel($projectDir);
+
+        try {
+            $kernel->boot();
+
+            $this->assertSame('$ecret', $kernel->getContainer()->getParameter('kernel.secret'));
+        } finally {
+            $fs->remove($projectDir);
+        }
+    }
 }
 
 class DebugWarmupKernel extends Kernel
@@ -359,6 +380,36 @@ class EnvDirKernel extends Kernel
     public function getProjectDir(): string
     {
         return $this->projectDir;
+    }
+}
+
+class CustomConfigDirKernel extends Kernel
+{
+    use MicroKernelTrait;
+
+    public function __construct(private readonly string $projectDir)
+    {
+        parent::__construct('test', false);
+    }
+
+    public function getProjectDir(): string
+    {
+        return $this->projectDir;
+    }
+
+    public function getCacheDir(): string
+    {
+        return $this->projectDir.'/var/cache/'.$this->environment;
+    }
+
+    public function getLogDir(): string
+    {
+        return $this->projectDir.'/var/log';
+    }
+
+    public function getConfigDir(): string
+    {
+        return $this->projectDir.'/config1/config';
     }
 }
 
