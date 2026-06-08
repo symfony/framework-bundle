@@ -43,10 +43,16 @@ trait MicroKernelTrait
 
     public function registerBundles(): iterable
     {
-        if (!is_file($bundlesPath = $this->getBundlesPath())) {
+        if (!is_file($this->getBundlesPath())) {
             yield new FrameworkBundle();
-        } else {
-            yield from parent::registerBundles();
+
+            return;
+        }
+
+        foreach ($this->getBundlesDefinition() as $class => $envs) {
+            if ($envs[$this->environment] ?? $envs['all'] ?? false) {
+                yield new $class();
+            }
         }
     }
 
@@ -140,10 +146,8 @@ trait MicroKernelTrait
      */
     protected function getKernelParameters(): array
     {
-        // `doGetKernelParameters() + parent::getKernelParameters()` is left-biased on the shared
-        // `kernel.bundles_metadata` key, so the namespace written by parent::getKernelParameters()
-        // is shadowed. Re-apply it here to keep both `path` (from KernelTrait) and `namespace`.
-        $parameters = $this->doGetKernelParameters() + parent::getKernelParameters();
+        $parameters = $this->doGetKernelParameters();
+        $parameters['kernel.charset'] = $this->getCharset();
 
         foreach ($this->bundles as $name => $bundle) {
             $parameters['kernel.bundles_metadata'][$name]['namespace'] = $bundle->getNamespace();
