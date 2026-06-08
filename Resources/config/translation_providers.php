@@ -38,9 +38,19 @@ return static function (ContainerConfigurator $container) {
         ->set('translation.provider_factory.null', NullProviderFactory::class)
             ->tag('translation.provider_factory')
 
+        ->set('translation.provider_factory.crowdin.http_client', HttpClientInterface::class)
+            ->factory([HttpClient::class, 'create'])
+            ->args([
+                [], // default options
+                20, // max host connections
+            ])
+            ->call('setLogger', [service('logger')])
+            ->tag('http_client.client')
+            ->tag('monolog.logger', ['channel' => 'http_client'])
+
         ->set('translation.provider_factory.crowdin', CrowdinProviderFactory::class)
             ->args([
-                service('http_client'),
+                service('translation.provider_factory.crowdin.http_client'),
                 service('logger'),
                 param('kernel.default_locale'),
                 service('translation.loader.xliff'),
