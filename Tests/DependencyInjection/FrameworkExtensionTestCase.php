@@ -836,6 +836,36 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $this->assertSame(['_locale' => 'fr|en'], $container->getDefinition('routing.loader')->getArgument(2));
     }
 
+    public function testRouterRequestContextInlinesHostAndScheme()
+    {
+        $container = $this->createContainerFromFile('full');
+
+        // The host and scheme are inlined as plain values instead of being read through
+        // ParameterBag::all() at runtime, which would eagerly resolve every env var and
+        // fail during cache warmup when one of them is missing.
+        $requestContext = $container->getDefinition('router.request_context');
+        $this->assertSame('localhost', $requestContext->getArgument(1));
+        $this->assertSame('http', $requestContext->getArgument(2));
+    }
+
+    public function testRouterRequestContextUsesHostAndSchemeParameters()
+    {
+        $container = $this->createContainerFromClosure(function ($container) {
+            $container->setParameter('router.request_context.host', 'example.com');
+            $container->setParameter('router.request_context.scheme', 'https');
+            $container->loadFromExtension('framework', [
+                'http_method_override' => false,
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+                'router' => ['resource' => '%kernel.project_dir%/config/routing.xml'],
+            ]);
+        });
+
+        $requestContext = $container->getDefinition('router.request_context');
+        $this->assertSame('example.com', $requestContext->getArgument(1));
+        $this->assertSame('https', $requestContext->getArgument(2));
+    }
+
     public function testRouterEnabledLocalesWithEnvPlaceholders()
     {
         $container = $this->createContainerFromFile('router_enabled_locales_env');
