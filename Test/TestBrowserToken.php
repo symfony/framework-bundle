@@ -50,6 +50,10 @@ class TestBrowserToken extends AbstractToken
 
     public function __unserialize(array $data): void
     {
+        if (($data[0] ?? null) instanceof \Stringable) {
+            throw new \BadMethodCallException('Cannot unserialize '.self::class);
+        }
+
         [$this->firewallName, $parentData] = $data;
 
         parent::__unserialize($parentData);
