@@ -2630,6 +2630,16 @@ abstract class FrameworkExtensionTestCase extends TestCase
 
     public function testRegisterParameterCollectingBehaviorDescribingTags()
     {
+        try {
+            $defaultTags = (new \ReflectionClassConstant(AddBehaviorDescribingTagsPass::class, 'DEFAULT_TAGS'))->getValue();
+        } catch (\ReflectionException) {
+            $defaultTags = [];
+        }
+
+        if (!\in_array('proxy', $defaultTags, true)) {
+            $this->markTestSkipped('Requires symfony/dependency-injection registering "proxy" and "container.service_subscriber.locator" as default behavior-describing tags.');
+        }
+
         $container = $this->createContainerFromFile('default_config', [], true, false);
         $container->addCompilerPass(new AddBehaviorDescribingTagsPass([
             'container.do_not_inline',
