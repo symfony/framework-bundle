@@ -93,7 +93,7 @@ final class ContainerLintCommand extends Command
             }, $kernel, $kernel::class);
             $container = $buildContainer();
         } else {
-            $container = unserialize(file_get_contents(substr_replace($file, '.ser', -4)));
+            $container = unserialize(file_get_contents(substr_replace($file, '.ser', -4)), ['allowed_classes' => true]);
 
             if (!$container instanceof ContainerBuilder) {
                 throw new RuntimeException(\sprintf('This command does not support the application container: "%s" is not a "%s".', get_debug_type($container), ContainerBuilder::class));

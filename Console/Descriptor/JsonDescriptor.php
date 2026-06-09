@@ -173,7 +173,7 @@ class JsonDescriptor extends Descriptor
             throw new RuntimeException('The deprecation file does not exist, please try warming the cache first.');
         }
 
-        $logs = unserialize(file_get_contents($containerDeprecationFilePath));
+        $logs = unserialize(file_get_contents($containerDeprecationFilePath), ['allowed_classes' => false]);
 
         $formattedLogs = [];
         $remainingCount = 0;

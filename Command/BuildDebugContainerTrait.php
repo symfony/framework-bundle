@@ -57,7 +57,7 @@ trait BuildDebugContainerTrait
             }, $kernel, $kernel::class);
             $container = $buildContainer();
 
-            $dumpedContainer = unserialize(file_get_contents(substr_replace($file, '.ser', -4)));
+            $dumpedContainer = unserialize(file_get_contents(substr_replace($file, '.ser', -4)), ['allowed_classes' => true]);
             $container->setDefinitions($dumpedContainer->getDefinitions());
             $container->setAliases($dumpedContainer->getAliases());
 
