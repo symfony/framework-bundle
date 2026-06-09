@@ -76,7 +76,7 @@
         "symfony/json-streamer": "^7.3|^8.0",
         "symfony/uid": "^6.4|^7.0|^8.0",
         "symfony/web-link": "^6.4|^7.0|^8.0",
-        "symfony/webhook": "^7.2|^8.0",
+        "symfony/webhook": "^7.4|^8.0",
         "twig/twig": "^3.12"
     },
     "conflict": {
@@ -108,7 +108,7 @@
         "symfony/twig-bundle": "<6.4",
         "symfony/validator": "<6.4",
         "symfony/web-profiler-bundle": "<6.4",
-        "symfony/webhook": "<7.2",
+        "symfony/webhook": "<7.4",
         "symfony/workflow": "<7.4"
     },
     "autoload": {
