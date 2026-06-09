@@ -97,7 +97,7 @@ final class ContainerLintCommand extends Command
             $container = $buildContainer();
         } else {
             if (str_ends_with($file, '.xml') && is_file(substr_replace($file, '.ser', -4))) {
-                $container = unserialize(file_get_contents(substr_replace($file, '.ser', -4)));
+                $container = unserialize(file_get_contents(substr_replace($file, '.ser', -4)), ['allowed_classes' => true]);
             } else {
                 (new XmlFileLoader($container = new ContainerBuilder(new EnvPlaceholderParameterBag()), new FileLocator()))->load($file);
             }

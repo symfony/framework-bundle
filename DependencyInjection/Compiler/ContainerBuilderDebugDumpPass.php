@@ -49,7 +49,7 @@ class ContainerBuilderDebugDumpPass implements CompilerPassInterface
 
         try {
             $dump = new ContainerBuilder(clone $container->getParameterBag());
-            $dump->setDefinitions(unserialize(serialize($container->getDefinitions())));
+            $dump->setDefinitions(unserialize(serialize($container->getDefinitions()), ['allowed_classes' => true]));
             $dump->setAliases($container->getAliases());
 
             if (($bag = $container->getParameterBag()) instanceof EnvPlaceholderParameterBag) {

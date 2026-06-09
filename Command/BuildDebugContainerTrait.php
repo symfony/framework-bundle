@@ -61,7 +61,7 @@ trait BuildDebugContainerTrait
             $container = $buildContainer();
 
             if (str_ends_with($file, '.xml') && is_file(substr_replace($file, '.ser', -4))) {
-                $dumpedContainer = unserialize(file_get_contents(substr_replace($file, '.ser', -4)));
+                $dumpedContainer = unserialize(file_get_contents(substr_replace($file, '.ser', -4)), ['allowed_classes' => true]);
                 $container->setDefinitions($dumpedContainer->getDefinitions());
                 $container->setAliases($dumpedContainer->getAliases());
 
