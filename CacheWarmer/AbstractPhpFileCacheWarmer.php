@@ -55,7 +55,7 @@ abstract class AbstractPhpFileCacheWarmer implements CacheWarmerInterface
             if (null === $value) {
                 unset($values[$key]);
             } elseif ($value instanceof DeepCloner) {
-                $values[$key] = $value->clone();
+                $values[$key] = $value->clone(null, true);
             } elseif (\is_string($value) && str_contains($value, ':')) {
                 $values[$key] = unserialize($value, ['allowed_classes' => true]);
             }
