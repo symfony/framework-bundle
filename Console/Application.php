@@ -25,12 +25,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Contracts\Service\ContainerAwareInterface;
+use Symfony\Contracts\Service\ContainerProviderInterface;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Application extends BaseApplication implements ContainerAwareInterface
+class Application extends BaseApplication implements ContainerProviderInterface
 {
     private bool $commandsRegistered = false;
 
