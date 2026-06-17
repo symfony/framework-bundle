@@ -51,6 +51,6 @@ class FragmentTest extends AbstractWebTestCase
         $client = self::createClient(['test_case' => 'Fragment', 'root_config' => 'config.yml', 'debug' => true]);
         $client->request('GET', '/fragment_uri');
 
-        $this->assertMatchesRegularExpression('#/_fragment\?_hash=.+&_path=_format%3Dhtml%26_locale%3Den%26_controller%3DSymfony%255CBundle%255CFrameworkBundle%255CTests%255CFunctional%255CBundle%255CTestBundle%255CController%255CFragmentController%253A%253AindexAction$#', $client->getResponse()->getContent());
+        $this->assertMatchesRegularExpression('#/_fragment\?(?:_expiration=.+&)?_hash=.+&_path=_format%3Dhtml%26_locale%3Den%26_controller%3DSymfony%255CBundle%255CFrameworkBundle%255CTests%255CFunctional%255CBundle%255CTestBundle%255CController%255CFragmentController%253A%253AindexAction$#', $client->getResponse()->getContent());
     }
 }
