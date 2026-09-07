@@ -629,7 +629,7 @@ class FrameworkExtension extends Extension
             }
         }
 
-        if ($this->readConfigEnabled('remote-event', $container, $config['remote-event'])) {
+        if ($this->readConfigEnabled('remote_event', $container, $config['remote_event'])) {
             $this->registerRemoteEventConfiguration($loader);
         }
 
