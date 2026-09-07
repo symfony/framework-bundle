@@ -1,24 +1,23 @@
 <?php
 
 return function (Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator $container) {
+    $container->services()->alias('test_workflow', 'workflow.article')->public();
     $container->extension('framework', [
         'workflows' => [
-            'test_workflow' => [
+            'article' => [
                 'type' => 'workflow',
                 'supports' => [
                     'Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\FrameworkExtensionTestCase',
                 ],
-                'initial_marking' => ['start'],
+                'initial_marking' => ['draft'],
                 'places' => [
-                    'start',
-                    'middle',
-                    'end',
-                    'alternative',
+                    'draft',
+                    'published',
                 ],
                 'transitions' => [
-                    'base_transition' => [
-                        'from' => ['middle'],
-                        'to' => ['alternative'],
+                    'publish' => [
+                        'from' => ['draft'],
+                        'to' => ['published'],
                     ],
                 ],
             ],
