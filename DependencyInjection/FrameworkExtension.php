@@ -672,7 +672,7 @@ class FrameworkExtension extends Extension
 
                 $definition->addTag('json_path.function', [
                     'name' => $attribute->name,
-                    'return_type' => $attribute->returnType,
+                    'return_type' => $attribute->returnType->value,
                     'arity' => $reflector->getMethod('__invoke')->getNumberOfRequiredParameters(),
                 ]);
             });

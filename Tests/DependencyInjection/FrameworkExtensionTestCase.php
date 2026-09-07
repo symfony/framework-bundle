@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\RequiresMethod;
 use PHPUnit\Framework\Attributes\TestWith;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LogLevel;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\JsonPathPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Tests\DependencyInjection\Fixtures\Workflow\Validator\DefinitionValidator;
@@ -41,6 +42,7 @@ use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\AddBehaviorDescribingTagsPass;
+use Symfony\Component\DependencyInjection\Compiler\CheckDefinitionValidityPass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveBindingsPass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveTaggedIteratorArgumentPass;
@@ -3268,13 +3270,29 @@ abstract class FrameworkExtensionTestCase extends TestCase
                 ->setAutoconfigured(true);
         });
 
-        $this->assertEquals([['name' => 'upper', 'return_type' => FunctionReturnType::Value, 'arity' => 1]], $container->getDefinition('json_path.function.upper')->getTag('json_path.function'));
+        $this->assertSame([['name' => 'upper', 'return_type' => 'value', 'arity' => 1]], $container->getDefinition('json_path.function.upper')->getTag('json_path.function'));
 
         $locatorArgument = $container->getDefinition('json_path.crawler')->getArgument(0);
         $this->assertInstanceOf(ServiceLocatorArgument::class, $locatorArgument);
         $this->assertInstanceOf(TaggedIteratorArgument::class, $locatorArgument->getTaggedIteratorArgument());
         $this->assertSame('json_path.function', $locatorArgument->getTaggedIteratorArgument()->getTag());
         $this->assertSame('name', $locatorArgument->getTaggedIteratorArgument()->getIndexAttribute());
+    }
+
+    #[RequiresMethod(JsonPathCrawlerInterface::class, 'crawl')]
+    public function testJsonPathFunctionMetadataIsCollectedOnCompilation()
+    {
+        $container = $this->createContainerFromClosure(static function (ContainerBuilder $container) {
+            $container->loadFromExtension('framework', []);
+            $container->register('json_path.function.upper', UppercaseFunction::class)
+                ->setAutoconfigured(true);
+            $container->addCompilerPass(new JsonPathPass());
+        }, compile: false);
+
+        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass(), new CheckDefinitionValidityPass()]);
+        $container->compile();
+
+        $this->assertSame(['upper' => ['arity' => 1, 'return_type' => FunctionReturnType::Value]], $container->getDefinition('json_path.crawler')->getArgument(1));
     }
 
     public function testObjectMapperEnabled()
@@ -3364,7 +3382,7 @@ abstract class FrameworkExtensionTestCase extends TestCase
         return self::$containerCache[$cacheKey] = $container;
     }
 
-    protected function createContainerFromClosure($closure, $data = []): ContainerBuilder
+    protected function createContainerFromClosure($closure, $data = [], bool $compile = true): ContainerBuilder
     {
         $container = $this->createContainer($data);
         $container->registerExtension(new FrameworkExtension());
@@ -3374,7 +3392,10 @@ abstract class FrameworkExtensionTestCase extends TestCase
         $container->getCompilerPassConfig()->setOptimizationPasses([]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->getCompilerPassConfig()->setAfterRemovingPasses([]);
-        $container->compile();
+
+        if ($compile) {
+            $container->compile();
+        }
 
         return $container;
     }
