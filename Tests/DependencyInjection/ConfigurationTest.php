@@ -632,6 +632,26 @@ class ConfigurationTest extends TestCase
         $this->assertSame(['foo' => 'bar', JsonDecode::DETAILED_ERROR_MESSAGES => false, 'foobar' => 'baz'], $config['serializer']['default_context'] ?? []);
     }
 
+    public function testRemoteEventCanBeConfigured()
+    {
+        $processor = new Processor();
+
+        foreach (['remote_event', 'remote-event'] as $key) {
+            foreach ([true, false] as $enabled) {
+                $config = $processor->processConfiguration(new Configuration(true), [
+                    [
+                        'http_method_override' => false,
+                        'handle_all_throwables' => true,
+                        'php_errors' => ['log' => true],
+                        $key => ['enabled' => $enabled],
+                    ],
+                ]);
+
+                $this->assertSame(['enabled' => $enabled], $config['remote_event'], $key);
+            }
+        }
+    }
+
     protected static function getBundleDefaultConfig()
     {
         return [
@@ -888,7 +908,7 @@ class ConfigurationTest extends TestCase
                 'routing' => [],
                 'message_bus' => 'messenger.default_bus',
             ],
-            'remote-event' => [
+            'remote_event' => [
                 'enabled' => false,
             ],
         ];

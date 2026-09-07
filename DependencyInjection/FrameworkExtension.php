@@ -567,8 +567,8 @@ class FrameworkExtension extends Extension
             }
         }
 
-        if ($this->readConfigEnabled('remote-event', $container, $config['remote-event'])) {
-            $this->registerRemoteEventConfiguration($config['remote-event'], $container, $loader);
+        if ($this->readConfigEnabled('remote_event', $container, $config['remote_event'])) {
+            $this->registerRemoteEventConfiguration($config['remote_event'], $container, $loader);
         }
 
         if ($this->readConfigEnabled('html_sanitizer', $container, $config['html_sanitizer'])) {
