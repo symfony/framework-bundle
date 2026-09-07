@@ -2837,7 +2837,7 @@ class Configuration implements ConfigurationInterface
     {
         $rootNode
             ->children()
-                ->arrayNode('remote-event')
+                ->arrayNode('remote_event')
                     ->info('RemoteEvent configuration')
                     ->{$enableIfStandalone('symfony/remote-event', RemoteEvent::class)}()
                 ->end()

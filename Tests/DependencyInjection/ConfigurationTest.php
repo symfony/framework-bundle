@@ -1117,6 +1117,26 @@ class ConfigurationTest extends TestCase
         );
     }
 
+    public function testRemoteEventCanBeConfigured()
+    {
+        $processor = new Processor();
+
+        foreach (['remote_event', 'remote-event'] as $key) {
+            foreach ([true, false] as $enabled) {
+                $config = $processor->processConfiguration(new Configuration(true), [
+                    [
+                        'http_method_override' => false,
+                        'handle_all_throwables' => true,
+                        'php_errors' => ['log' => true],
+                        $key => ['enabled' => $enabled],
+                    ],
+                ]);
+
+                $this->assertSame(['enabled' => $enabled], $config['remote_event'], $key);
+            }
+        }
+    }
+
     protected static function getBundleDefaultConfig()
     {
         return [
@@ -1459,7 +1479,7 @@ class ConfigurationTest extends TestCase
                 'signature_format' => 'legacy',
                 'timestamp_tolerance' => 300,
             ],
-            'remote-event' => [
+            'remote_event' => [
                 'enabled' => !class_exists(FullStack::class) && class_exists(RemoteEvent::class),
             ],
             'json_streamer' => [

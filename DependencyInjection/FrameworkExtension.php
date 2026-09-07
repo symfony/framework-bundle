@@ -659,7 +659,7 @@ class FrameworkExtension extends Extension
             }
         }
 
-        if ($this->readConfigEnabled('remote-event', $container, $config['remote-event'])) {
+        if ($this->readConfigEnabled('remote_event', $container, $config['remote_event'])) {
             $this->registerRemoteEventConfiguration($loader);
         }
 
@@ -706,7 +706,7 @@ class FrameworkExtension extends Extension
 
                 $definition->addTag('json_path.function', [
                     'name' => $attribute->name,
-                    'return_type' => $attribute->returnType,
+                    'return_type' => $attribute->returnType->value,
                     'arity' => $reflector->getMethod('__invoke')->getNumberOfRequiredParameters(),
                 ]);
             });

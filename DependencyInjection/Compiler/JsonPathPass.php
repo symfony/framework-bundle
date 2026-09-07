@@ -13,6 +13,7 @@ namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\JsonPath\FunctionReturnType;
 
 /**
  * Collects metadata (arity, return type) for custom JsonPath functions
@@ -33,9 +34,11 @@ class JsonPathPass implements CompilerPassInterface
                     continue;
                 }
 
+                $returnType = $attributes['return_type'] ?? null;
+
                 $metadata[$attributes['name']] = [
                     'arity' => $attributes['arity'] ?? null,
-                    'return_type' => $attributes['return_type'] ?? null,
+                    'return_type' => \is_string($returnType) ? FunctionReturnType::from($returnType) : $returnType,
                 ];
             }
         }
