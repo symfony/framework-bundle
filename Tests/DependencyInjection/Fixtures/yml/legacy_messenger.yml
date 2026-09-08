@@ -1,4 +1,4 @@
 framework:
     messenger:
         transports:
-            schedule: 'schedule://default'
+            async: 'in-memory://'

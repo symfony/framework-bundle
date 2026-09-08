@@ -2,6 +2,8 @@
 
 $container->loadFromExtension('framework', [
     'messenger' => [
-        'reject_redelivered_messages' => false,
+        'transports' => [
+            'async' => 'in-memory://',
+        ],
     ],
 ]);
