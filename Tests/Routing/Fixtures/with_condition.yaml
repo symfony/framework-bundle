@@ -1,3 +1,0 @@
-foo:
-    path: /foo
-    condition: '%parameter.condition%'
